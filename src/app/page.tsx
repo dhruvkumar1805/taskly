@@ -1,103 +1,175 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const res = await fetch("/api/tasks");
+        if (!res.ok) throw new Error("Failed to fetch tasks");
+        const data = await res.json();
+        setTasks(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadTasks();
+  }, []);
+
+  const addTask = async () => {
+    if (!title.trim()) return;
+
+    const tempId = Date.now();
+    const newTask = {
+      id: tempId,
+      title,
+      completed: false,
+      createdAt: new Date(),
+    };
+
+    setTasks((prev) => [newTask, ...prev]);
+    setTitle("");
+
+    try {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        body: JSON.stringify({ title }),
+      });
+      const savedTask = await res.json();
+
+      setTasks((prev) => prev.map((t) => (t.id === tempId ? savedTask : t)));
+    } catch {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
+    }
+  };
+
+  const toggleTask = async (id: number, completed: boolean) => {
+    const prevTasks = tasks;
+
+    setTasks((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, completed: !completed } : t))
+    );
+
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ completed: !completed }),
+      });
+      const updated = await res.json();
+
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    } catch {
+      setTasks(prevTasks);
+    }
+  };
+
+  const deleteTask = async (id: number) => {
+    const prevTasks = tasks;
+
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+
+    try {
+      await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+    } catch {
+      setTasks(prevTasks);
+    }
+  };
+
+  const saveEdit = async (id: number) => {
+    if (!editingTitle.trim()) {
+      setEditingId(null);
+      return;
+    }
+
+    const prevTasks = tasks;
+
+    setTasks((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, title: editingTitle } : t))
+    );
+    setEditingId(null);
+
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ title: editingTitle }),
+      });
+      const updated = await res.json();
+
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    } catch {
+      setTasks(prevTasks);
+    }
+  };
+
+  return (
+    <main className="p-6 max-w-lg mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Todo App</h1>
+
+      <div className="flex gap-2 mb-4">
+        <input
+          className="border p-2 flex-1"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter task..."
+        />
+        <button className="bg-blue-500 text-white px-4" onClick={addTask}>
+          Add
+        </button>
+      </div>
+
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.id} className="flex justify-between items-center mb-2">
+            {editingId === task.id ? (
+              <input
+                className="border p-1 flex-1 mr-2"
+                value={editingTitle}
+                onChange={(e) => setEditingTitle(e.target.value)}
+                onBlur={() => saveEdit(task.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveEdit(task.id);
+                  if (e.key === "Escape") setEditingId(null);
+                }}
+                autoFocus
+              />
+            ) : (
+              <span
+                onClick={() => toggleTask(task.id, task.completed)}
+                className={`cursor-pointer flex-1 ${
+                  task.completed ? "line-through text-gray-500" : ""
+                }`}
+              >
+                {task.title}
+              </span>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                className="text-blue-500"
+                onClick={() => {
+                  setEditingId(task.id);
+                  setEditingTitle(task.title);
+                }}
+              >
+                ✏️
+              </button>
+              <button
+                className="text-red-500"
+                onClick={() => deleteTask(task.id)}
+              >
+                ❌
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </main>
   );
 }
