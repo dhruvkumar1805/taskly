@@ -48,11 +48,10 @@ export default function Sidebar() {
           <DialogHeader>
             <DialogTitle>Create New Task</DialogTitle>
           </DialogHeader>
-          <TaskForm
-            onSubmit={() => {
-              setOpen(false);
-            }}
-          />
+
+          <div className="rounded-xl border bg-card p-4">
+            <TaskForm onSubmit={() => setOpen(false)} />
+          </div>
         </DialogContent>
       </Dialog>
 

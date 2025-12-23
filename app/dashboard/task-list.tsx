@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Task } from "@/generated/prisma/client";
-import { deleteTask, toggleTaskStatus } from "../actions/tasks";
+import { deleteTask, toggleTaskStatus, updateTask } from "../actions/tasks";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+import TaskForm from "./task-form";
 
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
@@ -26,6 +34,8 @@ function isOverdue(task: { dueDate: Date | null; status: string }) {
 export default function TaskList({ tasks }: { tasks: Task[] }) {
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [open, setOpen] = useState(false);
 
   const filteredTasks = tasks.filter((task) => {
     if (status !== "ALL" && task.status !== status) return false;
@@ -116,6 +126,17 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
                   )}
                 </div>
 
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setEditingTask(task);
+                    setOpen(true);
+                  }}
+                >
+                  Edit
+                </Button>
+
                 <form action={deleteTask.bind(null, task.id)}>
                   <Button
                     variant="ghost"
@@ -136,6 +157,25 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           </p>
         )}
       </ul>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Task</DialogTitle>
+          </DialogHeader>
+
+          {editingTask && (
+            <TaskForm
+              task={editingTask}
+              action={updateTask.bind(null, editingTask.id)}
+              submitLabel="Save Changes"
+              onSubmit={() => {
+                setOpen(false);
+                setEditingTask(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
