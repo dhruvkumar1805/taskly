@@ -11,6 +11,7 @@ export async function createTask(formData: FormData) {
   }
 
   const title = formData.get("title")?.toString();
+  const description = formData.get("description")?.toString();
   const priority = formData.get("priority")?.toString() as
     | "LOW"
     | "MEDIUM"
@@ -25,6 +26,7 @@ export async function createTask(formData: FormData) {
   await prisma.task.create({
     data: {
       title,
+      description: description || null,
       priority: priority ?? "MEDIUM",
       dueDate: dueDateRaw ? new Date(dueDateRaw) : null,
       userId: session.user.id,

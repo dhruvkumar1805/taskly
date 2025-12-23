@@ -15,22 +15,37 @@ export default async function DashboardPage() {
 
       <TaskForm />
 
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {tasks.map((task) => (
-          <li key={task.id} className="border p-3 rounded flex justify-between">
-            <span>{task.title}</span>
-            <span className="text-sm text-gray-500">{task.status}</span>
+          <li key={task.id} className="border p-4 rounded space-y-1">
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium">{task.title}</h3>
+              <span className="text-xs px-2 py-1 rounded border">
+                {task.priority}
+              </span>
+            </div>
+
+            {task.description && (
+              <p className="text-sm text-gray-600">{task.description}</p>
+            )}
+
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>Status: {task.status}</span>
+              {task.dueDate && (
+                <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
+              )}
+            </div>
           </li>
         ))}
+        <form
+          action={async () => {
+            "use server";
+            await signOut();
+          }}
+        >
+          <button className="border px-4 py-2">Sign out</button>
+        </form>
       </ul>
-      <form
-        action={async () => {
-          "use server";
-          await signOut();
-        }}
-      >
-        <button className="border px-4 py-2">Sign out</button>
-      </form>
     </div>
   );
 }
