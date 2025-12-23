@@ -1,3 +1,5 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 type Stats = {
   total: number;
   inProgress: number;
@@ -18,9 +20,16 @@ export default function StatsCards({ stats }: { stats: Stats }) {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border bg-white p-4">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="text-2xl font-semibold">{value}</p>
-    </div>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {label}
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <div className="text-2xl font-semibold">{value}</div>
+      </CardContent>
+    </Card>
   );
 }

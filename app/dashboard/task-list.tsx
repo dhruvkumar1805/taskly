@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Task } from "@/generated/prisma/client";
+import { deleteTask } from "../actions/tasks";
 
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
@@ -79,6 +80,11 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
                   <span>Due {new Date(task.dueDate).toLocaleDateString()}</span>
                 )}
               </div>
+              <form action={deleteTask.bind(null, task.id)}>
+                <button className="text-xs text-red-600 hover:underline">
+                  Delete
+                </button>
+              </form>
             </div>
           </li>
         ))}
