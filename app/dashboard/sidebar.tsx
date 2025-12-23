@@ -13,8 +13,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import TaskForm from "./task-form";
+import { useState } from "react";
 
 export default function Sidebar() {
+  const [open, setOpen] = useState(false);
+
   const pathname = usePathname();
 
   const isActive = (href: string) => pathname === href;
@@ -33,7 +36,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button className="mb-6 w-full flex items-center gap-2">
             <Plus className="h-4 w-4" />
@@ -45,8 +48,11 @@ export default function Sidebar() {
           <DialogHeader>
             <DialogTitle>Create New Task</DialogTitle>
           </DialogHeader>
-
-          <TaskForm />
+          <TaskForm
+            onSubmit={() => {
+              setOpen(false);
+            }}
+          />
         </DialogContent>
       </Dialog>
 

@@ -12,10 +12,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function TaskForm() {
+export default function TaskForm({ onSubmit }: { onSubmit?: () => void }) {
   return (
     <form
       action={createTask}
+      onSubmit={onSubmit}
       className="space-y-4 rounded-xl border bg-card p-4"
     >
       <Input name="title" placeholder="Task title" required />
@@ -28,7 +29,7 @@ export default function TaskForm() {
 
       <div className="flex gap-3">
         <Select name="priority" defaultValue="MEDIUM">
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-40">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
           <SelectContent>
