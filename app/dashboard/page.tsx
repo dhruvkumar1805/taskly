@@ -3,6 +3,8 @@ import { auth, signOut } from "@/lib/auth";
 import { getTasks } from "@/app/lib/tasks";
 import TaskForm from "./task-form";
 import { toggleTaskStatus, deleteTask } from "@/app/actions/tasks";
+import { getDashboardStats } from "@/app/lib/dashboard";
+import StatsCards from "./stats-cards";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -10,12 +12,14 @@ export default async function DashboardPage() {
 
   const tasks = await getTasks();
 
+  const stats = await getDashboardStats();
+
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-xl font-semibold">Your Tasks</h1>
 
+      <StatsCards stats={stats} />
       <TaskForm />
-
       <ul className="space-y-3">
         {tasks.map((task) => (
           <li key={task.id} className="border p-4 rounded space-y-1">
