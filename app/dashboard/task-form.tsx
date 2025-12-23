@@ -41,10 +41,10 @@ export default function TaskForm({
         name="description"
         placeholder="Description (optional)"
         defaultValue={task?.description ?? ""}
-        rows={3}
+        rows={4}
       />
 
-      <div className="flex gap-3">
+      <div className="flex items-center justify-between gap-3">
         <Select name="priority" defaultValue={task?.priority ?? "MEDIUM"}>
           <SelectTrigger className="w-40">
             <SelectValue />
@@ -64,9 +64,10 @@ export default function TaskForm({
           }
           className="w-[160px]"
         />
-
-        <Button type="submit">{submitLabel}</Button>
       </div>
+      <Button className="w-full cursor-pointer" type="submit">
+        {submitLabel}
+      </Button>
     </form>
   );
 }

@@ -12,10 +12,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { LogOut } from "lucide-react";
 import TaskForm from "./task-form";
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 
-export default function Sidebar() {
+type SidebarProps = {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+};
+
+export default function Sidebar({ user }: SidebarProps) {
   const [open, setOpen] = useState(false);
 
   const pathname = usePathname();
@@ -23,15 +40,15 @@ export default function Sidebar() {
   const isActive = (href: string) => pathname === href;
 
   return (
-    <aside className="w-72 border-r bg-card px-4 py-6 flex flex-col">
+    <aside className="h-screen w-60 shrink-0 border-r bg-card px-4 py-6 flex flex-col overflow-hidden">
       <div className="mb-6">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">
             ✓
           </div>
-          <div>
-            <p className="font-semibold leading-none">Taskly</p>
-            <p className="text-xs text-muted-foreground">Workspace</p>
+          <div className="space-y-1">
+            <p className="font-semibold text-lg leading-none">Taskly</p>
+            <p className="text-xs text-muted-foreground">Simplify Life</p>
           </div>
         </div>
       </div>
@@ -57,14 +74,12 @@ export default function Sidebar() {
 
       <Separator className="mb-4" />
 
-      <div className="mb-2 text-xs font-medium text-muted-foreground">
-        MAIN MENU
-      </div>
+      <div className="mb-2 text-xs font-medium text-muted-foreground">MENU</div>
 
       <nav className="space-y-1 text-sm">
         <Link
           href="/dashboard"
-          className={`flex items-center gap-3 rounded px-3 py-2 transition ${
+          className={`flex items-center gap-3 rounded-md px-3 py-2 transition ${
             isActive("/dashboard")
               ? "bg-muted text-foreground font-medium"
               : "text-muted-foreground hover:bg-muted"
@@ -74,18 +89,54 @@ export default function Sidebar() {
           Dashboard
         </Link>
 
-        <span className="flex items-center gap-3 rounded px-3 py-2 text-muted-foreground cursor-not-allowed">
+        <span className="flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground cursor-not-allowed">
           <ListTodo className="h-4 w-4" />
           My Tasks
         </span>
 
-        <span className="flex items-center gap-3 rounded px-3 py-2 text-muted-foreground cursor-not-allowed">
+        <span className="flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground cursor-not-allowed">
           <CheckCircle2 className="h-4 w-4" />
           Completed
         </span>
       </nav>
 
       <div className="flex-1" />
+      <Separator className="my-4" />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 hover:bg-muted transition">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback>
+                {user?.name?.[0]?.toUpperCase() ?? "U"}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="flex flex-col text-left">
+              <span className="text-sm font-medium">
+                {user?.name ?? "User"}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {user?.email}
+              </span>
+            </div>
+          </button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent side="top" align="end">
+          <DropdownMenuItem
+            className="text-destructive cursor-pointer"
+            onClick={() =>
+              signOut({
+                callbackUrl: "/login",
+              })
+            }
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </aside>
   );
 }
