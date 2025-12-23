@@ -1,34 +1,48 @@
 "use client";
 
 import { createTask } from "@/app/actions/tasks";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function TaskForm() {
   return (
-    <form action={createTask} className="space-y-2">
-      <input
-        name="title"
-        placeholder="Task title"
-        className="border p-2 w-full"
-        required
-      />
+    <form
+      action={createTask}
+      className="space-y-4 rounded-xl border bg-card p-4"
+    >
+      <h2 className="text-sm font-medium text-muted-foreground">Create Task</h2>
 
-      <textarea
+      <Input name="title" placeholder="Task title" required />
+
+      <Textarea
         name="description"
         placeholder="Description (optional)"
-        className="border p-2 w-full"
         rows={3}
       />
 
-      <div className="flex gap-2">
-        <select name="priority" defaultValue="MEDIUM" className="border p-2">
-          <option value="LOW">Low</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="HIGH">High</option>
-        </select>
+      <div className="flex gap-3">
+        <Select name="priority" defaultValue="MEDIUM">
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="LOW">Low</SelectItem>
+            <SelectItem value="MEDIUM">Medium</SelectItem>
+            <SelectItem value="HIGH">High</SelectItem>
+          </SelectContent>
+        </Select>
 
-        <input type="date" name="dueDate" className="border p-2" />
+        <Input type="date" name="dueDate" className="w-[160px]" />
 
-        <button className="bg-black text-white px-4">Add</button>
+        <Button type="submit">Add</Button>
       </div>
     </form>
   );

@@ -6,6 +6,13 @@ import { deleteTask, toggleTaskStatus } from "../actions/tasks";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
@@ -29,27 +36,35 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
   return (
     <div className="space-y-4">
       <div className="flex gap-3">
-        <select
+        <Select
           value={status}
-          onChange={(e) => setStatus(e.target.value as StatusFilter)}
-          className="border rounded px-3 py-2 text-sm"
+          onValueChange={(v) => setStatus(v as StatusFilter)}
         >
-          <option value="ALL">All Statuses</option>
-          <option value="TODO">Todo</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="COMPLETED">Completed</option>
-        </select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Statuses</SelectItem>
+            <SelectItem value="TODO">Todo</SelectItem>
+            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+            <SelectItem value="COMPLETED">Completed</SelectItem>
+          </SelectContent>
+        </Select>
 
-        <select
+        <Select
           value={priority}
-          onChange={(e) => setPriority(e.target.value as PriorityFilter)}
-          className="border rounded px-3 py-2 text-sm"
+          onValueChange={(v) => setPriority(v as PriorityFilter)}
         >
-          <option value="ALL">All Priorities</option>
-          <option value="LOW">Low</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="HIGH">High</option>
-        </select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Priorities</SelectItem>
+            <SelectItem value="LOW">Low</SelectItem>
+            <SelectItem value="MEDIUM">Medium</SelectItem>
+            <SelectItem value="HIGH">High</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <ul className="space-y-4">
