@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import type { Task } from "@/generated/prisma/client";
-import { deleteTask } from "../actions/tasks";
+import { deleteTask, toggleTaskStatus } from "../actions/tasks";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
@@ -49,48 +52,71 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
         </select>
       </div>
 
-      <ul className="space-y-3">
-        {filteredTasks.map((task) => (
-          <li
-            key={task.id}
-            className={`border p-4 rounded space-y-1 ${
-              isOverdue(task) ? "border-red-400 bg-red-50" : ""
-            }`}
-          >
-            <div className="flex justify-between">
-              <h3 className="font-medium">{task.title}</h3>
-              <span className="text-xs border px-2 py-1 rounded">
-                {task.priority}
-              </span>
-            </div>
+      <ul className="space-y-4">
+        {filteredTasks.map((task) => {
+          const overdue = isOverdue(task);
 
-            {task.description && (
-              <p className="text-sm text-gray-600">{task.description}</p>
-            )}
+          return (
+            <Card
+              key={task.id}
+              className={overdue ? "border-destructive/50" : ""}
+            >
+              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                <div>
+                  <h3 className="font-medium leading-none">{task.title}</h3>
 
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>{task.status.replace("_", " ")}</span>
+                  {task.description && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {task.description}
+                    </p>
+                  )}
+                </div>
 
-              <div className="flex gap-2">
-                {isOverdue(task) && (
-                  <span className="text-red-600 font-medium">Overdue</span>
-                )}
+                <Badge variant="outline">{task.priority}</Badge>
+              </CardHeader>
 
-                {task.dueDate && (
-                  <span>Due {new Date(task.dueDate).toLocaleDateString()}</span>
-                )}
-              </div>
-              <form action={deleteTask.bind(null, task.id)}>
-                <button className="text-xs text-red-600 hover:underline">
-                  Delete
-                </button>
-              </form>
-            </div>
-          </li>
-        ))}
+              <CardContent className="flex items-center justify-between text-sm">
+                <form action={toggleTaskStatus.bind(null, task.id)}>
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                  >
+                    {task.status.replace("_", " ")}
+                  </Button>
+                </form>
+
+                <div className="flex items-center gap-3 text-muted-foreground">
+                  {overdue && (
+                    <span className="text-destructive font-medium">
+                      Overdue
+                    </span>
+                  )}
+
+                  {task.dueDate && (
+                    <span>
+                      Due {new Date(task.dueDate).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+
+                <form action={deleteTask.bind(null, task.id)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Delete
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          );
+        })}
 
         {filteredTasks.length === 0 && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             No tasks match the selected filters
           </p>
         )}
