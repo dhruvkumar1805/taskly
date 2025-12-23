@@ -35,3 +35,53 @@ export async function createTask(formData: FormData) {
 
   revalidatePath("/dashboard");
 }
+
+export async function toggleTaskStatus(taskId: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const task = await prisma.task.findFirst({
+    where: {
+      id: taskId,
+      userId: session.user.id,
+    },
+  });
+
+  if (!task) {
+    throw new Error("Task not found");
+  }
+
+  const nextStatus =
+    task.status === "TODO"
+      ? "IN_PROGRESS"
+      : task.status === "IN_PROGRESS"
+      ? "COMPLETED"
+      : "TODO";
+
+  await prisma.task.update({
+    where: { id: task.id },
+    data: {
+      status: nextStatus,
+    },
+  });
+
+  revalidatePath("/dashboard");
+}
+
+export async function deleteTask(taskId: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.task.deleteMany({
+    where: {
+      id: taskId,
+      userId: session.user.id,
+    },
+  });
+
+  revalidatePath("/dashboard");
+}

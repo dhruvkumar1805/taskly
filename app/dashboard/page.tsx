@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { getTasks } from "@/app/lib/tasks";
 import TaskForm from "./task-form";
+import { toggleTaskStatus, deleteTask } from "@/app/actions/tasks";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -30,10 +31,30 @@ export default async function DashboardPage() {
             )}
 
             <div className="flex justify-between text-xs text-gray-500">
-              <span>Status: {task.status}</span>
+              <form
+                action={async () => {
+                  "use server";
+                  await toggleTaskStatus(task.id);
+                }}
+              >
+                <button className="text-xs px-2 py-1 rounded border hover:bg-gray-100">
+                  {task.status}
+                </button>
+              </form>
+
               {task.dueDate && (
                 <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
               )}
+              <form
+                action={async () => {
+                  "use server";
+                  await deleteTask(task.id);
+                }}
+              >
+                <button className="text-xs text-red-600 hover:underline">
+                  Delete
+                </button>
+              </form>
             </div>
           </li>
         ))}
