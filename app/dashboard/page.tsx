@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { getTasks } from "@/app/lib/tasks";
 import TaskForm from "./task-form";
-import { toggleTaskStatus, deleteTask } from "@/app/actions/tasks";
 import { getDashboardStats } from "@/app/lib/dashboard";
 import StatsCards from "./stats-cards";
 import TaskList from "./task-list";
