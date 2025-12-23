@@ -1,28 +1,66 @@
+"use client";
+
+import { LayoutDashboard, CheckCircle2, ListTodo, Plus } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 export default function Sidebar() {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => pathname === href;
+
   return (
-    <aside className="w-64 border-r bg-card px-4 py-6">
+    <aside className="w-72 border-r bg-card px-4 py-6 flex flex-col">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold">Taskly</h1>
-        <p className="text-sm text-muted-foreground">Task Manager</p>
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">
+            ✓
+          </div>
+          <div>
+            <p className="font-semibold leading-none">Taskly</p>
+            <p className="text-xs text-muted-foreground">Workspace</p>
+          </div>
+        </div>
       </div>
+
+      <Button className="mb-6 w-full flex items-center gap-2">
+        <Plus className="h-4 w-4" />
+        Create New Task
+      </Button>
 
       <Separator className="mb-4" />
 
-      <nav className="space-y-2 text-sm">
+      <div className="mb-2 text-xs font-medium text-muted-foreground">
+        MAIN MENU
+      </div>
+
+      <nav className="space-y-1 text-sm">
         <Link
           href="/dashboard"
-          className="block rounded px-3 py-2 hover:bg-muted"
+          className={`flex items-center gap-3 rounded px-3 py-2 transition ${
+            isActive("/dashboard")
+              ? "bg-muted text-foreground font-medium"
+              : "text-muted-foreground hover:bg-muted"
+          }`}
         >
+          <LayoutDashboard className="h-4 w-4" />
           Dashboard
         </Link>
 
-        <span className="block rounded px-3 py-2 text-muted-foreground cursor-not-allowed">
-          Tasks
+        <span className="flex items-center gap-3 rounded px-3 py-2 text-muted-foreground cursor-not-allowed">
+          <ListTodo className="h-4 w-4" />
+          My Tasks
+        </span>
+
+        <span className="flex items-center gap-3 rounded px-3 py-2 text-muted-foreground cursor-not-allowed">
+          <CheckCircle2 className="h-4 w-4" />
+          Completed
         </span>
       </nav>
+
+      <div className="flex-1" />
     </aside>
   );
 }
