@@ -6,6 +6,12 @@ import type { Task } from "@/generated/prisma/client";
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
 
+function isOverdue(task: { dueDate: Date | null; status: string }) {
+  if (!task.dueDate) return false;
+  if (task.status === "COMPLETED") return false;
+  return new Date(task.dueDate) < new Date();
+}
+
 export default function TaskList({ tasks }: { tasks: Task[] }) {
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
@@ -44,7 +50,12 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
       <ul className="space-y-3">
         {filteredTasks.map((task) => (
-          <li key={task.id} className="border p-4 rounded space-y-1">
+          <li
+            key={task.id}
+            className={`border p-4 rounded space-y-1 ${
+              isOverdue(task) ? "border-red-400 bg-red-50" : ""
+            }`}
+          >
             <div className="flex justify-between">
               <h3 className="font-medium">{task.title}</h3>
               <span className="text-xs border px-2 py-1 rounded">
@@ -58,9 +69,16 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
             <div className="flex justify-between text-xs text-gray-500">
               <span>{task.status.replace("_", " ")}</span>
-              {task.dueDate && (
-                <span>Due {new Date(task.dueDate).toLocaleDateString()}</span>
-              )}
+
+              <div className="flex gap-2">
+                {isOverdue(task) && (
+                  <span className="text-red-600 font-medium">Overdue</span>
+                )}
+
+                {task.dueDate && (
+                  <span>Due {new Date(task.dueDate).toLocaleDateString()}</span>
+                )}
+              </div>
             </div>
           </li>
         ))}
