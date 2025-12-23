@@ -18,8 +18,6 @@ export default function TaskForm() {
       action={createTask}
       className="space-y-4 rounded-xl border bg-card p-4"
     >
-      <h2 className="text-sm font-medium text-muted-foreground">Create Task</h2>
-
       <Input name="title" placeholder="Task title" required />
 
       <Textarea

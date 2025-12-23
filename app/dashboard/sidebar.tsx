@@ -5,6 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import TaskForm from "./task-form";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -25,10 +33,22 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <Button className="mb-6 w-full flex items-center gap-2">
-        <Plus className="h-4 w-4" />
-        Create New Task
-      </Button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button className="mb-6 w-full flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Create New Task
+          </Button>
+        </DialogTrigger>
+
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Task</DialogTitle>
+          </DialogHeader>
+
+          <TaskForm />
+        </DialogContent>
+      </Dialog>
 
       <Separator className="mb-4" />
 

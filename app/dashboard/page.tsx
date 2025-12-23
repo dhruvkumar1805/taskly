@@ -19,7 +19,6 @@ export default async function DashboardPage() {
       <h1 className="text-xl font-semibold">Your Tasks</h1>
 
       <StatsCards stats={stats} />
-      <TaskForm />
       <TaskList tasks={tasks} />
     </div>
   );
