@@ -31,6 +31,12 @@ type Props = {
   onEdit: (task: Task) => void;
 };
 
+const PRIORITY_STYLES: Record<Task["priority"], string> = {
+  HIGH: "bg-red-500/10 text-red-600 border-red-500/30",
+  MEDIUM: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+  LOW: "bg-blue-500/10 text-blue-600 border-blue-500/30",
+};
+
 export default function TaskCard({ task, onEdit }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -51,7 +57,12 @@ export default function TaskCard({ task, onEdit }: Props) {
     dark:hover:shadow-black/40
   "
     >
-      <Badge variant="secondary" className="absolute left-5 top-5 text-xs">
+      <Badge
+        variant="outline"
+        className={`absolute left-5 top-5 text-xs font-medium ${
+          PRIORITY_STYLES[task.priority]
+        }`}
+      >
         {task.priority}
       </Badge>
 
@@ -172,7 +183,13 @@ export default function TaskCard({ task, onEdit }: Props) {
           )}
 
           <div className="mt-4 flex gap-2">
-            <Badge variant="secondary">{task.priority}</Badge>
+            <Badge
+              variant="outline"
+              className={`font-medium ${PRIORITY_STYLES[task.priority]}`}
+            >
+              {task.priority}
+            </Badge>
+
             <Badge variant="outline">{task.status.replace("_", " ")}</Badge>
 
             {task.dueDate && (
