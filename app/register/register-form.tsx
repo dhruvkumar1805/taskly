@@ -52,6 +52,11 @@ export default function RegisterForm() {
 
           <form action={handleSubmit} className="space-y-4">
             <div className="space-y-1">
+              <label className="text-sm font-medium">Full Name</label>
+              <Input name="name" type="text" placeholder="Your name" required />
+            </div>
+
+            <div className="space-y-1">
               <label className="text-sm font-medium">Email Address</label>
               <Input
                 name="email"

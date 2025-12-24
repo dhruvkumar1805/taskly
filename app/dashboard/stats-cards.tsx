@@ -58,7 +58,7 @@ function StatCard({
         </CardTitle>
 
         <div className={`rounded-md bg-muted p-2 ${iconClass}`}>
-          <Icon className="h-4 w-4" />
+          <Icon className="h-5 w-5" />
         </div>
       </CardHeader>
 
