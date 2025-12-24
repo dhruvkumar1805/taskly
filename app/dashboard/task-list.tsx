@@ -19,6 +19,7 @@ import {
 
 import TaskForm from "./task-form";
 import TaskCard from "./task-card";
+import CreateTaskCard from "../../components/create-task-card";
 
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
@@ -29,6 +30,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
 
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -145,6 +147,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             }}
           />
         ))}
+        <CreateTaskCard onClick={() => setCreateOpen(true)} />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -164,6 +167,19 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
               }}
             />
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Task</DialogTitle>
+          </DialogHeader>
+
+          <TaskForm
+            onSubmit={() => {
+              setCreateOpen(false);
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>
