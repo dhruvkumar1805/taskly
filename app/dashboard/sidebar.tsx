@@ -1,6 +1,13 @@
 "use client";
 
-import { LayoutDashboard, CheckCircle2, ListTodo, Plus } from "lucide-react";
+import {
+  LayoutDashboard,
+  CheckCircle2,
+  ListTodo,
+  Plus,
+  Sun,
+  Moon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -23,6 +30,7 @@ import { LogOut } from "lucide-react";
 import TaskForm from "./task-form";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
 
 type SidebarProps = {
   user?: {
@@ -34,6 +42,7 @@ type SidebarProps = {
 
 export default function Sidebar({ user }: SidebarProps) {
   const [open, setOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const pathname = usePathname();
 
@@ -124,6 +133,23 @@ export default function Sidebar({ user }: SidebarProps) {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent side="top" align="end">
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? (
+              <>
+                <Sun className="mr-2 h-4 w-4" />
+                Light mode
+              </>
+            ) : (
+              <>
+                <Moon className="mr-2 h-4 w-4" />
+                Dark mode
+              </>
+            )}
+          </DropdownMenuItem>
+
           <DropdownMenuItem
             className="text-destructive cursor-pointer"
             onClick={() =>
