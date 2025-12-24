@@ -78,6 +78,15 @@ export default function TaskCard({ task, onEdit }: Props) {
         >
           <Checkbox
             checked={isCompleted}
+            className="
+    transition-all
+    duration-200
+    ease-out
+    data-[state=checked]:scale-105
+    data-[state=unchecked]:scale-100
+    hover:border-primary
+    active:scale-95
+  "
             onClick={() => {
               (document.activeElement as HTMLElement)
                 ?.closest("form")
