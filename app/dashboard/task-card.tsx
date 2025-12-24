@@ -37,7 +37,20 @@ export default function TaskCard({ task, onEdit }: Props) {
   const isCompleted = task.status === "COMPLETED";
 
   return (
-    <Card className="relative rounded-xl p-5 transition hover:shadow-sm flex flex-col h-full">
+    <Card
+      className="
+    relative
+    rounded-xl
+    p-5
+    transition-all
+    duration-200
+    ease-out
+    hover:-translate-y-[2px]
+    hover:shadow-md
+    hover:shadow-black/5
+    dark:hover:shadow-black/40
+  "
+    >
       <Badge variant="secondary" className="absolute left-5 top-5 text-xs">
         {task.priority}
       </Badge>
@@ -98,7 +111,7 @@ export default function TaskCard({ task, onEdit }: Props) {
         <div
           role="button"
           onClick={() => setOpen(true)}
-          className="flex flex-1 cursor-pointer flex-col gap-1 rounded-md hover:bg-muted/50 h-full"
+          className="flex flex-1 cursor-pointer flex-col gap-1 h-full"
         >
           <h3
             className={`line-clamp-2 font-medium ${
@@ -123,8 +136,23 @@ export default function TaskCard({ task, onEdit }: Props) {
               <span />
             )}
 
-            <form action={toggleTaskStatus.bind(null, task.id)}>
-              <Button variant="outline" size="sm" className="h-7 px-2 text-xs">
+            <form
+              onClick={(e) => e.stopPropagation()}
+              action={toggleTaskStatus.bind(null, task.id)}
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                className={`
+      h-7 px-2 text-xs
+      transition-all duration-200 ease-out
+      ${
+        task.status === "COMPLETED"
+          ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+          : "hover:bg-muted"
+      }
+    `}
+              >
                 {task.status.replace("_", " ")}
               </Button>
             </form>
