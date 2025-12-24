@@ -7,6 +7,7 @@ import {
   Plus,
   Sun,
   Moon,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -51,9 +52,9 @@ export default function Sidebar({ user }: SidebarProps) {
   return (
     <aside className="h-screen w-60 shrink-0 border-r bg-card px-4 py-6 flex flex-col overflow-hidden">
       <div className="mb-6">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">
-            ✓
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
+            <Check />
           </div>
           <div className="space-y-1">
             <p className="font-semibold text-lg leading-none">Taskly</p>

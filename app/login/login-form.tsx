@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, ArrowRight } from "lucide-react";
+import { Eye, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginForm() {
@@ -22,7 +22,7 @@ export default function LoginForm() {
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
-              ✓
+              <Check />
             </div>
             <span className="font-semibold text-lg">Taskly</span>
           </div>

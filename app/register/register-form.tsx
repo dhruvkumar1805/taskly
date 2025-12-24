@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Check } from "lucide-react";
 
 export default function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +38,7 @@ export default function RegisterForm() {
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
-              ✓
+              <Check />
             </div>
             <span className="font-semibold text-lg">Taskly</span>
           </div>
