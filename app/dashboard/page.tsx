@@ -4,7 +4,7 @@ import { getTasks } from "@/app/lib/tasks";
 import { getDashboardStats } from "@/app/lib/dashboard";
 import StatsCards from "./stats-cards";
 import TaskList from "./task-list";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -44,11 +44,17 @@ export default async function DashboardPage() {
             {getGreeting()}, {name}! 👋
           </h1>
           <p className="text-sm text-muted-foreground">
-            {stats.inProgress === 0
-              ? "You’re all caught up for today 🎉"
-              : `You have ${stats.inProgress} ${
-                  stats.inProgress === 1 ? "task" : "tasks"
-                } remaining today.`}
+            {stats.inProgress === 0 ? (
+              "You’re all caught up for today 🎉"
+            ) : (
+              <>
+                You have{" "}
+                <span className="font-semibold text-foreground">
+                  {stats.inProgress} {stats.inProgress === 1 ? "task" : "tasks"}
+                </span>{" "}
+                remaining today.
+              </>
+            )}
           </p>
         </div>
 
