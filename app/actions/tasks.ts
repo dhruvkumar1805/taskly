@@ -70,6 +70,24 @@ export async function toggleTaskStatus(taskId: string) {
   revalidatePath("/dashboard");
 }
 
+export async function toggleTaskCompleted(taskId: string) {
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    select: { status: true },
+  });
+
+  if (!task) return;
+
+  const nextStatus = task.status === "COMPLETED" ? "TODO" : "COMPLETED";
+
+  await prisma.task.update({
+    where: { id: taskId },
+    data: { status: nextStatus },
+  });
+
+  revalidatePath("/dashboard");
+}
+
 export async function deleteTask(taskId: string) {
   const session = await auth();
   if (!session?.user?.id) {

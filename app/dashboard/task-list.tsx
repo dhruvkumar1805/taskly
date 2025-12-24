@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 
 import TaskForm from "./task-form";
+import TaskCard from "./task-card";
 
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
@@ -111,86 +112,19 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
         </Select>
       </div>
 
-      <ul className="space-y-4">
-        {filteredTasks.map((task) => {
-          const overdue = isOverdue(task);
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredTasks.map((task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            onEdit={(t) => {
+              setEditingTask(t);
+              setOpen(true);
+            }}
+          />
+        ))}
+      </div>
 
-          return (
-            <Card
-              key={task.id}
-              className={overdue ? "border-destructive/50" : ""}
-            >
-              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                <div>
-                  <h3 className="font-medium leading-none">{task.title}</h3>
-
-                  {task.description && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {task.description}
-                    </p>
-                  )}
-                </div>
-
-                <Badge variant="outline">{task.priority}</Badge>
-              </CardHeader>
-
-              <CardContent className="flex items-center justify-between text-sm">
-                <form action={toggleTaskStatus.bind(null, task.id)}>
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    size="sm"
-                    className="h-7 px-2 text-xs"
-                  >
-                    {task.status.replace("_", " ")}
-                  </Button>
-                </form>
-
-                <div className="flex items-center gap-3 text-muted-foreground">
-                  {overdue && (
-                    <span className="text-destructive font-medium">
-                      Overdue
-                    </span>
-                  )}
-
-                  {task.dueDate && (
-                    <span>
-                      Due {new Date(task.dueDate).toLocaleDateString()}
-                    </span>
-                  )}
-                </div>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setEditingTask(task);
-                    setOpen(true);
-                  }}
-                >
-                  Edit
-                </Button>
-
-                <form action={deleteTask.bind(null, task.id)}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive"
-                  >
-                    Delete
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          );
-        })}
-
-        {filteredTasks.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            No tasks match the selected filters
-          </p>
-        )}
-      </ul>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
