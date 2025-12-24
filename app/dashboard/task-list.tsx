@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import type { Task } from "@/generated/prisma/client";
-import { deleteTask, toggleTaskStatus, updateTask } from "../actions/tasks";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { updateTask } from "../actions/tasks";
 import {
   Select,
   SelectContent,
@@ -39,19 +36,26 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const filteredTasks = tasks.filter((task) => {
-    if (status !== "ALL" && task.status !== status) return false;
-    if (priority !== "ALL" && task.priority !== priority) return false;
+  const filteredTasks = tasks
+    .filter((task) => {
+      if (status !== "ALL" && task.status !== status) return false;
+      if (priority !== "ALL" && task.priority !== priority) return false;
 
-    if (query) {
-      const q = query.toLowerCase();
-      const inTitle = task.title.toLowerCase().includes(q);
-      const inDesc = task.description?.toLowerCase().includes(q);
-      if (!inTitle && !inDesc) return false;
-    }
+      if (query) {
+        const q = query.toLowerCase();
+        const inTitle = task.title.toLowerCase().includes(q);
+        const inDesc = task.description?.toLowerCase().includes(q);
+        if (!inTitle && !inDesc) return false;
+      }
 
-    return true;
-  });
+      return true;
+    })
+    .sort((a, b) => {
+      if (a.status === "COMPLETED" && b.status !== "COMPLETED") return 1;
+      if (a.status !== "COMPLETED" && b.status === "COMPLETED") return -1;
+
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   return (
     <div className="space-y-4">
@@ -100,7 +104,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           value={priority}
           onValueChange={(v) => setPriority(v as PriorityFilter)}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-45">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
           <SelectContent>
@@ -112,7 +116,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 auto-rows-fr">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
         {filteredTasks.map((task) => (
           <TaskCard
             key={task.id}
