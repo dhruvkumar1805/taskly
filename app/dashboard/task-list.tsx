@@ -112,7 +112,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 auto-rows-fr">
         {filteredTasks.map((task) => (
           <TaskCard
             key={task.id}

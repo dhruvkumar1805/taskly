@@ -16,7 +16,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
   task: Task;
@@ -24,10 +32,12 @@ type Props = {
 };
 
 export default function TaskCard({ task, onEdit }: Props) {
+  const [open, setOpen] = useState(false);
+
   const isCompleted = task.status === "COMPLETED";
 
   return (
-    <Card className="relative rounded-xl p-5 transition hover:shadow-sm">
+    <Card className="relative rounded-xl p-5 transition hover:shadow-sm flex flex-col h-full">
       <Badge variant="secondary" className="absolute left-5 top-5 text-xs">
         {task.priority}
       </Badge>
@@ -35,7 +45,12 @@ export default function TaskCard({ task, onEdit }: Props) {
       <div className="absolute right-4 top-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-8 w-8">
+            <Button
+              onClick={(e) => e.stopPropagation()}
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+            >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -55,8 +70,12 @@ export default function TaskCard({ task, onEdit }: Props) {
         </DropdownMenu>
       </div>
 
-      <div className="mt-8 flex items-start gap-3">
-        <form action={toggleTaskCompleted.bind(null, task.id)} className="pt-1">
+      <div className="mt-8 flex items-start gap-3 flex-1">
+        <form
+          onClick={(e) => e.stopPropagation()}
+          action={toggleTaskCompleted.bind(null, task.id)}
+          className="pt-1"
+        >
           <Checkbox
             checked={isCompleted}
             onClick={() => {
@@ -66,9 +85,14 @@ export default function TaskCard({ task, onEdit }: Props) {
             }}
           />
         </form>
-        <div className="flex flex-1 flex-col gap-1">
+
+        <div
+          role="button"
+          onClick={() => setOpen(true)}
+          className="flex flex-1 cursor-pointer flex-col gap-1 rounded-md hover:bg-muted/50 h-full"
+        >
           <h3
-            className={`font-medium leading-snug ${
+            className={`line-clamp-2 font-medium ${
               isCompleted ? "line-through text-muted-foreground" : ""
             }`}
           >
@@ -76,12 +100,12 @@ export default function TaskCard({ task, onEdit }: Props) {
           </h3>
 
           {task.description && (
-            <p className="text-sm text-muted-foreground leading-snug">
+            <p className="line-clamp-2 text-sm text-muted-foreground">
               {task.description}
             </p>
           )}
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-auto flex items-center justify-between pt-3">
             {task.dueDate ? (
               <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
                 Due {new Date(task.dueDate).toLocaleDateString()}
@@ -98,6 +122,30 @@ export default function TaskCard({ task, onEdit }: Props) {
           </div>
         </div>
       </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{task.title}</DialogTitle>
+          </DialogHeader>
+
+          {task.description && (
+            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+              {task.description}
+            </p>
+          )}
+
+          <div className="mt-4 flex gap-2">
+            <Badge variant="secondary">{task.priority}</Badge>
+            <Badge variant="outline">{task.status.replace("_", " ")}</Badge>
+
+            {task.dueDate && (
+              <Badge variant="outline">
+                Due {new Date(task.dueDate).toLocaleDateString()}
+              </Badge>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
