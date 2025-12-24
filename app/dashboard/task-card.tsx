@@ -25,6 +25,7 @@ import {
 
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type Props = {
   task: Task;
@@ -59,9 +60,11 @@ export default function TaskCard({ task, onEdit }: Props) {
     >
       <Badge
         variant="outline"
-        className={`absolute left-5 top-5 text-xs font-medium ${
-          PRIORITY_STYLES[task.priority]
-        }`}
+        className={`
+    absolute left-5 top-5 text-xs font-medium
+    transition-colors duration-200
+    ${PRIORITY_STYLES[task.priority]}
+  `}
       >
         {task.priority}
       </Badge>
@@ -86,7 +89,10 @@ export default function TaskCard({ task, onEdit }: Props) {
 
             <DropdownMenuItem
               className="text-destructive"
-              onClick={() => deleteTask(task.id)}
+              onClick={async () => {
+                await deleteTask(task.id);
+                toast.error("Task deleted");
+              }}
             >
               Delete
             </DropdownMenuItem>
@@ -97,25 +103,29 @@ export default function TaskCard({ task, onEdit }: Props) {
       <div className="mt-8 flex items-start gap-3 flex-1">
         <form
           onClick={(e) => e.stopPropagation()}
-          action={toggleTaskCompleted.bind(null, task.id)}
-          className="pt-1"
+          action={async () => {
+            await toggleTaskCompleted(task.id);
+            toast.success(
+              isCompleted ? "Task marked as pending" : "Task completed"
+            );
+          }}
+          className="pt-1 flex items-center"
         >
           <Checkbox
             checked={isCompleted}
+            onCheckedChange={async () => {
+              await toggleTaskCompleted(task.id);
+
+              toast.success(
+                isCompleted ? "Task marked as pending" : "Task completed"
+              );
+            }}
             className="
-    transition-all
-    duration-200
-    ease-out
+    transition-all duration-200 ease-out
     data-[state=checked]:scale-105
-    data-[state=unchecked]:scale-100
     hover:border-primary
     active:scale-95
   "
-            onClick={() => {
-              (document.activeElement as HTMLElement)
-                ?.closest("form")
-                ?.requestSubmit();
-            }}
           />
         </form>
 

@@ -62,7 +62,7 @@ export default function TaskForm({
           defaultValue={
             task?.dueDate ? task.dueDate.toISOString().split("T")[0] : ""
           }
-          className="w-[160px]"
+          className="w-40"
         />
       </div>
       <Button className="w-full cursor-pointer" type="submit">
