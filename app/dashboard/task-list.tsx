@@ -36,21 +36,55 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
 
   const filteredTasks = tasks.filter((task) => {
     if (status !== "ALL" && task.status !== status) return false;
     if (priority !== "ALL" && task.priority !== priority) return false;
+
+    if (query) {
+      const q = query.toLowerCase();
+      const inTitle = task.title.toLowerCase().includes(q);
+      const inDesc = task.description?.toLowerCase().includes(q);
+      if (!inTitle && !inDesc) return false;
+    }
+
     return true;
   });
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setQuery("");
+            }}
+            className="w-full rounded-md border bg-background px-10 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="m21 21-4.35-4.35" />
+            <circle cx="11" cy="11" r="8" />
+          </svg>
+        </div>
+      </div>
+
       <div className="flex gap-3">
         <Select
           value={status}
           onValueChange={(v) => setStatus(v as StatusFilter)}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-45">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
