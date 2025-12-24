@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Task } from "@/generated/prisma/client";
 import { updateTask } from "../actions/tasks";
 import {
@@ -23,18 +23,14 @@ import TaskCard from "./task-card";
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
 
-function isOverdue(task: { dueDate: Date | null; status: string }) {
-  if (!task.dueDate) return false;
-  if (task.status === "COMPLETED") return false;
-  return new Date(task.dueDate) < new Date();
-}
-
 export default function TaskList({ tasks }: { tasks: Task[] }) {
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const filteredTasks = tasks
     .filter((task) => {
@@ -57,13 +53,34 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
+      if (isTyping) return;
+
+      if (e.key === "/") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <input
+            ref={searchRef}
             type="text"
-            placeholder="Search tasks..."
+            placeholder="Search tasks ( / )"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -71,6 +88,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             }}
             className="w-full rounded-md border bg-background px-10 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
+
           <svg
             className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
             fill="none"
