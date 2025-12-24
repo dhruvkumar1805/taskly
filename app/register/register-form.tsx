@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Check } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 export default function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,11 @@ export default function RegisterForm() {
       return;
     }
 
-    window.location.href = "/login";
+    await signIn("credentials", {
+      email: formData.get("email"),
+      password: formData.get("password"),
+      callbackUrl: "/dashboard",
+    });
   }
 
   return (
