@@ -12,6 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { useState } from "react";
 
 export default function TaskForm({
   task,
@@ -24,6 +33,10 @@ export default function TaskForm({
   submitLabel?: string;
   onSubmit?: () => void;
 }) {
+  const [dueDate, setDueDate] = useState<Date | undefined>(
+    task?.dueDate ? new Date(task.dueDate) : undefined
+  );
+
   return (
     <form
       action={action ?? createTask}
@@ -44,9 +57,39 @@ export default function TaskForm({
         rows={4}
       />
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="md:flex items-center justify-between gap-3 space-y-4 md:space-y-0">
+        <div className="flex flex-col gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={`w-50 justify-start text-left font-normal ${
+                  !dueDate && "text-muted-foreground"
+                }`}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dueDate ? format(dueDate, "PPP") : "Pick a date"}
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dueDate}
+                onSelect={setDueDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+
+          <input
+            type="hidden"
+            name="dueDate"
+            value={dueDate ? dueDate.toISOString() : ""}
+          />
+        </div>
         <Select name="priority" defaultValue={task?.priority ?? "MEDIUM"}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-30">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -55,15 +98,6 @@ export default function TaskForm({
             <SelectItem value="HIGH">High</SelectItem>
           </SelectContent>
         </Select>
-
-        <Input
-          type="date"
-          name="dueDate"
-          defaultValue={
-            task?.dueDate ? task.dueDate.toISOString().split("T")[0] : ""
-          }
-          className="w-40"
-        />
       </div>
       <Button className="w-full cursor-pointer" type="submit">
         {submitLabel}

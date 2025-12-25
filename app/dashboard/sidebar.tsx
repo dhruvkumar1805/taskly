@@ -76,7 +76,7 @@ export default function Sidebar({ user }: SidebarProps) {
             <DialogTitle>Create New Task</DialogTitle>
           </DialogHeader>
 
-          <div className="rounded-xl border bg-card p-4">
+          <div className="rounded-xl">
             <TaskForm onSubmit={() => setOpen(false)} />
           </div>
         </DialogContent>
