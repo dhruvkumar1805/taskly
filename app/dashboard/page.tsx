@@ -40,7 +40,7 @@ export default async function DashboardPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl md:text-3xl font-bold">
             {getGreeting()}, {name}! 👋
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <Card className="w-fit rounded-xl px-3 py-2">
+        <Card className="hidden md:block w-fit rounded-xl px-3 py-2">
           <div className="flex flex-col items-end text-right">
             <p className="text-sm font-semibold">{dateString}</p>
             <p className="text-xs text-muted-foreground">{dayString}</p>
