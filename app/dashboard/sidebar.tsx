@@ -50,7 +50,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const isActive = (href: string) => pathname === href;
 
   return (
-    <aside className="h-screen w-60 shrink-0 border-r bg-card px-4 py-6 flex flex-col overflow-hidden">
+    <aside className="h-full w-60 shrink-0 border-r bg-card px-4 py-6 flex flex-col overflow-hidden">
       <div className="mb-6">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">

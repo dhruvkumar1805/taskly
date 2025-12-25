@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
-import Sidebar from "./sidebar";
+import { redirect } from "next/navigation";
+import DashboardShell from "./dashboard-shell";
 
 export default async function DashboardLayout({
   children,
@@ -7,13 +8,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+  if (!session) redirect("/login");
 
-  return (
-    <div className="flex h-screen">
-      <Sidebar user={session?.user} />
-      <main className="flex-1 overflow-y-auto [color-scheme:dark]">
-        {children}
-      </main>
-    </div>
-  );
+  return <DashboardShell user={session.user}>{children}</DashboardShell>;
 }
