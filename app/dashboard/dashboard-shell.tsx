@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { Check, Menu } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -47,8 +47,10 @@ export default function DashboardShell({
               <Sidebar user={user} />
             </SheetContent>
           </Sheet>
-
-          <span className="font-semibold">Taskly</span>
+          <div className="h-7 w-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
+            <Check size={20} />
+          </div>
+          <span className="text-lg font-semibold">Taskly</span>
         </header>
 
         <main className="flex-1 overflow-y-auto">{children}</main>
