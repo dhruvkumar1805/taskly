@@ -49,13 +49,14 @@ export default function TaskCard({ task, onEdit }: Props) {
     relative
     rounded-xl
     p-5
+    shadow-[0_1px_2px_rgba(0,0,0,0.04)]
+    dark:shadow-[0_1px_2px_rgba(0,0,0,0.25)]
     transition-all
     duration-200
     ease-out
     hover:-translate-y-[2px]
-    hover:shadow-md
-    hover:shadow-black/5
-    dark:hover:shadow-black/40
+    hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]
+    dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.45)]
   "
     >
       <Badge
