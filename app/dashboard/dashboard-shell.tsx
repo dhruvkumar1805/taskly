@@ -23,7 +23,7 @@ export default function DashboardShell({
     <div className="h-screen">
       <div className="hidden md:flex h-full">
         <Sidebar user={user} />
-        <main className="flex-1 overflow-y-auto bg-muted/60 dark:bg-neutral-950">
+        <main className="flex-1 overflow-y-auto bg-muted/60 bg-dashboard">
           {children}
         </main>
       </div>

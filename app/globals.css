@@ -117,6 +117,14 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.dark .bg-dashboard {
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(at 40% 20%, hsla(0,0%,100%,0.06) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsla(0,0%,100%,0.04) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsla(0,0%,100%,0.03) 0px, transparent 50%);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -125,3 +133,4 @@
     @apply bg-background text-foreground;
   }
 }
+
