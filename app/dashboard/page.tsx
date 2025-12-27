@@ -44,13 +44,13 @@ export default async function DashboardPage() {
             {getGreeting()}, {name}! 👋
           </h1>
           <p className="text-sm text-muted-foreground">
-            {stats.inProgress === 0 ? (
+            {stats.todo === 0 ? (
               "You’re all caught up for today 🎉"
             ) : (
               <>
                 You have{" "}
-                <span className="font-semibold text-foreground">
-                  {stats.inProgress} {stats.inProgress === 1 ? "task" : "tasks"}
+                <span className="font-semibold text-primary">
+                  {stats.todo} {stats.todo === 1 ? "task" : "tasks"}
                 </span>{" "}
                 remaining today.
               </>

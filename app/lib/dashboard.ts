@@ -10,8 +10,11 @@ export async function getDashboardStats() {
   const userId = session.user.id;
   const now = new Date();
 
-  const [total, inProgress, completed, overdue] = await Promise.all([
+  const [total, todo, inProgress, completed, overdue] = await Promise.all([
     prisma.task.count({ where: { userId } }),
+    prisma.task.count({
+      where: { userId, status: "TODO" },
+    }),
     prisma.task.count({
       where: { userId, status: "IN_PROGRESS" },
     }),
@@ -29,6 +32,7 @@ export async function getDashboardStats() {
 
   return {
     total,
+    todo,
     inProgress,
     completed,
     overdue,
