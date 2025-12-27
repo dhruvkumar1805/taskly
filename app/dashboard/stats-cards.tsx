@@ -52,19 +52,15 @@ function StatCard({
 }) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {label}
-        </CardTitle>
-
+      <CardHeader className="flex flex-col">
         <div className={`rounded-md bg-muted p-2 ${iconClass}`}>
           <Icon className="h-5 w-5" />
         </div>
-      </CardHeader>
-
-      <CardContent>
         <div className="text-3xl font-semibold">{value}</div>
-      </CardContent>
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {label}
+        </CardTitle>
+      </CardHeader>
     </Card>
   );
 }
