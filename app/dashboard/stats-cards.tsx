@@ -53,7 +53,7 @@ function StatCard({
   return (
     <Card>
       <CardHeader className="flex flex-col">
-        <div className={`rounded-md bg-muted p-2 ${iconClass}`}>
+        <div className={`rounded-md bg-muted p-2 hidden md:block ${iconClass}`}>
           <Icon className="h-5 w-5" />
         </div>
         <div className="text-3xl font-semibold">{value}</div>
