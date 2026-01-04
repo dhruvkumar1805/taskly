@@ -1,14 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, ArrowRight, Check } from "lucide-react";
+import { Eye, ArrowRight, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginForm() {
+  const [loading, setLoading] = useState(false);
+
   async function handleLogin(formData: FormData) {
+    setLoading(true);
+
     await signIn("credentials", {
       email: formData.get("email"),
       password: formData.get("password"),
@@ -42,6 +47,7 @@ export default function LoginForm() {
                 type="email"
                 placeholder="you@example.com"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -53,13 +59,27 @@ export default function LoginForm() {
                   type="password"
                   placeholder="••••••••"
                   required
+                  disabled={loading}
                 />
-                <Eye className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" />
+                <Eye className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
               </div>
             </div>
 
-            <Button type="submit" className="cursor-pointer w-full gap-2">
-              Sign in <ArrowRight className="h-4 w-4" />
+            <Button
+              type="submit"
+              className="w-full gap-2"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in…
+                </>
+              ) : (
+                <>
+                  Sign in <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </Button>
           </form>
 

@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Check } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { Check, Loader2 } from "lucide-react";
 
 export default function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
@@ -22,11 +22,10 @@ export default function RegisterForm() {
       body: formData,
     });
 
-    setLoading(false);
-
     if (!res.ok) {
       const data = await res.json();
       setError(data.error || "Something went wrong");
+      setLoading(false);
       return;
     }
 
@@ -58,7 +57,12 @@ export default function RegisterForm() {
           <form action={handleSubmit} className="space-y-4">
             <div className="space-y-1">
               <label className="text-sm font-medium">Full Name</label>
-              <Input name="name" type="text" placeholder="Your name" required />
+              <Input
+                name="name"
+                placeholder="Your name"
+                required
+                disabled={loading}
+              />
             </div>
 
             <div className="space-y-1">
@@ -68,6 +72,7 @@ export default function RegisterForm() {
                 type="email"
                 placeholder="you@example.com"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -79,6 +84,7 @@ export default function RegisterForm() {
                 placeholder="Minimum 6 characters"
                 required
                 minLength={6}
+                disabled={loading}
               />
             </div>
 
@@ -86,10 +92,17 @@ export default function RegisterForm() {
 
             <Button
               type="submit"
-              className="w-full cursor-pointer"
+              className="w-full gap-2"
               disabled={loading}
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Creating account…
+                </>
+              ) : (
+                "Create account"
+              )}
             </Button>
           </form>
 
