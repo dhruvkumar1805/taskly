@@ -5,11 +5,12 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, ArrowRight, Check, Loader2 } from "lucide-react";
+import { Eye, ArrowRight, Check, Loader2, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleLogin(formData: FormData) {
     setLoading(true);
@@ -56,20 +57,29 @@ export default function LoginForm() {
               <div className="relative">
                 <Input
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   required
                   disabled={loading}
+                  className="pr-10"
                 />
-                <Eye className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
               </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full gap-2"
-              disabled={loading}
-            >
+            <Button type="submit" className="w-full gap-2" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
