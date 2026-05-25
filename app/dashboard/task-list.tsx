@@ -31,13 +31,9 @@ import CreateTaskCard from "../../components/create-task-card";
 
 type OptimisticAction =
   | { type: "toggle_completed"; id: string }
-  | { type: "toggle_status"; id: string }
-  | { type: "delete"; id: string };
+  | { type: "toggle_status"; id: string };
 
 function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
-  if (action.type === "delete") {
-    return tasks.filter((t) => t.id !== action.id);
-  }
   return tasks.map((t) => {
     if (t.id !== action.id) return t;
     if (action.type === "toggle_completed") {
@@ -55,13 +51,17 @@ function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
 
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
+type SortOption = "created" | "due" | "priority";
 
 export default function TaskList({ tasks }: { tasks: Task[] }) {
   const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
+  const deleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
+  const [sort, setSort] = useState<SortOption>("created");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -102,14 +102,35 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
   }
 
   function handleDelete(id: string) {
-    startTransition(async () => {
-      applyOptimistic({ type: "delete", id });
-      await deleteTask(id);
-      toast.error("Task deleted");
+    setPendingDeletes((prev) => new Set([...prev, id]));
+
+    toast("Task deleted", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          const timer = deleteTimers.current.get(id);
+          if (timer) clearTimeout(timer);
+          deleteTimers.current.delete(id);
+          setPendingDeletes((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        },
+      },
+      duration: 4000,
     });
+
+    const timer = setTimeout(async () => {
+      deleteTimers.current.delete(id);
+      await deleteTask(id);
+    }, 4000);
+
+    deleteTimers.current.set(id, timer);
   }
 
   const filteredTasks = optimisticTasks
+    .filter((t) => !pendingDeletes.has(t.id))
     .filter((task) => {
       if (status !== "ALL" && task.status !== status) return false;
       if (priority !== "ALL" && task.priority !== priority) return false;
@@ -127,6 +148,16 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
       if (a.status === "COMPLETED" && b.status !== "COMPLETED") return 1;
       if (a.status !== "COMPLETED" && b.status === "COMPLETED") return -1;
 
+      if (sort === "due") {
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      }
+      if (sort === "priority") {
+        const order = { HIGH: 0, MEDIUM: 1, LOW: 2 } as const;
+        return order[a.priority] - order[b.priority];
+      }
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
@@ -198,6 +229,17 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             <SelectItem value="LOW">Low</SelectItem>
             <SelectItem value="MEDIUM">Medium</SelectItem>
             <SelectItem value="HIGH">High</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+          <SelectTrigger className="w-38">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="created">Newest first</SelectItem>
+            <SelectItem value="due">Due date</SelectItem>
+            <SelectItem value="priority">Priority</SelectItem>
           </SelectContent>
         </Select>
       </div>

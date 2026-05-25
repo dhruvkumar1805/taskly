@@ -20,6 +20,31 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 
+function getDueDateInfo(dueDate: Date, isCompleted: boolean) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const due = new Date(dueDate);
+  due.setHours(0, 0, 0, 0);
+
+  if (isCompleted) {
+    return { label: `Due ${new Date(dueDate).toLocaleDateString()}`, className: "bg-muted text-muted-foreground" };
+  }
+  if (due < today) {
+    return { label: "Overdue", className: "bg-red-500/10 text-red-600 border border-red-500/20" };
+  }
+  if (due.getTime() === today.getTime()) {
+    return { label: "Due today", className: "bg-amber-500/10 text-amber-600 border border-amber-500/20" };
+  }
+  if (due.getTime() === tomorrow.getTime()) {
+    return { label: "Due tomorrow", className: "bg-yellow-500/10 text-yellow-600 border border-yellow-500/20" };
+  }
+  return { label: `Due ${new Date(dueDate).toLocaleDateString()}`, className: "bg-muted text-muted-foreground" };
+}
+
 type Props = {
   task: Task;
   isPending?: boolean;
@@ -45,7 +70,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
   const [open, setOpen] = useState(false);
 
   const isCompleted = task.status === "COMPLETED";
-  const isOverdue = !!task.dueDate && new Date(task.dueDate) < new Date() && !isCompleted;
+  const dueDateInfo = task.dueDate ? getDueDateInfo(task.dueDate, isCompleted) : null;
 
   return (
     <Card
@@ -100,15 +125,9 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
             onCheckedChange={() => onToggleCompleted(task.id)}
             className="transition-all duration-200 ease-out data-[state=checked]:scale-105 hover:border-primary active:scale-95"
           />
-          {task.dueDate && (
-            <span
-              className={`rounded-md px-2 py-0.5 text-xs font-medium ${
-                isOverdue
-                  ? "bg-red-500/10 text-red-600 border border-red-500/20"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {isOverdue ? "Overdue" : `Due ${new Date(task.dueDate).toLocaleDateString()}`}
+          {dueDateInfo && (
+            <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}>
+              {dueDateInfo.label}
             </span>
           )}
         </div>
@@ -142,12 +161,9 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
             <Badge variant="outline" className={STATUS_STYLES[task.status]}>
               {task.status.replace("_", " ")}
             </Badge>
-            {task.dueDate && (
-              <Badge
-                variant="outline"
-                className={isOverdue ? "bg-red-500/10 text-red-600 border-red-500/30" : ""}
-              >
-                {isOverdue ? "Overdue" : `Due ${new Date(task.dueDate).toLocaleDateString()}`}
+            {dueDateInfo && (
+              <Badge variant="outline" className={dueDateInfo.className}>
+                {dueDateInfo.label}
               </Badge>
             )}
           </div>
