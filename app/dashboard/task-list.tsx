@@ -21,6 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ClipboardList, SearchX, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import TaskForm from "./task-form";
@@ -56,6 +58,7 @@ type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
 
 export default function TaskList({ tasks }: { tasks: Task[] }) {
   const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
 
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
@@ -66,19 +69,35 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
   const searchRef = useRef<HTMLInputElement>(null);
 
+  function addPending(id: string) {
+    setPendingIds((prev) => new Set([...prev, id]));
+  }
+
+  function removePending(id: string) {
+    setPendingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }
+
   function handleToggleCompleted(id: string) {
     const wasCompleted = optimisticTasks.find((t) => t.id === id)?.status === "COMPLETED";
+    addPending(id);
     startTransition(async () => {
       applyOptimistic({ type: "toggle_completed", id });
       await toggleTaskCompleted(id);
       toast.success(wasCompleted ? "Task marked as pending" : "Task completed");
+      removePending(id);
     });
   }
 
   function handleToggleStatus(id: string) {
+    addPending(id);
     startTransition(async () => {
       applyOptimistic({ type: "toggle_status", id });
       await toggleTaskStatus(id);
+      removePending(id);
     });
   }
 
@@ -192,22 +211,59 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-6 auto-rows-fr">
-        {filteredTasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onEdit={(t) => {
-              setEditingTask(t);
-              setOpen(true);
-            }}
-            onToggleCompleted={handleToggleCompleted}
-            onToggleStatus={handleToggleStatus}
-            onDelete={handleDelete}
-          />
-        ))}
-        <CreateTaskCard onClick={() => setCreateOpen(true)} />
-      </div>
+      {filteredTasks.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-16 text-center">
+          <div className="rounded-full bg-muted p-4">
+            {tasks.length === 0 ? (
+              <ClipboardList className="h-6 w-6 text-muted-foreground" />
+            ) : (
+              <SearchX className="h-6 w-6 text-muted-foreground" />
+            )}
+          </div>
+          <div>
+            <p className="font-medium">
+              {tasks.length === 0 ? "No tasks yet" : "No tasks found"}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {tasks.length === 0
+                ? "Create your first task to get started."
+                : "Try adjusting your search or filters."}
+            </p>
+          </div>
+          {tasks.length === 0 ? (
+            <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4 mr-1" />
+              New Task
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => { setStatus("ALL"); setPriority("ALL"); setQuery(""); }}
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-6 auto-rows-fr">
+          {filteredTasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              isPending={pendingIds.has(task.id)}
+              onEdit={(t) => {
+                setEditingTask(t);
+                setOpen(true);
+              }}
+              onToggleCompleted={handleToggleCompleted}
+              onToggleStatus={handleToggleStatus}
+              onDelete={handleDelete}
+            />
+          ))}
+          <CreateTaskCard onClick={() => setCreateOpen(true)} />
+        </div>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">

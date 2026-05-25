@@ -23,6 +23,7 @@ import { useState } from "react";
 
 type Props = {
   task: Task;
+  isPending?: boolean;
   onEdit: (task: Task) => void;
   onToggleCompleted: (id: string) => void;
   onToggleStatus: (id: string) => void;
@@ -35,14 +36,15 @@ const PRIORITY_STYLES: Record<Task["priority"], string> = {
   LOW: "bg-blue-500/10 text-blue-600 border-blue-500/30",
 };
 
-export default function TaskCard({ task, onEdit, onToggleCompleted, onToggleStatus, onDelete }: Props) {
+export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, onToggleStatus, onDelete }: Props) {
   const [open, setOpen] = useState(false);
 
   const isCompleted = task.status === "COMPLETED";
+  const isOverdue = !!task.dueDate && new Date(task.dueDate) < new Date() && !isCompleted;
 
   return (
     <Card
-      className="
+      className={`
     relative
     rounded-xl
     p-5
@@ -54,7 +56,8 @@ export default function TaskCard({ task, onEdit, onToggleCompleted, onToggleStat
     hover:-translate-y-[2px]
     hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]
     dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.45)]
-  "
+    ${isPending ? "opacity-60 pointer-events-none" : ""}
+  `}
     >
       <Badge
         variant="outline"
@@ -132,12 +135,14 @@ export default function TaskCard({ task, onEdit, onToggleCompleted, onToggleStat
                 "
                 />
               </div>
-              {task.dueDate ? (
-                <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
-                  Due {new Date(task.dueDate).toLocaleDateString()}
+              {task.dueDate && (
+                <span className={`rounded-md px-2 py-1 text-xs font-medium ${
+                  isOverdue
+                    ? "bg-red-500/10 text-red-600 border border-red-500/20"
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  {isOverdue ? "Overdue" : `Due ${new Date(task.dueDate).toLocaleDateString()}`}
                 </span>
-              ) : (
-                <span />
               )}
             </div>
 

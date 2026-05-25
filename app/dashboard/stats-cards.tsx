@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ListChecks, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 
 type Stats = {
@@ -15,25 +15,25 @@ export default function StatsCards({ stats }: { stats: Stats }) {
         label="Total Tasks"
         value={stats.total}
         icon={ListChecks}
-        iconClass="text-blue-600"
+        iconClass="text-blue-600 bg-blue-500/10"
       />
       <StatCard
         label="In Progress"
         value={stats.inProgress}
         icon={Loader2}
-        iconClass="text-orange-600"
+        iconClass="text-orange-600 bg-orange-500/10"
       />
       <StatCard
         label="Completed"
         value={stats.completed}
         icon={CheckCircle2}
-        iconClass="text-green-600"
+        iconClass="text-green-600 bg-green-500/10"
       />
       <StatCard
         label="Overdue"
         value={stats.overdue}
         icon={AlertTriangle}
-        iconClass="text-red-600"
+        iconClass="text-red-600 bg-red-500/10"
       />
     </div>
   );
@@ -52,15 +52,17 @@ function StatCard({
 }) {
   return (
     <Card>
-      <CardHeader className="flex flex-col">
-        <div className={`rounded-md bg-muted p-2 hidden md:block ${iconClass}`}>
-          <Icon className="h-5 w-5" />
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="text-3xl font-bold mt-1">{value}</p>
+          </div>
+          <div className={`rounded-lg p-3 hidden md:flex items-center justify-center ${iconClass}`}>
+            <Icon className="h-5 w-5" />
+          </div>
         </div>
-        <div className="text-3xl font-semibold">{value}</div>
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {label}
-        </CardTitle>
-      </CardHeader>
+      </CardContent>
     </Card>
   );
 }
