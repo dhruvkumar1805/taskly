@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useOptimistic, startTransition } from "react";
 import type { Task } from "@/generated/prisma/client";
-import { updateTask } from "../actions/tasks";
+import {
+  updateTask,
+  toggleTaskCompleted,
+  toggleTaskStatus,
+  deleteTask,
+} from "../actions/tasks";
 import {
   Select,
   SelectContent,
@@ -16,15 +21,42 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 import TaskForm from "./task-form";
 import TaskCard from "./task-card";
 import CreateTaskCard from "../../components/create-task-card";
 
+type OptimisticAction =
+  | { type: "toggle_completed"; id: string }
+  | { type: "toggle_status"; id: string }
+  | { type: "delete"; id: string };
+
+function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
+  if (action.type === "delete") {
+    return tasks.filter((t) => t.id !== action.id);
+  }
+  return tasks.map((t) => {
+    if (t.id !== action.id) return t;
+    if (action.type === "toggle_completed") {
+      return { ...t, status: t.status === "COMPLETED" ? "TODO" : "COMPLETED" } as Task;
+    }
+    const next =
+      t.status === "TODO"
+        ? "IN_PROGRESS"
+        : t.status === "IN_PROGRESS"
+        ? "COMPLETED"
+        : "TODO";
+    return { ...t, status: next } as Task;
+  });
+}
+
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
 
 export default function TaskList({ tasks }: { tasks: Task[] }) {
+  const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
+
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -34,7 +66,31 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const filteredTasks = tasks
+  function handleToggleCompleted(id: string) {
+    const wasCompleted = optimisticTasks.find((t) => t.id === id)?.status === "COMPLETED";
+    startTransition(async () => {
+      applyOptimistic({ type: "toggle_completed", id });
+      await toggleTaskCompleted(id);
+      toast.success(wasCompleted ? "Task marked as pending" : "Task completed");
+    });
+  }
+
+  function handleToggleStatus(id: string) {
+    startTransition(async () => {
+      applyOptimistic({ type: "toggle_status", id });
+      await toggleTaskStatus(id);
+    });
+  }
+
+  function handleDelete(id: string) {
+    startTransition(async () => {
+      applyOptimistic({ type: "delete", id });
+      await deleteTask(id);
+      toast.error("Task deleted");
+    });
+  }
+
+  const filteredTasks = optimisticTasks
     .filter((task) => {
       if (status !== "ALL" && task.status !== status) return false;
       if (priority !== "ALL" && task.priority !== priority) return false;
@@ -145,6 +201,9 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
               setEditingTask(t);
               setOpen(true);
             }}
+            onToggleCompleted={handleToggleCompleted}
+            onToggleStatus={handleToggleStatus}
+            onDelete={handleDelete}
           />
         ))}
         <CreateTaskCard onClick={() => setCreateOpen(true)} />

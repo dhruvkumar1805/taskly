@@ -1,11 +1,6 @@
 "use client";
 
 import { Task } from "@/generated/prisma/client";
-import {
-  toggleTaskStatus,
-  deleteTask,
-  toggleTaskCompleted,
-} from "../actions/tasks";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -25,11 +20,13 @@ import {
 
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 type Props = {
   task: Task;
   onEdit: (task: Task) => void;
+  onToggleCompleted: (id: string) => void;
+  onToggleStatus: (id: string) => void;
+  onDelete: (id: string) => void;
 };
 
 const PRIORITY_STYLES: Record<Task["priority"], string> = {
@@ -38,7 +35,7 @@ const PRIORITY_STYLES: Record<Task["priority"], string> = {
   LOW: "bg-blue-500/10 text-blue-600 border-blue-500/30",
 };
 
-export default function TaskCard({ task, onEdit }: Props) {
+export default function TaskCard({ task, onEdit, onToggleCompleted, onToggleStatus, onDelete }: Props) {
   const [open, setOpen] = useState(false);
 
   const isCompleted = task.status === "COMPLETED";
@@ -90,10 +87,7 @@ export default function TaskCard({ task, onEdit }: Props) {
 
             <DropdownMenuItem
               className="text-destructive"
-              onClick={async () => {
-                await deleteTask(task.id);
-                toast.error("Task deleted");
-              }}
+              onClick={() => onDelete(task.id)}
             >
               Delete
             </DropdownMenuItem>
@@ -129,12 +123,7 @@ export default function TaskCard({ task, onEdit }: Props) {
               >
                 <Checkbox
                   checked={isCompleted}
-                  onCheckedChange={async () => {
-                    await toggleTaskCompleted(task.id);
-                    toast.success(
-                      isCompleted ? "Task marked as pending" : "Task completed"
-                    );
-                  }}
+                  onCheckedChange={() => onToggleCompleted(task.id)}
                   className="
                 transition-all duration-200 ease-out
                 data-[state=checked]:scale-105
@@ -154,7 +143,7 @@ export default function TaskCard({ task, onEdit }: Props) {
 
             <form
               onClick={(e) => e.stopPropagation()}
-              action={toggleTaskStatus.bind(null, task.id)}
+              action={() => onToggleStatus(task.id)}
             >
               <Button
                 variant="outline"
