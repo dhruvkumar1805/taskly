@@ -74,7 +74,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
 
   return (
     <Card
-      className={`flex flex-col rounded-xl p-4 md:p-5 gap-3 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.45)] ${
+      className={`flex flex-col rounded-xl p-3 md:p-5 gap-2 md:gap-3 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.45)] ${
         isPending ? "opacity-60 pointer-events-none" : ""
       }`}
     >
@@ -114,7 +114,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
           {task.title}
         </h3>
         {task.description && (
-          <p className="line-clamp-2 text-sm text-muted-foreground">{task.description}</p>
+          <p className="hidden sm:block line-clamp-2 text-sm text-muted-foreground">{task.description}</p>
         )}
       </div>
 
@@ -126,7 +126,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
             className="transition-all duration-200 ease-out data-[state=checked]:scale-105 hover:border-primary active:scale-95"
           />
           {dueDateInfo && (
-            <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}>
+            <span className={`hidden sm:inline rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}>
               {dueDateInfo.label}
             </span>
           )}
