@@ -74,7 +74,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
 
   return (
     <Card
-      className={`flex flex-col rounded-xl p-5 gap-3 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.45)] ${
+      className={`flex flex-col rounded-xl p-4 md:p-5 gap-3 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.45)] ${
         isPending ? "opacity-60 pointer-events-none" : ""
       }`}
     >

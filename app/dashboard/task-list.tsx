@@ -183,8 +183,8 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-48">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+        <div className="relative flex-1 min-w-0">
           <input
             ref={searchRef}
             type="text"
@@ -208,40 +208,42 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           </svg>
         </div>
 
-        <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
-          <SelectTrigger className="w-38">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All Statuses</SelectItem>
-            <SelectItem value="TODO">Todo</SelectItem>
-            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-            <SelectItem value="COMPLETED">Completed</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-3 gap-2 sm:contents">
+          <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Statuses</SelectItem>
+              <SelectItem value="TODO">Todo</SelectItem>
+              <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+              <SelectItem value="COMPLETED">Completed</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-          <SelectTrigger className="w-38">
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All Priorities</SelectItem>
-            <SelectItem value="LOW">Low</SelectItem>
-            <SelectItem value="MEDIUM">Medium</SelectItem>
-            <SelectItem value="HIGH">High</SelectItem>
-          </SelectContent>
-        </Select>
+          <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Priorities</SelectItem>
+              <SelectItem value="LOW">Low</SelectItem>
+              <SelectItem value="MEDIUM">Medium</SelectItem>
+              <SelectItem value="HIGH">High</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-          <SelectTrigger className="w-38">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="created">Newest first</SelectItem>
-            <SelectItem value="due">Due date</SelectItem>
-            <SelectItem value="priority">Priority</SelectItem>
-          </SelectContent>
-        </Select>
+          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="created">Newest first</SelectItem>
+              <SelectItem value="due">Due date</SelectItem>
+              <SelectItem value="priority">Priority</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {filteredTasks.length === 0 ? (
@@ -279,7 +281,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-6 auto-rows-fr">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
           {filteredTasks.map((task) => (
             <TaskCard
               key={task.id}
