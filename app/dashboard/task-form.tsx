@@ -18,9 +18,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 export default function TaskForm({
   task,
@@ -29,18 +29,27 @@ export default function TaskForm({
   onSubmit,
 }: {
   task?: Task;
-  action?: (formData: FormData) => void;
+  action?: (formData: FormData) => Promise<void>;
   submitLabel?: string;
   onSubmit?: () => void;
 }) {
+  const [isPending, startTransition] = useTransition();
   const [dueDate, setDueDate] = useState<Date | undefined>(
     task?.dueDate ? new Date(task.dueDate) : undefined
   );
 
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    startTransition(async () => {
+      await (action ?? createTask)(formData);
+      onSubmit?.();
+    });
+  }
+
   return (
     <form
-      action={action ?? createTask}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       className="space-y-4"
     >
       <Input
@@ -99,8 +108,8 @@ export default function TaskForm({
           </SelectContent>
         </Select>
       </div>
-      <Button className="w-full cursor-pointer" type="submit">
-        {submitLabel}
+      <Button className="w-full cursor-pointer" type="submit" disabled={isPending}>
+        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : submitLabel}
       </Button>
     </form>
   );
