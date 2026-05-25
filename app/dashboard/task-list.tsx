@@ -300,6 +300,14 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
         </div>
       )}
 
+      <button
+        onClick={() => setCreateOpen(true)}
+        className="md:hidden fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95"
+        aria-label="New task"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
