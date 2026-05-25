@@ -123,21 +123,14 @@ export default function TaskCard({ task, onEdit }: Props) {
 
           <div className="mt-auto flex items-center justify-between pt-3">
             <div className="flex gap-4 items-start">
-              <form
+              <div
                 onClick={(e) => e.stopPropagation()}
-                action={async () => {
-                  await toggleTaskCompleted(task.id);
-                  toast.success(
-                    isCompleted ? "Task marked as pending" : "Task completed"
-                  );
-                }}
                 className="pt-1 flex items-center"
               >
                 <Checkbox
                   checked={isCompleted}
                   onCheckedChange={async () => {
                     await toggleTaskCompleted(task.id);
-
                     toast.success(
                       isCompleted ? "Task marked as pending" : "Task completed"
                     );
@@ -149,7 +142,7 @@ export default function TaskCard({ task, onEdit }: Props) {
                 active:scale-95
                 "
                 />
-              </form>
+              </div>
               {task.dueDate ? (
                 <span className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
                   Due {new Date(task.dueDate).toLocaleDateString()}

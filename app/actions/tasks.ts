@@ -71,8 +71,11 @@ export async function toggleTaskStatus(taskId: string) {
 }
 
 export async function toggleTaskCompleted(taskId: string) {
-  const task = await prisma.task.findUnique({
-    where: { id: taskId },
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const task = await prisma.task.findFirst({
+    where: { id: taskId, userId: session.user.id },
     select: { status: true },
   });
 
