@@ -1,0 +1,321 @@
+"use client";
+
+import { useState, useRef, useOptimistic, startTransition } from "react";
+import type { Task } from "@/generated/prisma/client";
+import {
+  updateTask,
+  toggleTaskCompleted,
+  toggleTaskStatus,
+  deleteTask,
+  createTask,
+} from "@/app/actions/tasks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronRight, ClipboardList, Plus, SearchX } from "lucide-react";
+import { toast } from "sonner";
+import TaskRow from "./task-row";
+import TaskForm from "@/app/dashboard/task-form";
+
+type OptimisticAction =
+  | { type: "toggle_completed"; id: string }
+  | { type: "toggle_status"; id: string };
+
+function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
+  return tasks.map((t) => {
+    if (t.id !== action.id) return t;
+    if (action.type === "toggle_completed") {
+      return { ...t, status: t.status === "COMPLETED" ? "TODO" : "COMPLETED" } as Task;
+    }
+    const next =
+      t.status === "TODO" ? "IN_PROGRESS" : t.status === "IN_PROGRESS" ? "COMPLETED" : "TODO";
+    return { ...t, status: next } as Task;
+  });
+}
+
+type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
+type SortOption = "created" | "due" | "priority";
+
+const STATUS_SECTIONS = [
+  { key: "TODO" as const, label: "To Do", color: "text-foreground" },
+  { key: "IN_PROGRESS" as const, label: "In Progress", color: "text-amber-600" },
+  { key: "COMPLETED" as const, label: "Completed", color: "text-emerald-600" },
+];
+
+export default function TasksView({ tasks }: { tasks: Task[] }) {
+  const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
+  const deleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const [priority, setPriority] = useState<PriorityFilter>("ALL");
+  const [sort, setSort] = useState<SortOption>("created");
+  const [query, setQuery] = useState("");
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+
+  function addPending(id: string) {
+    setPendingIds((prev) => new Set([...prev, id]));
+  }
+  function removePending(id: string) {
+    setPendingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }
+
+  function handleToggleCompleted(id: string) {
+    const wasCompleted = optimisticTasks.find((t) => t.id === id)?.status === "COMPLETED";
+    addPending(id);
+    startTransition(async () => {
+      applyOptimistic({ type: "toggle_completed", id });
+      await toggleTaskCompleted(id);
+      toast.success(wasCompleted ? "Task marked as pending" : "Task completed");
+      removePending(id);
+    });
+  }
+
+  function handleToggleStatus(id: string) {
+    addPending(id);
+    startTransition(async () => {
+      applyOptimistic({ type: "toggle_status", id });
+      await toggleTaskStatus(id);
+      removePending(id);
+    });
+  }
+
+  function handleDelete(id: string) {
+    setPendingDeletes((prev) => new Set([...prev, id]));
+    toast("Task deleted", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          const timer = deleteTimers.current.get(id);
+          if (timer) clearTimeout(timer);
+          deleteTimers.current.delete(id);
+          setPendingDeletes((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        },
+      },
+      duration: 4000,
+    });
+    const timer = setTimeout(async () => {
+      deleteTimers.current.delete(id);
+      await deleteTask(id);
+    }, 4000);
+    deleteTimers.current.set(id, timer);
+  }
+
+  function toggleCollapse(key: string) {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  }
+
+  const visibleTasks = optimisticTasks
+    .filter((t) => !pendingDeletes.has(t.id))
+    .filter((t) => {
+      if (priority !== "ALL" && t.priority !== priority) return false;
+      if (query) {
+        const q = query.toLowerCase();
+        if (!t.title.toLowerCase().includes(q) && !t.description?.toLowerCase().includes(q))
+          return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sort === "due") {
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      }
+      if (sort === "priority") {
+        const order = { HIGH: 0, MEDIUM: 1, LOW: 2 } as const;
+        return order[a.priority] - order[b.priority];
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+  const hasAnyVisible = visibleTasks.length > 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-48">
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Escape" && setQuery("")}
+            className="w-full rounded-md border bg-background px-10 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="m21 21-4.35-4.35" />
+            <circle cx="11" cy="11" r="8" />
+          </svg>
+        </div>
+
+        <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
+          <SelectTrigger className="w-38">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Priorities</SelectItem>
+            <SelectItem value="LOW">Low</SelectItem>
+            <SelectItem value="MEDIUM">Medium</SelectItem>
+            <SelectItem value="HIGH">High</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+          <SelectTrigger className="w-38">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="created">Newest first</SelectItem>
+            <SelectItem value="due">Due date</SelectItem>
+            <SelectItem value="priority">Priority</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Button onClick={() => setCreateOpen(true)} className="gap-2 ml-auto">
+          <Plus className="h-4 w-4" />
+          New Task
+        </Button>
+      </div>
+
+      {!hasAnyVisible ? (
+        <div className="flex flex-col items-center gap-3 py-16 text-center">
+          <div className="rounded-full bg-muted p-4">
+            {tasks.length === 0 ? (
+              <ClipboardList className="h-6 w-6 text-muted-foreground" />
+            ) : (
+              <SearchX className="h-6 w-6 text-muted-foreground" />
+            )}
+          </div>
+          <div>
+            <p className="font-medium">
+              {tasks.length === 0 ? "No tasks yet" : "No tasks found"}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {tasks.length === 0
+                ? "Create your first task to get started."
+                : "Try adjusting your search or filters."}
+            </p>
+          </div>
+          {tasks.length === 0 ? (
+            <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4 mr-1" />
+              New Task
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => { setPriority("ALL"); setQuery(""); }}
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {STATUS_SECTIONS.map(({ key, label, color }) => {
+            const sectionTasks = visibleTasks.filter((t) => t.status === key);
+            if (sectionTasks.length === 0) return null;
+
+            const isCollapsed = collapsed.has(key);
+
+            return (
+              <div key={key}>
+                <button
+                  onClick={() => toggleCollapse(key)}
+                  className="flex items-center gap-2 mb-3 group"
+                >
+                  {isCollapsed ? (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span className={`text-sm font-semibold ${color}`}>{label}</span>
+                  <span className="text-xs font-medium bg-muted text-muted-foreground rounded-full px-1.5 py-0.5">
+                    {sectionTasks.length}
+                  </span>
+                </button>
+
+                {!isCollapsed && (
+                  <div className="space-y-2">
+                    {sectionTasks.map((task) => (
+                      <TaskRow
+                        key={task.id}
+                        task={task}
+                        isPending={pendingIds.has(task.id)}
+                        onEdit={(t) => { setEditingTask(t); setEditOpen(true); }}
+                        onToggleCompleted={handleToggleCompleted}
+                        onToggleStatus={handleToggleStatus}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Task</DialogTitle>
+          </DialogHeader>
+          {editingTask && (
+            <TaskForm
+              task={editingTask}
+              action={updateTask.bind(null, editingTask.id)}
+              submitLabel="Save Changes"
+              onSubmit={() => { setEditOpen(false); setEditingTask(null); }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Task</DialogTitle>
+          </DialogHeader>
+          <TaskForm onSubmit={() => setCreateOpen(false)} />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
