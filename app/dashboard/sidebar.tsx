@@ -84,8 +84,6 @@ export default function Sidebar({ user }: SidebarProps) {
 
       <Separator className="mb-4" />
 
-      <div className="mb-2 text-xs font-medium text-muted-foreground">MENU</div>
-
       <nav className="space-y-1 text-sm">
         <Link
           href="/dashboard"
@@ -99,14 +97,20 @@ export default function Sidebar({ user }: SidebarProps) {
           Dashboard
         </Link>
 
-        <span className="flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground cursor-not-allowed">
-          <ListTodo className="h-4 w-4" />
-          My Tasks
+        <span className="flex items-center justify-between gap-3 rounded-md px-3 py-2 text-muted-foreground/40 select-none text-sm">
+          <span className="flex items-center gap-3">
+            <ListTodo className="h-4 w-4" />
+            My Tasks
+          </span>
+          <span className="text-[10px] font-medium tracking-wide uppercase bg-muted px-1.5 py-0.5 rounded">soon</span>
         </span>
 
-        <span className="flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground cursor-not-allowed">
-          <CheckCircle2 className="h-4 w-4" />
-          Completed
+        <span className="flex items-center justify-between gap-3 rounded-md px-3 py-2 text-muted-foreground/40 select-none text-sm">
+          <span className="flex items-center gap-3">
+            <CheckCircle2 className="h-4 w-4" />
+            Completed
+          </span>
+          <span className="text-[10px] font-medium tracking-wide uppercase bg-muted px-1.5 py-0.5 rounded">soon</span>
         </span>
       </nav>
 

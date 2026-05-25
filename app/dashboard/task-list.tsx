@@ -152,8 +152,8 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-48">
           <input
             ref={searchRef}
             type="text"
@@ -165,7 +165,6 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             }}
             className="w-full rounded-md border bg-background px-10 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
-
           <svg
             className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
             fill="none"
@@ -177,14 +176,9 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             <circle cx="11" cy="11" r="8" />
           </svg>
         </div>
-      </div>
 
-      <div className="flex gap-3">
-        <Select
-          value={status}
-          onValueChange={(v) => setStatus(v as StatusFilter)}
-        >
-          <SelectTrigger className="w-45">
+        <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
+          <SelectTrigger className="w-38">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -195,11 +189,8 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           </SelectContent>
         </Select>
 
-        <Select
-          value={priority}
-          onValueChange={(v) => setPriority(v as PriorityFilter)}
-        >
-          <SelectTrigger className="w-45">
+        <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
+          <SelectTrigger className="w-38">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
           <SelectContent>

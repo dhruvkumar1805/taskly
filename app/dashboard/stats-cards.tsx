@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { ListChecks, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 
 type Stats = {
   total: number;
@@ -9,57 +8,40 @@ type Stats = {
 };
 
 export default function StatsCards({ stats }: { stats: Stats }) {
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard
-        label="Total Tasks"
-        value={stats.total}
-        icon={ListChecks}
-        iconClass="text-blue-600 bg-blue-500/10"
-      />
-      <StatCard
-        label="In Progress"
-        value={stats.inProgress}
-        icon={Loader2}
-        iconClass="text-orange-600 bg-orange-500/10"
-      />
-      <StatCard
-        label="Completed"
-        value={stats.completed}
-        icon={CheckCircle2}
-        iconClass="text-green-600 bg-green-500/10"
-      />
-      <StatCard
-        label="Overdue"
-        value={stats.overdue}
-        icon={AlertTriangle}
-        iconClass="text-red-600 bg-red-500/10"
-      />
-    </div>
-  );
-}
+  const pct = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
 
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  iconClass,
-}: {
-  label: string;
-  value: number;
-  icon: React.ElementType;
-  iconClass: string;
-}) {
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="text-3xl font-bold mt-1">{value}</p>
+      <CardContent className="p-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-5">
+          <div className="pl-3 border-l-2 border-blue-500">
+            <p className="text-xs text-muted-foreground mb-1">Total</p>
+            <p className="text-2xl font-bold">{stats.total}</p>
           </div>
-          <div className={`rounded-lg p-3 hidden md:flex items-center justify-center ${iconClass}`}>
-            <Icon className="h-5 w-5" />
+          <div className="pl-3 border-l-2 border-amber-500">
+            <p className="text-xs text-muted-foreground mb-1">In Progress</p>
+            <p className="text-2xl font-bold">{stats.inProgress}</p>
+          </div>
+          <div className="pl-3 border-l-2 border-emerald-500">
+            <p className="text-xs text-muted-foreground mb-1">Completed</p>
+            <p className="text-2xl font-bold">{stats.completed}</p>
+          </div>
+          <div className="pl-3 border-l-2 border-red-500">
+            <p className="text-xs text-muted-foreground mb-1">Overdue</p>
+            <p className="text-2xl font-bold">{stats.overdue}</p>
+          </div>
+        </div>
+
+        <div className="mt-5 space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Completion</span>
+            <span className="font-medium">{pct}%</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+              style={{ width: `${pct}%` }}
+            />
           </div>
         </div>
       </CardContent>

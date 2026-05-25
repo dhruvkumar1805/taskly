@@ -17,7 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 
@@ -36,6 +35,12 @@ const PRIORITY_STYLES: Record<Task["priority"], string> = {
   LOW: "bg-blue-500/10 text-blue-600 border-blue-500/30",
 };
 
+const STATUS_STYLES: Record<Task["status"], string> = {
+  COMPLETED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+  IN_PROGRESS: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+  TODO: "hover:bg-muted",
+};
+
 export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, onToggleStatus, onDelete }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -44,131 +49,80 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
 
   return (
     <Card
-      className={`
-    relative
-    rounded-xl
-    p-5
-    shadow-[0_1px_2px_rgba(0,0,0,0.04)]
-    dark:shadow-[0_1px_2px_rgba(0,0,0,0.25)]
-    transition-all
-    duration-200
-    ease-out
-    hover:-translate-y-[2px]
-    hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]
-    dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.45)]
-    ${isPending ? "opacity-60 pointer-events-none" : ""}
-  `}
+      className={`flex flex-col rounded-xl p-5 gap-3 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.45)] ${
+        isPending ? "opacity-60 pointer-events-none" : ""
+      }`}
     >
-      <Badge
-        variant="outline"
-        className={`
-    absolute left-5 top-5 text-xs font-medium
-    transition-colors duration-200
-    ${PRIORITY_STYLES[task.priority]}
-  `}
-      >
-        {task.priority}
-      </Badge>
+      <div className="flex items-center justify-between">
+        <Badge
+          variant="outline"
+          className={`text-xs font-medium transition-colors duration-200 ${PRIORITY_STYLES[task.priority]}`}
+        >
+          {task.priority}
+        </Badge>
 
-      <div className="absolute right-4 top-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              onClick={(e) => e.stopPropagation()}
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8"
-            >
+            <Button size="icon" variant="ghost" className="h-7 w-7 -mr-1">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(task)}>
-              Edit
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => onDelete(task.id)}
-            >
+            <DropdownMenuItem onClick={() => onEdit(task)}>Edit</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={() => onDelete(task.id)}>
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div className="mt-8 flex items-start gap-3 flex-1">
-        <div
-          role="button"
-          onClick={() => setOpen(true)}
-          className="flex flex-1 cursor-pointer flex-col gap-1 h-full"
+      <div
+        role="button"
+        onClick={() => setOpen(true)}
+        className="flex-1 cursor-pointer space-y-1"
+      >
+        <h3
+          className={`font-medium leading-snug ${
+            isCompleted ? "line-through text-muted-foreground" : ""
+          }`}
         >
-          <h3
-            className={`line-clamp-2 font-medium ${
-              isCompleted ? "line-through text-muted-foreground" : ""
-            }`}
-          >
-            {task.title}
-          </h3>
-
-          {task.description && (
-            <p className="line-clamp-2 text-sm text-muted-foreground">
-              {task.description}
-            </p>
-          )}
-
-          <div className="mt-auto flex items-center justify-between pt-3">
-            <div className="flex gap-4 items-start">
-              <div
-                onClick={(e) => e.stopPropagation()}
-                className="pt-1 flex items-center"
-              >
-                <Checkbox
-                  checked={isCompleted}
-                  onCheckedChange={() => onToggleCompleted(task.id)}
-                  className="
-                transition-all duration-200 ease-out
-                data-[state=checked]:scale-105
-                hover:border-primary
-                active:scale-95
-                "
-                />
-              </div>
-              {task.dueDate && (
-                <span className={`rounded-md px-2 py-1 text-xs font-medium ${
-                  isOverdue
-                    ? "bg-red-500/10 text-red-600 border border-red-500/20"
-                    : "bg-muted text-muted-foreground"
-                }`}>
-                  {isOverdue ? "Overdue" : `Due ${new Date(task.dueDate).toLocaleDateString()}`}
-                </span>
-              )}
-            </div>
-
-            <form
-              onClick={(e) => e.stopPropagation()}
-              action={() => onToggleStatus(task.id)}
-            >
-              <Button
-                variant="outline"
-                size="sm"
-                className={`
-      h-7 px-2 text-xs
-      transition-all duration-200 ease-out
-      ${
-        task.status === "COMPLETED"
-          ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
-          : "hover:bg-muted"
-      }
-    `}
-              >
-                {task.status.replace("_", " ")}
-              </Button>
-            </form>
-          </div>
-        </div>
+          {task.title}
+        </h3>
+        {task.description && (
+          <p className="line-clamp-2 text-sm text-muted-foreground">{task.description}</p>
+        )}
       </div>
+
+      <div className="flex items-center justify-between pt-2 border-t border-border/50">
+        <div className="flex items-center gap-2">
+          <Checkbox
+            checked={isCompleted}
+            onCheckedChange={() => onToggleCompleted(task.id)}
+            className="transition-all duration-200 ease-out data-[state=checked]:scale-105 hover:border-primary active:scale-95"
+          />
+          {task.dueDate && (
+            <span
+              className={`rounded-md px-2 py-0.5 text-xs font-medium ${
+                isOverdue
+                  ? "bg-red-500/10 text-red-600 border border-red-500/20"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {isOverdue ? "Overdue" : `Due ${new Date(task.dueDate).toLocaleDateString()}`}
+            </span>
+          )}
+        </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onToggleStatus(task.id)}
+          className={`h-7 px-2 text-xs transition-all duration-200 ease-out ${STATUS_STYLES[task.status]}`}
+        >
+          {task.status.replace("_", " ")}
+        </Button>
+      </div>
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -181,19 +135,19 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
             </p>
           )}
 
-          <div className="mt-4 flex gap-2">
-            <Badge
-              variant="outline"
-              className={`font-medium ${PRIORITY_STYLES[task.priority]}`}
-            >
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Badge variant="outline" className={`font-medium ${PRIORITY_STYLES[task.priority]}`}>
               {task.priority}
             </Badge>
-
-            <Badge variant="outline">{task.status.replace("_", " ")}</Badge>
-
+            <Badge variant="outline" className={STATUS_STYLES[task.status]}>
+              {task.status.replace("_", " ")}
+            </Badge>
             {task.dueDate && (
-              <Badge variant="outline">
-                Due {new Date(task.dueDate).toLocaleDateString()}
+              <Badge
+                variant="outline"
+                className={isOverdue ? "bg-red-500/10 text-red-600 border-red-500/30" : ""}
+              >
+                {isOverdue ? "Overdue" : `Due ${new Date(task.dueDate).toLocaleDateString()}`}
               </Badge>
             )}
           </div>
