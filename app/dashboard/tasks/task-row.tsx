@@ -10,7 +10,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
 
 function getDueDateInfo(dueDate: Date, isCompleted: boolean) {
   const today = new Date();
@@ -56,41 +63,60 @@ export default function TaskRow({
   onToggleStatus,
   onDelete,
 }: Props) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const isCompleted = task.status === "COMPLETED";
   const dueDateInfo = task.dueDate ? getDueDateInfo(task.dueDate, isCompleted) : null;
 
   return (
-    <div
-      className={`flex items-start gap-3 rounded-xl border bg-card/90 px-3 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-muted/30 hover:shadow-md active:scale-[0.99] sm:items-center sm:px-4 ${
-        isPending ? "pointer-events-none opacity-60" : ""
-      }`}
-    >
-      <Checkbox
-        checked={isCompleted}
-        onCheckedChange={() => onToggleCompleted(task.id)}
-        className="shrink-0 transition-all duration-200 data-[state=checked]:scale-105"
-      />
+    <>
+      <div
+        className={`flex items-start gap-3 rounded-xl border bg-card/90 px-3 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-muted/30 hover:shadow-md active:scale-[0.99] sm:items-center sm:px-4 ${
+          isPending ? "pointer-events-none opacity-60" : ""
+        }`}
+      >
+        <Checkbox
+          checked={isCompleted}
+          onCheckedChange={() => onToggleCompleted(task.id)}
+          className="shrink-0 transition-all duration-200 data-[state=checked]:scale-105"
+        />
 
-      <div className="min-w-0 flex-1">
-        <div
-          role="button"
-          onClick={() => onEdit(task)}
-          className="cursor-pointer"
-        >
-          <p
-            className={`text-sm font-medium leading-snug ${
-              isCompleted ? "line-through text-muted-foreground" : ""
-            }`}
+        <div className="min-w-0 flex-1">
+          <div
+            role="button"
+            onClick={() => setDetailsOpen(true)}
+            className="cursor-pointer"
           >
-            {task.title}
-          </p>
-          {task.description && (
-            <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground sm:truncate">
-              {task.description}
+            <p
+              className={`text-sm font-medium leading-snug ${
+                isCompleted ? "line-through text-muted-foreground" : ""
+              }`}
+            >
+              {task.title}
             </p>
-          )}
+            {task.description && (
+              <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground sm:truncate">
+                {task.description}
+              </p>
+            )}
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:hidden">
+            <Badge
+              variant="outline"
+              className={`text-xs font-medium ${PRIORITY_STYLES[task.priority]}`}
+            >
+              {task.priority}
+            </Badge>
+            {dueDateInfo && (
+              <span
+                className={`rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}
+              >
+                {dueDateInfo.label}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:hidden">
+
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
           <Badge
             variant="outline"
             className={`text-xs font-medium ${PRIORITY_STYLES[task.priority]}`}
@@ -104,49 +130,61 @@ export default function TaskRow({
               {dueDateInfo.label}
             </span>
           )}
-        </div>
-      </div>
-
-      <div className="hidden sm:flex items-center gap-2 shrink-0">
-        <Badge
-          variant="outline"
-          className={`text-xs font-medium ${PRIORITY_STYLES[task.priority]}`}
-        >
-          {task.priority}
-        </Badge>
-        {dueDateInfo && (
-          <span
-            className={`rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onToggleStatus(task.id)}
+            className={`h-7 px-2 text-xs transition-all duration-200 ${STATUS_STYLES[task.status]}`}
           >
-            {dueDateInfo.label}
-          </span>
-        )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onToggleStatus(task.id)}
-          className={`h-7 px-2 text-xs transition-all duration-200 ${STATUS_STYLES[task.status]}`}
-        >
-          {task.status.replace("_", " ")}
-        </Button>
-      </div>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0">
-            <MoreHorizontal className="h-4 w-4" />
+            {task.status.replace("_", " ")}
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(task)}>Edit</DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive"
-            onClick={() => onDelete(task.id)}
-          >
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(task)}>Edit</DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={() => onDelete(task.id)}
+            >
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{task.title}</DialogTitle>
+          </DialogHeader>
+
+          {task.description && (
+            <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+              {task.description}
+            </p>
+          )}
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Badge variant="outline" className={`font-medium ${PRIORITY_STYLES[task.priority]}`}>
+              {task.priority}
+            </Badge>
+            <Badge variant="outline" className={`font-medium ${STATUS_STYLES[task.status]}`}>
+              {task.status.replace("_", " ")}
+            </Badge>
+            {dueDateInfo && (
+              <Badge variant="outline" className={dueDateInfo.className}>
+                {dueDateInfo.label}
+              </Badge>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
