@@ -74,7 +74,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
 
   return (
     <Card
-      className={`group relative flex min-h-40 flex-col rounded-xl border bg-card/90 p-4 md:min-h-48 md:p-5 gap-3 overflow-hidden shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-teal-500/25 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] dark:bg-card/80 dark:hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] ${
+      className={`group relative flex min-h-36 flex-col rounded-xl border bg-card/90 p-3.5 md:min-h-40 md:p-4 gap-2.5 overflow-hidden shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-teal-500/25 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] dark:bg-card/80 dark:hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] ${
         isPending ? "opacity-60 pointer-events-none" : ""
       }`}
     >
@@ -105,7 +105,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
       <div
         role="button"
         onClick={() => setOpen(true)}
-        className="flex-1 cursor-pointer space-y-2"
+        className="flex-1 cursor-pointer space-y-1.5"
       >
         <h3
           className={`text-base font-semibold leading-snug tracking-tight ${
@@ -119,7 +119,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60 sm:gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-border/60 sm:gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <Checkbox
             checked={isCompleted}
