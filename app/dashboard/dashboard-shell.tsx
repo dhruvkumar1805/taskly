@@ -24,7 +24,7 @@ export default function DashboardShell({
   user,
 }: {
   children: React.ReactNode;
-  user: DashboardUser;
+  user?: DashboardUser;
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
