@@ -12,12 +12,18 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import Sidebar from "./sidebar";
 
+type DashboardUser = {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+};
+
 export default function DashboardShell({
   children,
   user,
 }: {
   children: React.ReactNode;
-  user: any;
+  user: DashboardUser;
 }) {
   return (
     <div className="h-screen">
@@ -44,7 +50,7 @@ export default function DashboardShell({
                 </VisuallyHidden>
               </SheetHeader>
 
-              <Sidebar user={user} />
+              <Sidebar user={user} enableShortcut={false} />
             </SheetContent>
           </Sheet>
           <div className="h-7 w-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">

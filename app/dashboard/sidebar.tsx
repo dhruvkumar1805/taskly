@@ -29,7 +29,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut } from "lucide-react";
 import TaskForm from "./task-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 
@@ -39,15 +39,39 @@ type SidebarProps = {
     email?: string | null;
     image?: string | null;
   };
+  enableShortcut?: boolean;
 };
 
-export default function Sidebar({ user }: SidebarProps) {
+export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const pathname = usePathname();
 
   const isActive = (href: string) => pathname === href;
+
+  useEffect(() => {
+    if (!enableShortcut) return;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT" ||
+        target.isContentEditable;
+
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || isTyping) return;
+
+      if (e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        setOpen(true);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [enableShortcut]);
 
   return (
     <aside className="h-full w-60 shrink-0 border-r bg-card px-4 py-6 flex flex-col overflow-hidden">
