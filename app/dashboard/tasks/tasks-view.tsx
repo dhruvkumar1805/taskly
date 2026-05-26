@@ -164,7 +164,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl md:p-4">
+      <div className="animate-scale-in rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl md:p-4">
         <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="relative flex-1">
@@ -217,7 +217,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
       </div>
 
       {!hasAnyVisible ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card/80 px-5 py-14 text-center shadow-sm backdrop-blur-xl md:py-16">
+        <div className="animate-fade-up flex flex-col items-center gap-3 rounded-xl border bg-card/80 px-5 py-14 text-center shadow-sm backdrop-blur-xl md:py-16">
           <div className="rounded-full bg-teal-500/10 p-4 text-teal-700 dark:text-teal-300">
             {tasks.length === 0 ? (
               <ClipboardList className="h-6 w-6" />
@@ -259,7 +259,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
             const isCollapsed = collapsed.has(key);
 
             return (
-              <div key={key}>
+              <div key={key} className="animate-fade-up">
                 <button
                   onClick={() => toggleCollapse(key)}
                   className="flex items-center gap-2 mb-3 rounded-lg px-1 py-1 transition hover:bg-muted/50 group"
@@ -277,16 +277,21 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
 
                 {!isCollapsed && (
                   <div className="space-y-2">
-                    {sectionTasks.map((task) => (
-                      <TaskRow
+                    {sectionTasks.map((task, index) => (
+                      <div
                         key={task.id}
-                        task={task}
-                        isPending={pendingIds.has(task.id)}
-                        onEdit={(t) => { setEditingTask(t); setEditOpen(true); }}
-                        onToggleCompleted={handleToggleCompleted}
-                        onToggleStatus={handleToggleStatus}
-                        onDelete={handleDelete}
-                      />
+                        className="animate-fade-up"
+                        style={{ animationDelay: `${Math.min(280, index * 30)}ms` }}
+                      >
+                        <TaskRow
+                          task={task}
+                          isPending={pendingIds.has(task.id)}
+                          onEdit={(t) => { setEditingTask(t); setEditOpen(true); }}
+                          onToggleCompleted={handleToggleCompleted}
+                          onToggleStatus={handleToggleStatus}
+                          onDelete={handleDelete}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}

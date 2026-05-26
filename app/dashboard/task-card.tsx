@@ -74,11 +74,11 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
 
   return (
     <Card
-      className={`group relative flex min-h-36 flex-col rounded-xl border bg-card/90 p-3.5 md:min-h-40 md:p-4 gap-2.5 overflow-hidden shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-teal-500/25 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] dark:bg-card/80 dark:hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] ${
+      className={`group relative flex min-h-36 flex-col rounded-xl border bg-card/90 p-3.5 md:min-h-40 md:p-4 gap-2.5 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-teal-500/25 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] active:scale-[0.99] dark:bg-card/80 dark:hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] ${
         isPending ? "opacity-60 pointer-events-none" : ""
       }`}
     >
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 via-emerald-500 to-amber-400 opacity-0 transition-opacity group-hover:opacity-100" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 via-emerald-500 to-amber-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-center justify-between">
         <Badge
           variant="outline"

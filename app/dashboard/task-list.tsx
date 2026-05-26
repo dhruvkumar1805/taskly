@@ -184,7 +184,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-3 md:space-y-4">
-      <div className="rounded-xl border bg-card/85 p-2.5 shadow-sm backdrop-blur-xl md:p-3">
+      <div className="animate-scale-in rounded-xl border bg-card/85 p-2.5 shadow-sm backdrop-blur-xl md:p-3">
         <div className="mb-2.5 flex items-center justify-between gap-3 px-1">
           <div>
             <h2 className="text-sm font-semibold">Task board</h2>
@@ -252,7 +252,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
       </div>
 
       {filteredTasks.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card/80 px-5 py-14 text-center shadow-sm backdrop-blur-xl md:py-16">
+        <div className="animate-fade-up flex flex-col items-center gap-3 rounded-xl border bg-card/80 px-5 py-14 text-center shadow-sm backdrop-blur-xl md:py-16">
           <div className="rounded-full bg-teal-500/10 p-4 text-teal-700 dark:text-teal-300">
             {tasks.length === 0 ? (
               <ClipboardList className="h-6 w-6" />
@@ -288,38 +288,50 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
       ) : (
         <>
           <div className="space-y-2 sm:hidden">
-            {filteredTasks.map((task) => (
-              <TaskRow
+            {filteredTasks.map((task, index) => (
+              <div
                 key={task.id}
-                task={task}
-                isPending={pendingIds.has(task.id)}
-                onEdit={(t) => {
-                  setEditingTask(t);
-                  setOpen(true);
-                }}
-                onToggleCompleted={handleToggleCompleted}
-                onToggleStatus={handleToggleStatus}
-                onDelete={handleDelete}
-              />
+                className="animate-fade-up"
+                style={{ animationDelay: `${Math.min(360, index * 35)}ms` }}
+              >
+                <TaskRow
+                  task={task}
+                  isPending={pendingIds.has(task.id)}
+                  onEdit={(t) => {
+                    setEditingTask(t);
+                    setOpen(true);
+                  }}
+                  onToggleCompleted={handleToggleCompleted}
+                  onToggleStatus={handleToggleStatus}
+                  onDelete={handleDelete}
+                />
+              </div>
             ))}
           </div>
 
           <div className="hidden sm:grid sm:grid-cols-2 md:gap-4 xl:grid-cols-3 auto-rows-fr">
-            {filteredTasks.map((task) => (
-              <TaskCard
+            {filteredTasks.map((task, index) => (
+              <div
                 key={task.id}
-                task={task}
-                isPending={pendingIds.has(task.id)}
-                onEdit={(t) => {
-                  setEditingTask(t);
-                  setOpen(true);
-                }}
-                onToggleCompleted={handleToggleCompleted}
-                onToggleStatus={handleToggleStatus}
-                onDelete={handleDelete}
-              />
+                className="animate-fade-up"
+                style={{ animationDelay: `${Math.min(360, index * 35)}ms` }}
+              >
+                <TaskCard
+                  task={task}
+                  isPending={pendingIds.has(task.id)}
+                  onEdit={(t) => {
+                    setEditingTask(t);
+                    setOpen(true);
+                  }}
+                  onToggleCompleted={handleToggleCompleted}
+                  onToggleStatus={handleToggleStatus}
+                  onDelete={handleDelete}
+                />
+              </div>
             ))}
-            <CreateTaskCard onClick={() => setCreateOpen(true)} />
+            <div className="animate-fade-up animation-delay-225">
+              <CreateTaskCard onClick={() => setCreateOpen(true)} />
+            </div>
           </div>
         </>
       )}

@@ -39,7 +39,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-3 p-3 pb-24 md:space-y-5 md:p-6 lg:p-7">
-      <div className="flex flex-col gap-3 rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl md:flex-row md:items-center md:justify-between md:px-5 md:py-4">
+      <div className="animate-fade-up flex flex-col gap-3 rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl md:flex-row md:items-center md:justify-between md:px-5 md:py-4">
         <div className="min-w-0 space-y-1">
           <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
             {getGreeting()}, {name}
@@ -75,8 +75,12 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <StatsCards stats={stats} />
-      <TaskList tasks={tasks} />
+      <div className="animate-fade-up animation-delay-75">
+        <StatsCards stats={stats} />
+      </div>
+      <div className="animate-fade-up animation-delay-150">
+        <TaskList tasks={tasks} />
+      </div>
     </div>
   );
 }

@@ -32,12 +32,13 @@ export default function CreateTaskCard({ onClick }: Props) {
         shadow-sm
         backdrop-blur-xl
         transition-all
-        duration-200
-        hover:-translate-y-0.5
+        duration-300
+        hover:-translate-y-1
         hover:border-teal-500/45
         hover:bg-teal-500/5
         hover:shadow-md
         hover:text-foreground
+        active:scale-[0.99]
       "
     >
       <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-teal-500/10 text-teal-700 transition group-hover:bg-teal-500/15 dark:text-teal-300">

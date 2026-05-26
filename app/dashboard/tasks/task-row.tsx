@@ -61,7 +61,7 @@ export default function TaskRow({
 
   return (
     <div
-      className={`flex items-start gap-3 rounded-xl border bg-card/90 px-3 py-3 shadow-sm transition-all hover:bg-muted/30 sm:items-center sm:px-4 ${
+      className={`flex items-start gap-3 rounded-xl border bg-card/90 px-3 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-muted/30 hover:shadow-md active:scale-[0.99] sm:items-center sm:px-4 ${
         isPending ? "pointer-events-none opacity-60" : ""
       }`}
     >
