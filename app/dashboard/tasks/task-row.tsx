@@ -46,6 +46,12 @@ const STATUS_STYLES: Record<Task["status"], string> = {
   TODO: "hover:bg-muted",
 };
 
+const STATUS_LABELS: Record<Task["status"], string> = {
+  TODO: "To Do",
+  IN_PROGRESS: "In Progress",
+  COMPLETED: "Completed",
+};
+
 type Props = {
   task: Task;
   isPending?: boolean;
@@ -119,7 +125,7 @@ export default function TaskRow({
               onClick={() => onToggleStatus(task.id)}
               className={`h-7 px-2 text-xs transition-all duration-200 ${STATUS_STYLES[task.status]}`}
             >
-              {task.status.replace("_", " ")}
+              {STATUS_LABELS[task.status]}
             </Button>
           </div>
         </div>
@@ -144,7 +150,7 @@ export default function TaskRow({
             onClick={() => onToggleStatus(task.id)}
             className={`h-7 px-2 text-xs transition-all duration-200 ${STATUS_STYLES[task.status]}`}
           >
-            {task.status.replace("_", " ")}
+            {STATUS_LABELS[task.status]}
           </Button>
         </div>
 

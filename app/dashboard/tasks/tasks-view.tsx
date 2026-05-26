@@ -43,8 +43,8 @@ function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
   });
 }
 
+type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
-type SortOption = "created" | "due" | "priority";
 
 const STATUS_SECTIONS = [
   { key: "TODO" as const, label: "To Do", color: "text-foreground" },
@@ -58,8 +58,8 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
   const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
   const deleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
+  const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
-  const [sort, setSort] = useState<SortOption>("created");
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
@@ -138,6 +138,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
   const visibleTasks = optimisticTasks
     .filter((t) => !pendingDeletes.has(t.id))
     .filter((t) => {
+      if (status !== "ALL" && t.status !== status) return false;
       if (priority !== "ALL" && t.priority !== priority) return false;
       if (query) {
         const q = query.toLowerCase();
@@ -146,73 +147,67 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
       }
       return true;
     })
-    .sort((a, b) => {
-      if (sort === "due") {
-        if (!a.dueDate && !b.dueDate) return 0;
-        if (!a.dueDate) return 1;
-        if (!b.dueDate) return -1;
-        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      }
-      if (sort === "priority") {
-        const order = { HIGH: 0, MEDIUM: 1, LOW: 2 } as const;
-        return order[a.priority] - order[b.priority];
-      }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const hasAnyVisible = visibleTasks.length > 0;
 
   return (
-    <div className="space-y-4">
-      <div className="animate-scale-in rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl md:p-4">
-        <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="relative flex-1">
+    <div className="space-y-3 md:space-y-4">
+      <div className="animate-scale-in rounded-xl border bg-card/85 p-2.5 shadow-sm backdrop-blur-xl md:p-3">
+        <div className="mb-2.5 flex items-center justify-between gap-3 px-1">
+          <div>
+            <h2 className="text-sm font-semibold">All tasks</h2>
+            <p className="hidden text-xs text-muted-foreground sm:block">
+              Search and filter your active work.
+            </p>
+          </div>
+          <Button
+            onClick={() => setCreateOpen(true)}
+            className="hidden gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90 sm:flex dark:bg-primary dark:text-primary-foreground"
+          >
+            <Plus className="h-4 w-4" />
+            New Task
+          </Button>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative flex-1 min-w-0">
             <input
               type="text"
               placeholder="Search tasks..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Escape" && setQuery("")}
-              className="h-11 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20 sm:h-10"
+              className="h-10 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20"
             />
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
-          <Button onClick={() => setCreateOpen(true)} className="h-11 gap-2 shrink-0 rounded-lg sm:hidden">
-            <Plus className="h-4 w-4" />
-            New Task
-          </Button>
-        </div>
 
-        <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:contents">
-          <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-            <SelectTrigger className="h-11 rounded-lg bg-background/80 shadow-sm sm:h-10">
-              <SelectValue placeholder="Priority" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Priorities</SelectItem>
-              <SelectItem value="LOW">Low</SelectItem>
-              <SelectItem value="MEDIUM">Medium</SelectItem>
-              <SelectItem value="HIGH">High</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-2 sm:contents">
+            <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
+              <SelectTrigger className="h-10 w-full min-w-0 rounded-lg bg-background/80 shadow-sm">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Statuses</SelectItem>
+                <SelectItem value="TODO">Todo</SelectItem>
+                <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="h-11 rounded-lg bg-background/80 shadow-sm sm:h-10">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="created">Newest first</SelectItem>
-              <SelectItem value="due">Due date</SelectItem>
-              <SelectItem value="priority">Priority</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Button onClick={() => setCreateOpen(true)} className="gap-2 hidden rounded-lg bg-foreground text-background hover:bg-foreground/90 sm:flex ml-auto dark:bg-primary dark:text-primary-foreground">
-          <Plus className="h-4 w-4" />
-          New Task
-        </Button>
+            <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
+              <SelectTrigger className="h-10 w-full min-w-0 rounded-lg bg-background/80 shadow-sm">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Priorities</SelectItem>
+                <SelectItem value="LOW">Low</SelectItem>
+                <SelectItem value="MEDIUM">Medium</SelectItem>
+                <SelectItem value="HIGH">High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -244,7 +239,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => { setPriority("ALL"); setQuery(""); }}
+              onClick={() => { setStatus("ALL"); setPriority("ALL"); setQuery(""); }}
             >
               Clear filters
             </Button>
