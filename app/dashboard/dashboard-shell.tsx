@@ -35,15 +35,15 @@ export default function DashboardShell({
       </div>
 
       <div className="flex md:hidden h-full flex-col">
-        <header className="flex items-center gap-3 border-b bg-card/85 px-4 py-3 shadow-sm backdrop-blur-xl">
+        <header className="sticky top-0 z-40 flex items-center gap-3 border-b bg-card/90 px-3 py-2.5 shadow-sm backdrop-blur-xl">
           <Sheet>
             <SheetTrigger asChild>
-              <Button size="icon" variant="ghost" className="rounded-lg">
+              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-lg">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="left" className="p-0 w-60">
+            <SheetContent side="left" className="w-[82vw] max-w-72 p-0">
               <SheetHeader>
                 <VisuallyHidden>
                   <SheetTitle>Navigation</SheetTitle>
@@ -54,9 +54,9 @@ export default function DashboardShell({
             </SheetContent>
           </Sheet>
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center font-bold shadow-sm shadow-teal-500/25">
-            <Check size={20} />
+            <Check size={18} />
           </div>
-          <span className="text-lg font-semibold">Taskly</span>
+          <span className="text-base font-semibold">Taskly</span>
         </header>
 
         <main className="flex-1 overflow-y-auto bg-transparent">{children}</main>

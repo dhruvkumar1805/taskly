@@ -164,8 +164,8 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl">
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+      <div className="rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl md:p-4">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="relative flex-1">
             <input
@@ -174,19 +174,19 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Escape" && setQuery("")}
-              className="h-10 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20"
+              className="h-11 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20 sm:h-10"
             />
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
-          <Button onClick={() => setCreateOpen(true)} className="gap-2 shrink-0 rounded-lg sm:hidden">
+          <Button onClick={() => setCreateOpen(true)} className="h-11 gap-2 shrink-0 rounded-lg sm:hidden">
             <Plus className="h-4 w-4" />
             New Task
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:contents">
+        <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:contents">
           <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
+            <SelectTrigger className="h-11 rounded-lg bg-background/80 shadow-sm sm:h-10">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -198,7 +198,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
           </Select>
 
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
+            <SelectTrigger className="h-11 rounded-lg bg-background/80 shadow-sm sm:h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -217,7 +217,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
       </div>
 
       {!hasAnyVisible ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card/80 py-16 text-center shadow-sm backdrop-blur-xl">
+        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card/80 px-5 py-14 text-center shadow-sm backdrop-blur-xl md:py-16">
           <div className="rounded-full bg-teal-500/10 p-4 text-teal-700 dark:text-teal-300">
             {tasks.length === 0 ? (
               <ClipboardList className="h-6 w-6" />
@@ -251,7 +251,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
           )}
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-5 md:space-y-6">
           {STATUS_SECTIONS.map(({ key, label, color }) => {
             const sectionTasks = visibleTasks.filter((t) => t.status === key);
             if (sectionTasks.length === 0) return null;
@@ -323,7 +323,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
 
       <button
         onClick={() => setCreateOpen(true)}
-        className="md:hidden fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95"
+        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-lg shadow-foreground/25 transition-transform active:scale-95 md:hidden dark:bg-primary dark:text-primary-foreground"
         aria-label="New task"
       >
         <Plus className="h-6 w-6" />

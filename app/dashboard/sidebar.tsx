@@ -75,8 +75,8 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
   }, [enableShortcut]);
 
   return (
-    <aside className="h-full w-60 shrink-0 border-r bg-card/90 px-4 py-6 flex flex-col overflow-hidden shadow-[12px_0_36px_rgba(15,23,42,0.04)] backdrop-blur-xl dark:bg-card/80">
-      <div className="mb-7">
+    <aside className="h-full w-full shrink-0 border-r bg-card/90 px-4 py-5 md:w-60 md:py-6 flex flex-col overflow-hidden shadow-[12px_0_36px_rgba(15,23,42,0.04)] backdrop-blur-xl dark:bg-card/80">
+      <div className="mb-6 md:mb-7">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center font-bold shadow-sm shadow-teal-500/25">
             <Check className="h-5 w-5" />
@@ -90,7 +90,7 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="mb-6 h-10 w-full justify-between rounded-lg bg-foreground text-background shadow-sm shadow-foreground/10 hover:bg-foreground/90 dark:bg-primary dark:text-primary-foreground">
+          <Button className="mb-5 h-11 w-full justify-between rounded-lg bg-foreground text-background shadow-sm shadow-foreground/10 hover:bg-foreground/90 md:mb-6 md:h-10 dark:bg-primary dark:text-primary-foreground">
             <span className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Create New Task
@@ -115,10 +115,10 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
 
       <Separator className="mb-4 opacity-60" />
 
-      <nav className="space-y-1 text-sm">
+      <nav className="space-y-1.5 text-sm md:space-y-1">
         <Link
           href="/dashboard"
-          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition ${
+          className={`flex items-center gap-3 rounded-lg px-3 py-3 transition md:py-2.5 ${
             isActive("/dashboard")
               ? "bg-teal-500/10 text-teal-700 font-medium shadow-sm ring-1 ring-teal-500/15 dark:text-teal-300"
               : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
@@ -130,7 +130,7 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
 
         <Link
           href="/dashboard/tasks"
-          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all ${
+          className={`flex items-center gap-3 rounded-lg px-3 py-3 transition-all md:py-2.5 ${
             isActive("/dashboard/tasks")
               ? "bg-teal-500/10 text-teal-700 font-medium shadow-sm ring-1 ring-teal-500/15 dark:text-teal-300"
               : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
@@ -140,7 +140,7 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
           My Tasks
         </Link>
 
-        <span className="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-muted-foreground/45 select-none text-sm">
+        <span className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 text-muted-foreground/45 select-none text-sm md:py-2.5">
           <span className="flex items-center gap-3">
             <CheckCircle2 className="h-4 w-4" />
             Completed

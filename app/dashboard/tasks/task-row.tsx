@@ -61,7 +61,7 @@ export default function TaskRow({
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-all hover:bg-muted/30 ${
+      className={`flex items-start gap-3 rounded-xl border bg-card/90 px-3 py-3 shadow-sm transition-all hover:bg-muted/30 sm:items-center sm:px-4 ${
         isPending ? "pointer-events-none opacity-60" : ""
       }`}
     >
@@ -71,23 +71,40 @@ export default function TaskRow({
         className="shrink-0 transition-all duration-200 data-[state=checked]:scale-105"
       />
 
-      <div
-        role="button"
-        onClick={() => onEdit(task)}
-        className="flex-1 min-w-0 cursor-pointer"
-      >
-        <p
-          className={`text-sm font-medium leading-snug truncate ${
-            isCompleted ? "line-through text-muted-foreground" : ""
-          }`}
+      <div className="min-w-0 flex-1">
+        <div
+          role="button"
+          onClick={() => onEdit(task)}
+          className="cursor-pointer"
         >
-          {task.title}
-        </p>
-        {task.description && (
-          <p className="text-xs text-muted-foreground truncate mt-0.5">
-            {task.description}
+          <p
+            className={`text-sm font-medium leading-snug ${
+              isCompleted ? "line-through text-muted-foreground" : ""
+            }`}
+          >
+            {task.title}
           </p>
-        )}
+          {task.description && (
+            <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground sm:truncate">
+              {task.description}
+            </p>
+          )}
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:hidden">
+          <Badge
+            variant="outline"
+            className={`text-xs font-medium ${PRIORITY_STYLES[task.priority]}`}
+          >
+            {task.priority}
+          </Badge>
+          {dueDateInfo && (
+            <span
+              className={`rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}
+            >
+              {dueDateInfo.label}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="hidden sm:flex items-center gap-2 shrink-0">

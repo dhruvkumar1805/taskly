@@ -183,11 +183,11 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl">
-        <div className="mb-3 flex items-center justify-between gap-3 px-1">
+      <div className="rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl md:p-4">
+        <div className="mb-3 flex items-center justify-between gap-3 px-1 md:mb-4">
           <div>
             <h2 className="text-sm font-semibold">Task board</h2>
-            <p className="text-xs text-muted-foreground">Search, filter, and sort your active work.</p>
+            <p className="hidden text-xs text-muted-foreground sm:block">Search, filter, and sort your active work.</p>
           </div>
           <Button onClick={() => setCreateOpen(true)} className="hidden gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90 sm:flex dark:bg-primary dark:text-primary-foreground">
             <Plus className="h-4 w-4" />
@@ -195,7 +195,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           </Button>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
         <div className="relative flex-1 min-w-0">
           <input
             ref={searchRef}
@@ -206,14 +206,14 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             onKeyDown={(e) => {
               if (e.key === "Escape") setQuery("");
             }}
-            className="h-10 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20"
+            className="h-11 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20 sm:h-10"
           />
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:contents">
+        <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3 sm:contents">
           <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
-            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
+            <SelectTrigger className="h-11 rounded-lg bg-background/80 shadow-sm sm:h-10">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -225,7 +225,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           </Select>
 
           <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
+            <SelectTrigger className="h-11 rounded-lg bg-background/80 shadow-sm sm:h-10">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -237,7 +237,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           </Select>
 
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
+            <SelectTrigger className="h-11 rounded-lg bg-background/80 shadow-sm sm:h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -251,7 +251,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
       </div>
 
       {filteredTasks.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card/80 py-16 text-center shadow-sm backdrop-blur-xl">
+        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card/80 px-5 py-14 text-center shadow-sm backdrop-blur-xl md:py-16">
           <div className="rounded-full bg-teal-500/10 p-4 text-teal-700 dark:text-teal-300">
             {tasks.length === 0 ? (
               <ClipboardList className="h-6 w-6" />
@@ -285,7 +285,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-5 auto-rows-fr">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 xl:grid-cols-3 auto-rows-fr">
           {filteredTasks.map((task) => (
             <TaskCard
               key={task.id}
@@ -306,7 +306,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
       <button
         onClick={() => setCreateOpen(true)}
-        className="md:hidden fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center transition-transform active:scale-95"
+        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-lg shadow-foreground/25 transition-transform active:scale-95 md:hidden dark:bg-primary dark:text-primary-foreground"
         aria-label="New task"
       >
         <Plus className="h-6 w-6" />

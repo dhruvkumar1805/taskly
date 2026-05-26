@@ -74,7 +74,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
 
   return (
     <Card
-      className={`group relative flex min-h-48 flex-col rounded-xl border bg-card/90 p-4 md:p-5 gap-3 overflow-hidden shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-teal-500/25 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] dark:bg-card/80 dark:hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] ${
+      className={`group relative flex min-h-40 flex-col rounded-xl border bg-card/90 p-4 md:min-h-48 md:p-5 gap-3 overflow-hidden shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-teal-500/25 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] dark:bg-card/80 dark:hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] ${
         isPending ? "opacity-60 pointer-events-none" : ""
       }`}
     >
@@ -115,11 +115,11 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
           {task.title}
         </h3>
         {task.description && (
-          <p className="hidden sm:block line-clamp-2 text-sm text-muted-foreground">{task.description}</p>
+          <p className="line-clamp-2 text-sm text-muted-foreground">{task.description}</p>
         )}
       </div>
 
-      <div className="flex items-center justify-between gap-3 pt-3 border-t border-border/60">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60 sm:gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <Checkbox
             checked={isCompleted}
@@ -127,7 +127,7 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
             className="transition-all duration-200 ease-out data-[state=checked]:scale-105 hover:border-primary active:scale-95"
           />
           {dueDateInfo && (
-            <span className={`hidden min-w-0 items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium sm:inline-flex ${dueDateInfo.className}`}>
+            <span className={`inline-flex min-w-0 items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}>
               <CalendarClock className="h-3 w-3 shrink-0" />
               {dueDateInfo.label}
             </span>

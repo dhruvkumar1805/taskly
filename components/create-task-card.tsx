@@ -13,7 +13,8 @@ export default function CreateTaskCard({ onClick }: Props) {
       role="button"
       onClick={onClick}
       className="
-        min-h-48
+        min-h-36
+        md:min-h-48
         group
         flex
         cursor-pointer
