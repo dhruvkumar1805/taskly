@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useOptimistic, startTransition } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useOptimistic,
+  startTransition,
+} from "react";
 import type { Task } from "@/generated/prisma/client";
 import {
   updateTask,
@@ -38,14 +44,17 @@ function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
   return tasks.map((t) => {
     if (t.id !== action.id) return t;
     if (action.type === "toggle_completed") {
-      return { ...t, status: t.status === "COMPLETED" ? "TODO" : "COMPLETED" } as Task;
+      return {
+        ...t,
+        status: t.status === "COMPLETED" ? "TODO" : "COMPLETED",
+      } as Task;
     }
     const next =
       t.status === "TODO"
         ? "IN_PROGRESS"
         : t.status === "IN_PROGRESS"
-        ? "COMPLETED"
-        : "TODO";
+          ? "COMPLETED"
+          : "TODO";
     return { ...t, status: next } as Task;
   });
 }
@@ -55,14 +64,19 @@ type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
 type SortOption = "created" | "due" | "priority";
 
 export default function TaskList({ tasks }: { tasks: Task[] }) {
-  const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
+  const [optimisticTasks, applyOptimistic] = useOptimistic(
+    tasks,
+    optimisticReducer,
+  );
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
-  const deleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const deleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
 
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
-  const [sort, setSort] = useState<SortOption>("created");
+  const [sort] = useState<SortOption>("created");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -83,7 +97,8 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
   }
 
   function handleToggleCompleted(id: string) {
-    const wasCompleted = optimisticTasks.find((t) => t.id === id)?.status === "COMPLETED";
+    const wasCompleted =
+      optimisticTasks.find((t) => t.id === id)?.status === "COMPLETED";
     addPending(id);
     startTransition(async () => {
       applyOptimistic({ type: "toggle_completed", id });
@@ -188,66 +203,66 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
         <div className="mb-2.5 flex items-center justify-between gap-3 px-1">
           <div>
             <h2 className="text-sm font-semibold">Task board</h2>
-            <p className="hidden text-xs text-muted-foreground sm:block">Search, filter, and sort your active work.</p>
+            <p className="hidden text-xs text-muted-foreground sm:block">
+              Search and filter your active work.
+            </p>
           </div>
-          <Button onClick={() => setCreateOpen(true)} className="hidden gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90 sm:flex dark:bg-primary dark:text-primary-foreground">
+          <Button
+            onClick={() => setCreateOpen(true)}
+            className="hidden gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90 sm:flex dark:bg-primary dark:text-primary-foreground"
+          >
             <Plus className="h-4 w-4" />
             New Task
           </Button>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="relative flex-1 min-w-0">
-          <input
-            ref={searchRef}
-            type="text"
-            placeholder="Search tasks ( / )"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setQuery("");
-            }}
-            className="h-10 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20"
-          />
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        </div>
+          <div className="relative flex-1 min-w-0">
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder="Search tasks ( / )"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setQuery("");
+              }}
+              className="h-10 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20"
+            />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          </div>
 
-        <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3 sm:contents">
-          <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
-            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Statuses</SelectItem>
-              <SelectItem value="TODO">Todo</SelectItem>
-              <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-              <SelectItem value="COMPLETED">Completed</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-2 gap-2 sm:contents">
+            <Select
+              value={status}
+              onValueChange={(v) => setStatus(v as StatusFilter)}
+            >
+              <SelectTrigger className="h-10 w-full min-w-0 rounded-lg bg-background/80 shadow-sm">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Statuses</SelectItem>
+                <SelectItem value="TODO">Todo</SelectItem>
+                <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
-              <SelectValue placeholder="Priority" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Priorities</SelectItem>
-              <SelectItem value="LOW">Low</SelectItem>
-              <SelectItem value="MEDIUM">Medium</SelectItem>
-              <SelectItem value="HIGH">High</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="created">Newest first</SelectItem>
-              <SelectItem value="due">Due date</SelectItem>
-              <SelectItem value="priority">Priority</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <Select
+              value={priority}
+              onValueChange={(v) => setPriority(v as PriorityFilter)}
+            >
+              <SelectTrigger className="h-10 w-full min-w-0 rounded-lg bg-background/80 shadow-sm">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Priorities</SelectItem>
+                <SelectItem value="LOW">Low</SelectItem>
+                <SelectItem value="MEDIUM">Medium</SelectItem>
+                <SelectItem value="HIGH">High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -271,7 +286,11 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             </p>
           </div>
           {tasks.length === 0 ? (
-            <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setCreateOpen(true)}
+            >
               <Plus className="h-4 w-4 mr-1" />
               New Task
             </Button>
@@ -279,7 +298,11 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => { setStatus("ALL"); setPriority("ALL"); setQuery(""); }}
+              onClick={() => {
+                setStatus("ALL");
+                setPriority("ALL");
+                setQuery("");
+              }}
             >
               Clear filters
             </Button>
