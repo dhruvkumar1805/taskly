@@ -113,6 +113,14 @@ export default function TaskRow({
                 {dueDateInfo.label}
               </span>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onToggleStatus(task.id)}
+              className={`h-7 px-2 text-xs transition-all duration-200 ${STATUS_STYLES[task.status]}`}
+            >
+              {task.status.replace("_", " ")}
+            </Button>
           </div>
         </div>
 
