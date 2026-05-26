@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, SearchX, Plus } from "lucide-react";
+import { ClipboardList, Plus, Search, SearchX } from "lucide-react";
 import { toast } from "sonner";
 
 import TaskForm from "./task-form";
@@ -183,7 +183,19 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+      <div className="rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl">
+        <div className="mb-3 flex items-center justify-between gap-3 px-1">
+          <div>
+            <h2 className="text-sm font-semibold">Task board</h2>
+            <p className="text-xs text-muted-foreground">Search, filter, and sort your active work.</p>
+          </div>
+          <Button onClick={() => setCreateOpen(true)} className="hidden gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90 sm:flex dark:bg-primary dark:text-primary-foreground">
+            <Plus className="h-4 w-4" />
+            New Task
+          </Button>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
         <div className="relative flex-1 min-w-0">
           <input
             ref={searchRef}
@@ -194,23 +206,14 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             onKeyDown={(e) => {
               if (e.key === "Escape") setQuery("");
             }}
-            className="w-full rounded-md border bg-background px-10 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            className="h-10 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20"
           />
-          <svg
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="m21 21-4.35-4.35" />
-            <circle cx="11" cy="11" r="8" />
-          </svg>
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         </div>
 
         <div className="grid grid-cols-3 gap-2 sm:contents">
           <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
-            <SelectTrigger>
+            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -222,7 +225,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           </Select>
 
           <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-            <SelectTrigger>
+            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -234,7 +237,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           </Select>
 
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger>
+            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -244,15 +247,16 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             </SelectContent>
           </Select>
         </div>
+        </div>
       </div>
 
       {filteredTasks.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <div className="rounded-full bg-muted p-4">
+        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card/80 py-16 text-center shadow-sm backdrop-blur-xl">
+          <div className="rounded-full bg-teal-500/10 p-4 text-teal-700 dark:text-teal-300">
             {tasks.length === 0 ? (
-              <ClipboardList className="h-6 w-6 text-muted-foreground" />
+              <ClipboardList className="h-6 w-6" />
             ) : (
-              <SearchX className="h-6 w-6 text-muted-foreground" />
+              <SearchX className="h-6 w-6" />
             )}
           </div>
           <div>
@@ -281,7 +285,7 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5 auto-rows-fr">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-5 auto-rows-fr">
           {filteredTasks.map((task) => (
             <TaskCard
               key={task.id}

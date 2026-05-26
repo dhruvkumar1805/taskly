@@ -24,34 +24,43 @@ export default function Filters({
     return `/dashboard?${q.toString()}`;
   }
 
+  function linkClass(isActive: boolean) {
+    return `border px-3 py-1 rounded ${
+      isActive ? "bg-muted text-foreground" : "text-muted-foreground"
+    }`;
+  }
+
   return (
     <div className="flex gap-2 text-sm">
-      <Link href="/dashboard" className="border px-3 py-1 rounded">
+      <Link
+        href="/dashboard"
+        className={linkClass(!current.status && !current.priority && !current.overdue)}
+      >
         All
       </Link>
 
       <Link
         href={build({ status: "TODO" })}
-        className="border px-3 py-1 rounded"
+        className={linkClass(current.status === "TODO")}
       >
         Todo
       </Link>
 
       <Link
         href={build({ status: "IN_PROGRESS" })}
-        className="border px-3 py-1 rounded"
+        className={linkClass(current.status === "IN_PROGRESS")}
       >
         In Progress
       </Link>
 
       <Link
         href={build({ status: "COMPLETED" })}
-        className="border px-3 py-1 rounded"
+        className={linkClass(current.status === "COMPLETED")}
       >
         Completed
       </Link>
 
-      <Link href={build({ overdue: "1" })} className="border px-3 py-1 rounded">
+      <Link href={build({ overdue: "1" })} className={linkClass(Boolean(current.overdue))}>
         Overdue
       </Link>
     </div>

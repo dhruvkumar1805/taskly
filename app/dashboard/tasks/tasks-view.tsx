@@ -7,7 +7,6 @@ import {
   toggleTaskCompleted,
   toggleTaskStatus,
   deleteTask,
-  createTask,
 } from "@/app/actions/tasks";
 import {
   Select,
@@ -23,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, ClipboardList, Plus, SearchX } from "lucide-react";
+import { ChevronDown, ChevronRight, ClipboardList, Plus, Search, SearchX } from "lucide-react";
 import { toast } from "sonner";
 import TaskRow from "./task-row";
 import TaskForm from "@/app/dashboard/task-form";
@@ -127,7 +126,11 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
   function toggleCollapse(key: string) {
     setCollapsed((prev) => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
       return next;
     });
   }
@@ -161,7 +164,8 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+      <div className="rounded-xl border bg-card/85 p-3 shadow-sm backdrop-blur-xl">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="relative flex-1">
             <input
@@ -170,20 +174,11 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Escape" && setQuery("")}
-              className="w-full rounded-md border bg-background px-10 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              className="h-10 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20"
             />
-            <svg
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="m21 21-4.35-4.35" />
-              <circle cx="11" cy="11" r="8" />
-            </svg>
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
-          <Button onClick={() => setCreateOpen(true)} className="gap-2 shrink-0 sm:hidden">
+          <Button onClick={() => setCreateOpen(true)} className="gap-2 shrink-0 rounded-lg sm:hidden">
             <Plus className="h-4 w-4" />
             New Task
           </Button>
@@ -191,7 +186,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
 
         <div className="grid grid-cols-2 gap-2 sm:contents">
           <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-            <SelectTrigger>
+            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -203,7 +198,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
           </Select>
 
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger>
+            <SelectTrigger className="h-10 rounded-lg bg-background/80 shadow-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -214,19 +209,20 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
           </Select>
         </div>
 
-        <Button onClick={() => setCreateOpen(true)} className="gap-2 hidden sm:flex ml-auto">
+        <Button onClick={() => setCreateOpen(true)} className="gap-2 hidden rounded-lg bg-foreground text-background hover:bg-foreground/90 sm:flex ml-auto dark:bg-primary dark:text-primary-foreground">
           <Plus className="h-4 w-4" />
           New Task
         </Button>
+        </div>
       </div>
 
       {!hasAnyVisible ? (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <div className="rounded-full bg-muted p-4">
+        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card/80 py-16 text-center shadow-sm backdrop-blur-xl">
+          <div className="rounded-full bg-teal-500/10 p-4 text-teal-700 dark:text-teal-300">
             {tasks.length === 0 ? (
-              <ClipboardList className="h-6 w-6 text-muted-foreground" />
+              <ClipboardList className="h-6 w-6" />
             ) : (
-              <SearchX className="h-6 w-6 text-muted-foreground" />
+              <SearchX className="h-6 w-6" />
             )}
           </div>
           <div>
@@ -266,7 +262,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
               <div key={key}>
                 <button
                   onClick={() => toggleCollapse(key)}
-                  className="flex items-center gap-2 mb-3 group"
+                  className="flex items-center gap-2 mb-3 rounded-lg px-1 py-1 transition hover:bg-muted/50 group"
                 >
                   {isCollapsed ? (
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />

@@ -8,6 +8,7 @@ import {
   Sun,
   Moon,
   Check,
+  Command,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -74,24 +75,30 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
   }, [enableShortcut]);
 
   return (
-    <aside className="h-full w-60 shrink-0 border-r bg-card px-4 py-6 flex flex-col overflow-hidden">
-      <div className="mb-6">
+    <aside className="h-full w-60 shrink-0 border-r bg-card/90 px-4 py-6 flex flex-col overflow-hidden shadow-[12px_0_36px_rgba(15,23,42,0.04)] backdrop-blur-xl dark:bg-card/80">
+      <div className="mb-7">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
-            <Check />
+          <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center font-bold shadow-sm shadow-teal-500/25">
+            <Check className="h-5 w-5" />
           </div>
           <div className="space-y-1">
             <p className="font-semibold text-lg leading-none">Taskly</p>
-            <p className="text-xs text-muted-foreground">Simplify Life</p>
+            <p className="text-xs text-muted-foreground">Focused daily work</p>
           </div>
         </div>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="mb-6 w-full flex items-center gap-2">
+          <Button className="mb-6 h-10 w-full justify-between rounded-lg bg-foreground text-background shadow-sm shadow-foreground/10 hover:bg-foreground/90 dark:bg-primary dark:text-primary-foreground">
+            <span className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Create New Task
+            </span>
+            <span className="hidden items-center gap-1 rounded-md bg-background/15 px-1.5 py-0.5 text-[10px] font-medium md:flex">
+              <Command className="h-3 w-3" />
+              N
+            </span>
           </Button>
         </DialogTrigger>
 
@@ -106,15 +113,15 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
         </DialogContent>
       </Dialog>
 
-      <Separator className="mb-4" />
+      <Separator className="mb-4 opacity-60" />
 
       <nav className="space-y-1 text-sm">
         <Link
           href="/dashboard"
-          className={`flex items-center gap-3 rounded-md px-3 py-2 transition ${
+          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition ${
             isActive("/dashboard")
-              ? "bg-muted text-foreground font-medium"
-              : "text-muted-foreground hover:bg-muted"
+              ? "bg-teal-500/10 text-teal-700 font-medium shadow-sm ring-1 ring-teal-500/15 dark:text-teal-300"
+              : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
           }`}
         >
           <LayoutDashboard className="h-4 w-4" />
@@ -123,44 +130,44 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
 
         <Link
           href="/dashboard/tasks"
-          className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all ${
             isActive("/dashboard/tasks")
-              ? "bg-primary/10 text-primary font-medium border-primary"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              ? "bg-teal-500/10 text-teal-700 font-medium shadow-sm ring-1 ring-teal-500/15 dark:text-teal-300"
+              : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
           }`}
         >
           <ListTodo className="h-4 w-4 shrink-0" />
           My Tasks
         </Link>
 
-        <span className="flex items-center justify-between gap-3 rounded-md px-3 py-2 text-muted-foreground/40 select-none text-sm">
+        <span className="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-muted-foreground/45 select-none text-sm">
           <span className="flex items-center gap-3">
             <CheckCircle2 className="h-4 w-4" />
             Completed
           </span>
-          <span className="text-[10px] font-medium tracking-wide uppercase bg-muted px-1.5 py-0.5 rounded">
+          <span className="text-[10px] font-medium tracking-wide uppercase bg-muted px-1.5 py-0.5 rounded-md">
             soon
           </span>
         </span>
       </nav>
 
       <div className="flex-1" />
-      <Separator className="my-4" />
+      <Separator className="my-4 opacity-60" />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 hover:bg-muted transition">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>
+          <button className="flex w-full items-center gap-3 rounded-lg border bg-background/60 px-3 py-2.5 text-left shadow-sm transition hover:bg-muted/70">
+            <Avatar className="h-9 w-9 border">
+              <AvatarFallback className="bg-teal-500/10 text-teal-700 dark:text-teal-300">
                 {user?.name?.[0]?.toUpperCase() ?? "U"}
               </AvatarFallback>
             </Avatar>
 
-            <div className="flex flex-col text-left">
-              <span className="text-sm font-medium">
+            <div className="flex min-w-0 flex-col text-left">
+              <span className="truncate text-sm font-medium">
                 {user?.name ?? "User"}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="truncate text-xs text-muted-foreground">
                 {user?.email}
               </span>
             </div>

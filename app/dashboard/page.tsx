@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
-import { auth, signOut } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { getTasks } from "@/app/lib/tasks";
 import { getDashboardStats } from "@/app/lib/dashboard";
 import StatsCards from "./stats-cards";
 import TaskList from "./task-list";
 import { Card } from "@/components/ui/card";
+import { CalendarDays, CheckCircle2, Sparkles } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -37,31 +38,45 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <h1 className="text-2xl md:text-3xl font-bold">
-            {getGreeting()}, {name}! 👋
-          </h1>
-          <p className="text-sm text-muted-foreground">
+    <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8 space-y-5 md:space-y-7">
+      <div className="flex flex-col gap-4 rounded-xl border bg-card/85 p-4 shadow-sm backdrop-blur-xl md:flex-row md:items-center md:justify-between md:p-6">
+        <div className="min-w-0 space-y-3">
+          <div className="inline-flex items-center gap-2 rounded-full border bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
+            <Sparkles className="h-3.5 w-3.5 text-teal-600" />
+            Today&apos;s focus
+          </div>
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+              {getGreeting()}, {name}
+            </h1>
+            <p className="text-sm text-muted-foreground">
             {stats.todo === 0 ? (
-              "You’re all caught up for today 🎉"
+              <span className="inline-flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                You&apos;re all caught up for today.
+              </span>
             ) : (
               <>
                 You have{" "}
-                <span className="font-semibold text-primary">
+                <span className="font-semibold text-teal-700 dark:text-teal-300">
                   {stats.todo} {stats.todo === 1 ? "task" : "tasks"}
                 </span>{" "}
                 remaining today.
               </>
             )}
-          </p>
+            </p>
+          </div>
         </div>
 
-        <Card className="hidden md:block w-fit rounded-xl px-3 py-2">
-          <div className="flex flex-col items-end text-right">
-            <p className="text-sm font-semibold">{dateString}</p>
-            <p className="text-xs text-muted-foreground">{dayString}</p>
+        <Card className="w-full rounded-lg border bg-background/70 px-4 py-3 shadow-sm md:w-fit">
+          <div className="flex items-center gap-3 md:justify-end">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-300">
+              <CalendarDays className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col md:items-end md:text-right">
+              <p className="text-sm font-semibold">{dateString}</p>
+              <p className="text-xs text-muted-foreground">{dayString}</p>
+            </div>
           </div>
         </Card>
       </div>

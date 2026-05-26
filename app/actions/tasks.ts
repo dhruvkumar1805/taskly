@@ -112,6 +112,12 @@ export async function updateTask(taskId: string, formData: FormData) {
   if (!session?.user?.id) return;
 
   const title = formData.get("title")?.toString();
+  const priority = formData.get("priority")?.toString() as
+    | "LOW"
+    | "MEDIUM"
+    | "HIGH"
+    | undefined;
+
   if (!title) return;
 
   await prisma.task.update({
@@ -122,7 +128,7 @@ export async function updateTask(taskId: string, formData: FormData) {
     data: {
       title,
       description: formData.get("description")?.toString() || null,
-      priority: formData.get("priority") as any,
+      priority,
       dueDate: formData.get("dueDate")
         ? new Date(formData.get("dueDate") as string)
         : null,
