@@ -27,6 +27,7 @@ import { toast } from "sonner";
 
 import TaskForm from "./task-form";
 import TaskCard from "./task-card";
+import TaskRow from "./tasks/task-row";
 import CreateTaskCard from "../../components/create-task-card";
 
 type OptimisticAction =
@@ -285,23 +286,42 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:gap-4 xl:grid-cols-3 auto-rows-fr">
-          {filteredTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              isPending={pendingIds.has(task.id)}
-              onEdit={(t) => {
-                setEditingTask(t);
-                setOpen(true);
-              }}
-              onToggleCompleted={handleToggleCompleted}
-              onToggleStatus={handleToggleStatus}
-              onDelete={handleDelete}
-            />
-          ))}
-          <CreateTaskCard onClick={() => setCreateOpen(true)} />
-        </div>
+        <>
+          <div className="space-y-2 sm:hidden">
+            {filteredTasks.map((task) => (
+              <TaskRow
+                key={task.id}
+                task={task}
+                isPending={pendingIds.has(task.id)}
+                onEdit={(t) => {
+                  setEditingTask(t);
+                  setOpen(true);
+                }}
+                onToggleCompleted={handleToggleCompleted}
+                onToggleStatus={handleToggleStatus}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+
+          <div className="hidden sm:grid sm:grid-cols-2 md:gap-4 xl:grid-cols-3 auto-rows-fr">
+            {filteredTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                isPending={pendingIds.has(task.id)}
+                onEdit={(t) => {
+                  setEditingTask(t);
+                  setOpen(true);
+                }}
+                onToggleCompleted={handleToggleCompleted}
+                onToggleStatus={handleToggleStatus}
+                onDelete={handleDelete}
+              />
+            ))}
+            <CreateTaskCard onClick={() => setCreateOpen(true)} />
+          </div>
+        </>
       )}
 
       <button
