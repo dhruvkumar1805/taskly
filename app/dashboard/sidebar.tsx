@@ -41,9 +41,10 @@ type SidebarProps = {
     image?: string | null;
   };
   enableShortcut?: boolean;
+  onNavigate?: () => void;
 };
 
-export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
+export default function Sidebar({ user, enableShortcut = true, onNavigate }: SidebarProps) {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -118,6 +119,7 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
       <nav className="space-y-1.5 text-sm md:space-y-1">
         <Link
           href="/dashboard"
+          onClick={onNavigate}
           className={`flex items-center gap-3 rounded-lg px-3 py-3 transition md:py-2.5 ${
             isActive("/dashboard")
               ? "bg-teal-500/10 text-teal-700 font-medium shadow-sm ring-1 ring-teal-500/15 dark:text-teal-300"
@@ -130,6 +132,7 @@ export default function Sidebar({ user, enableShortcut = true }: SidebarProps) {
 
         <Link
           href="/dashboard/tasks"
+          onClick={onNavigate}
           className={`flex items-center gap-3 rounded-lg px-3 py-3 transition-all md:py-2.5 ${
             isActive("/dashboard/tasks")
               ? "bg-teal-500/10 text-teal-700 font-medium shadow-sm ring-1 ring-teal-500/15 dark:text-teal-300"

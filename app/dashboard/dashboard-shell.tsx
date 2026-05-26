@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Menu } from "lucide-react";
+import { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -25,6 +26,8 @@ export default function DashboardShell({
   children: React.ReactNode;
   user: DashboardUser;
 }) {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <div className="h-screen bg-background bg-[radial-gradient(circle_at_top_left,rgba(20,184,166,0.12),transparent_28rem),radial-gradient(circle_at_top_right,rgba(245,158,11,0.12),transparent_24rem)] dark:bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.10),transparent_28rem),radial-gradient(circle_at_top_right,rgba(251,191,36,0.09),transparent_24rem)]">
       <div className="hidden md:flex h-full">
@@ -36,7 +39,7 @@ export default function DashboardShell({
 
       <div className="flex md:hidden h-full flex-col">
         <header className="sticky top-0 z-40 flex items-center gap-3 border-b bg-card/90 px-3 py-2.5 shadow-sm backdrop-blur-xl">
-          <Sheet>
+          <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
             <SheetTrigger asChild>
               <Button size="icon" variant="ghost" className="h-10 w-10 rounded-lg">
                 <Menu className="h-5 w-5" />
@@ -50,7 +53,11 @@ export default function DashboardShell({
                 </VisuallyHidden>
               </SheetHeader>
 
-              <Sidebar user={user} enableShortcut={false} />
+              <Sidebar
+                user={user}
+                enableShortcut={false}
+                onNavigate={() => setMobileNavOpen(false)}
+              />
             </SheetContent>
           </Sheet>
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center font-bold shadow-sm shadow-teal-500/25">
