@@ -34,6 +34,11 @@ export default function RootLayout({
           {children}
           <Toaster />
         </ThemeProvider>
+        <script
+          src="https://solvo-kohl.vercel.app/widget.js"
+          data-site-id="d20LIFOt8Q"
+          async
+        ></script>
       </body>
     </html>
   );
