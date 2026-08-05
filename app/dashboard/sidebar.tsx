@@ -13,13 +13,6 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/logo";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -27,8 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut } from "lucide-react";
-import TaskForm from "./task-form";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 
@@ -41,6 +33,7 @@ type SidebarProps = {
   enableShortcut?: boolean;
   onNavigate?: () => void;
   onOpenCommandPalette?: () => void;
+  onOpenCreateTask?: () => void;
 };
 
 export default function Sidebar({
@@ -48,8 +41,8 @@ export default function Sidebar({
   enableShortcut = true,
   onNavigate,
   onOpenCommandPalette,
+  onOpenCreateTask,
 }: SidebarProps) {
-  const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const pathname = usePathname();
@@ -71,13 +64,13 @@ export default function Sidebar({
 
       if (e.key.toLowerCase() === "n") {
         e.preventDefault();
-        setOpen(true);
+        onOpenCreateTask?.();
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [enableShortcut]);
+  }, [enableShortcut, onOpenCreateTask]);
 
   return (
     <aside className="h-full w-full shrink-0 bg-sidebar px-4 py-5 md:w-60 md:py-6 flex flex-col overflow-hidden">
@@ -108,31 +101,22 @@ export default function Sidebar({
         </span>
       </button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button
-            onClick={() => onNavigate?.()}
-            className="mb-5 h-10 w-full justify-between md:mb-6"
-          >
-            <span className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Create new task
-            </span>
-            <span className="hidden items-center gap-1 rounded-sm bg-primary-foreground/15 px-1.5 py-0.5 font-mono text-[10px] font-medium md:flex">
-              <Command className="h-3 w-3" />
-              N
-            </span>
-          </Button>
-        </DialogTrigger>
-
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Create new task</DialogTitle>
-          </DialogHeader>
-
-          <TaskForm onSubmit={() => setOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      <Button
+        onClick={() => {
+          onNavigate?.();
+          onOpenCreateTask?.();
+        }}
+        className="mb-5 h-10 w-full justify-between md:mb-6"
+      >
+        <span className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Create new task
+        </span>
+        <span className="hidden items-center gap-1 rounded-sm bg-primary-foreground/15 px-1.5 py-0.5 font-mono text-[10px] font-medium md:flex">
+          <Command className="h-3 w-3" />
+          N
+        </span>
+      </Button>
 
       <nav className="space-y-0.5 text-sm">
         <Link

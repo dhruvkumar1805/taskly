@@ -12,9 +12,16 @@ import {
 } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Logo } from "@/components/logo";
 import Sidebar from "./sidebar";
 import CommandPalette from "./command-palette";
+import TaskForm from "./task-form";
 
 type DashboardUser = {
   name?: string | null;
@@ -33,6 +40,7 @@ export default function DashboardShell({
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -49,7 +57,11 @@ export default function DashboardShell({
   return (
     <div className="h-screen bg-background">
       <div className="hidden md:flex h-full">
-        <Sidebar user={user} onOpenCommandPalette={() => setCommandOpen(true)} />
+        <Sidebar
+          user={user}
+          onOpenCommandPalette={() => setCommandOpen(true)}
+          onOpenCreateTask={() => setCreateTaskOpen(true)}
+        />
         <main className="my-2 mr-2 flex-1 overflow-y-auto rounded-xl border border-border bg-frame">
           {children}
         </main>
@@ -76,6 +88,7 @@ export default function DashboardShell({
                 enableShortcut={false}
                 onNavigate={() => setMobileNavOpen(false)}
                 onOpenCommandPalette={() => setCommandOpen(true)}
+                onOpenCreateTask={() => setCreateTaskOpen(true)}
               />
             </SheetContent>
           </Sheet>
@@ -86,6 +99,15 @@ export default function DashboardShell({
       </div>
 
       <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} tasks={tasks} />
+
+      <Dialog open={createTaskOpen} onOpenChange={setCreateTaskOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create new task</DialogTitle>
+          </DialogHeader>
+          <TaskForm onSubmit={() => setCreateTaskOpen(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
