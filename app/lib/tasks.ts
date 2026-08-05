@@ -1,7 +1,8 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
-export async function getTasks() {
+export const getTasks = cache(async () => {
   const session = await auth();
   if (!session?.user?.id) return [];
 
@@ -9,4 +10,4 @@ export async function getTasks() {
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
   });
-}
+});
