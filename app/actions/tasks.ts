@@ -33,7 +33,7 @@ export async function createTask(formData: FormData) {
     },
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function toggleTaskStatus(taskId: string) {
@@ -67,7 +67,7 @@ export async function toggleTaskStatus(taskId: string) {
     },
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function toggleTaskCompleted(taskId: string) {
@@ -88,7 +88,7 @@ export async function toggleTaskCompleted(taskId: string) {
     data: { status: nextStatus },
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function deleteTask(taskId: string) {
@@ -104,7 +104,7 @@ export async function deleteTask(taskId: string) {
     },
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function updateTask(taskId: string, formData: FormData) {
@@ -135,5 +135,5 @@ export async function updateTask(taskId: string, formData: FormData) {
     },
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
 }

@@ -1,14 +1,16 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getTasks } from "@/app/lib/tasks";
+import { getDashboardStats } from "@/app/lib/dashboard";
 import TasksView from "./tasks-view";
+import StatsCards from "../stats-cards";
 import { ListTodo } from "lucide-react";
 
 export default async function TasksPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const tasks = await getTasks();
+  const [tasks, stats] = await Promise.all([getTasks(), getDashboardStats()]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-4 p-3 pb-24 md:space-y-7 md:p-6 lg:p-8">
@@ -25,6 +27,7 @@ export default async function TasksPage() {
           </div>
         </div>
       </div>
+      <StatsCards stats={stats} />
       <TasksView tasks={tasks} />
     </div>
   );
