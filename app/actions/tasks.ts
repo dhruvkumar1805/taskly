@@ -64,6 +64,7 @@ export async function toggleTaskStatus(taskId: string) {
     where: { id: task.id },
     data: {
       status: nextStatus,
+      completedAt: nextStatus === "COMPLETED" ? new Date() : null,
     },
   });
 
@@ -85,7 +86,10 @@ export async function toggleTaskCompleted(taskId: string) {
 
   await prisma.task.update({
     where: { id: taskId },
-    data: { status: nextStatus },
+    data: {
+      status: nextStatus,
+      completedAt: nextStatus === "COMPLETED" ? new Date() : null,
+    },
   });
 
   revalidatePath("/dashboard", "layout");
