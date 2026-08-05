@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 /generated/prisma
+
+# local design/product working docs (not part of the shipped repo)
+/DESIGN.md
+/PRODUCT.md
