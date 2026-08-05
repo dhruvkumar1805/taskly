@@ -64,8 +64,8 @@ export default function RootLayout({
           data-title="Taskly Support"
           data-color="#d9622f"
           data-site-id="d20LIFOt8Q"
-          data-offset-bottom="60"
-          data-offset-side="20"
+          data-offset-bottom="10"
+          data-offset-side="10"
           data-logo="https://taskly-pmmm.vercel.app/favicon.ico"
           async
         ></script>
