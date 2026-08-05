@@ -96,7 +96,10 @@ export default function Sidebar({
 
       <button
         type="button"
-        onClick={onOpenCommandPalette}
+        onClick={() => {
+          onNavigate?.();
+          onOpenCommandPalette?.();
+        }}
         className="mb-4 flex h-9 w-full items-center gap-2 rounded-md border border-border bg-background px-3 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <Search className="h-3.5 w-3.5 shrink-0" />
@@ -108,7 +111,10 @@ export default function Sidebar({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="mb-5 h-10 w-full justify-between md:mb-6">
+          <Button
+            onClick={() => onNavigate?.()}
+            className="mb-5 h-10 w-full justify-between md:mb-6"
+          >
             <span className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create new task
