@@ -6,7 +6,7 @@ import { CheckCircle2, Circle, ListTodo } from "lucide-react";
 const FEATURES = [
   {
     title: "Capture without friction",
-    desc: "Type into the quick-add bar or press ‘n’ from anywhere and a task is in your list before you lose the thought. No forms, no required fields.",
+    desc: "Type “landlord tomorrow 3pm !high” into the quick-add bar and Taskly splits it into a title, due date, and priority on its own. No forms, no date picker required.",
   },
   {
     title: "Priority that means something",

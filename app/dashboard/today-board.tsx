@@ -28,6 +28,7 @@ import Link from "next/link";
 import TaskForm from "./task-form";
 import TaskRow from "./tasks/task-row";
 import { useListKeyboardNav } from "@/hooks/use-list-keyboard-nav";
+import { parseQuickAdd } from "./parse-quick-add";
 
 type OptimisticAction =
   | { type: "toggle_completed"; id: string }
@@ -53,19 +54,49 @@ function isSameDay(a: Date, b: Date) {
   );
 }
 
+const QUICK_ADD_PRIORITY_DOT: Record<string, string> = {
+  HIGH: "bg-primary",
+  MEDIUM: "bg-muted-foreground/50",
+  LOW: "bg-info",
+};
+
+function formatPreviewDate(date: Date, hasTime: boolean) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dayOnly = new Date(date);
+  dayOnly.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((dayOnly.getTime() - today.getTime()) / 86400000);
+
+  let label: string;
+  if (diffDays === 0) label = "Today";
+  else if (diffDays === 1) label = "Tomorrow";
+  else if (diffDays === -1) label = "Yesterday";
+  else label = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+
+  if (hasTime) {
+    label += `, ${date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`;
+  }
+  return label;
+}
+
 function QuickAdd() {
   const [title, setTitle] = useState("");
   const [pending, startTransition] = useTransition();
+
+  const parsed = useMemo(() => (title.trim() ? parseQuickAdd(title) : null), [title]);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const trimmed = title.trim();
     if (!trimmed) return;
 
+    const { title: parsedTitle, dueDate, priority } = parseQuickAdd(trimmed);
+    if (!parsedTitle) return;
+
     const fd = new FormData();
-    fd.set("title", trimmed);
-    fd.set("priority", "MEDIUM");
-    fd.set("dueDate", new Date().toISOString());
+    fd.set("title", parsedTitle);
+    fd.set("priority", priority ?? "MEDIUM");
+    fd.set("dueDate", (dueDate ?? new Date()).toISOString());
 
     startTransition(async () => {
       await createTask(fd);
@@ -82,10 +113,24 @@ function QuickAdd() {
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Add a task for today, then press Enter"
+        placeholder="Add a task — try “tomorrow 3pm !high”"
         disabled={pending}
-        className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-60"
+        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-60"
       />
+      {parsed && (parsed.dueDate || parsed.priority) && (
+        <div className="flex shrink-0 items-center gap-1.5">
+          {parsed.priority && (
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${QUICK_ADD_PRIORITY_DOT[parsed.priority]}`}
+            />
+          )}
+          {parsed.dueDate && (
+            <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 font-mono text-xs whitespace-nowrap text-primary">
+              {formatPreviewDate(parsed.dueDate, parsed.hasTime)}
+            </span>
+          )}
+        </div>
+      )}
       {pending && <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />}
     </form>
   );
