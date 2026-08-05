@@ -2,7 +2,6 @@
 
 import type { Task } from "@/generated/prisma/client";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -27,28 +26,42 @@ function getDueDateInfo(dueDate: Date, isCompleted: boolean) {
   const due = new Date(dueDate);
   due.setHours(0, 0, 0, 0);
 
-  if (isCompleted) return { label: new Date(dueDate).toLocaleDateString(), className: "bg-muted text-muted-foreground" };
-  if (due < today) return { label: "Overdue", className: "bg-red-500/10 text-red-600 border border-red-500/20" };
-  if (due.getTime() === today.getTime()) return { label: "Due today", className: "bg-amber-500/10 text-amber-600 border border-amber-500/20" };
-  if (due.getTime() === tomorrow.getTime()) return { label: "Due tomorrow", className: "bg-yellow-500/10 text-yellow-600 border border-yellow-500/20" };
-  return { label: new Date(dueDate).toLocaleDateString(), className: "bg-muted text-muted-foreground" };
+  const formatted = new Date(dueDate).toLocaleDateString();
+
+  if (isCompleted) return { label: formatted, tone: "neutral" as const };
+  if (due < today) return { label: "Overdue", tone: "urgent" as const };
+  if (due.getTime() === today.getTime()) return { label: "Due today", tone: "soon" as const };
+  if (due.getTime() === tomorrow.getTime()) return { label: "Due tomorrow", tone: "soon" as const };
+  return { label: formatted, tone: "neutral" as const };
 }
 
-const PRIORITY_STYLES: Record<Task["priority"], string> = {
-  HIGH: "bg-red-500/10 text-red-600 border-red-500/30",
-  MEDIUM: "bg-amber-500/10 text-amber-600 border-amber-500/30",
-  LOW: "bg-blue-500/10 text-blue-600 border-blue-500/30",
+const DUE_TONE_STYLES: Record<"urgent" | "soon" | "neutral", string> = {
+  urgent: "bg-primary/10 text-primary",
+  soon: "bg-primary/5 text-primary/90",
+  neutral: "bg-muted text-muted-foreground",
 };
 
-const STATUS_STYLES: Record<Task["status"], string> = {
-  COMPLETED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
-  IN_PROGRESS: "bg-amber-500/10 text-amber-600 border-amber-500/30",
-  TODO: "hover:bg-muted",
+const PRIORITY_DOT: Record<Task["priority"], string> = {
+  HIGH: "bg-primary",
+  MEDIUM: "bg-muted-foreground/50",
+  LOW: "bg-info",
+};
+
+const PRIORITY_TEXT: Record<Task["priority"], string> = {
+  HIGH: "text-primary",
+  MEDIUM: "text-muted-foreground",
+  LOW: "text-info",
+};
+
+const STATUS_BUTTON_STYLES: Record<Task["status"], string> = {
+  TODO: "",
+  IN_PROGRESS: "border-info/40 text-info hover:bg-info/10",
+  COMPLETED: "border-success/40 text-success hover:bg-success/10",
 };
 
 const STATUS_LABELS: Record<Task["status"], string> = {
-  TODO: "To Do",
-  IN_PROGRESS: "In Progress",
+  TODO: "To do",
+  IN_PROGRESS: "In progress",
   COMPLETED: "Completed",
 };
 
@@ -76,14 +89,14 @@ export default function TaskRow({
   return (
     <>
       <div
-        className={`flex items-start gap-3 rounded-xl border bg-card/90 px-3 py-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-muted/30 hover:shadow-md active:scale-[0.99] sm:items-center sm:px-4 ${
+        className={`flex items-start gap-3 rounded-lg border border-border bg-card px-3 py-3 transition-colors duration-150 hover:bg-muted/30 sm:items-center sm:px-4 ${
           isPending ? "pointer-events-none opacity-60" : ""
         }`}
       >
         <Checkbox
           checked={isCompleted}
           onCheckedChange={() => onToggleCompleted(task.id)}
-          className="shrink-0 transition-all duration-200 data-[state=checked]:scale-105"
+          className="shrink-0 transition-transform duration-150 data-[state=checked]:scale-105"
         />
 
         <div className="min-w-0 flex-1">
@@ -106,16 +119,12 @@ export default function TaskRow({
             )}
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:hidden">
-            <Badge
-              variant="outline"
-              className={`text-xs font-medium ${PRIORITY_STYLES[task.priority]}`}
-            >
+            <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${PRIORITY_TEXT[task.priority]}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT[task.priority]}`} />
               {task.priority}
-            </Badge>
+            </span>
             {dueDateInfo && (
-              <span
-                className={`rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}
-              >
+              <span className={`rounded-sm px-2 py-0.5 text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
                 {dueDateInfo.label}
               </span>
             )}
@@ -123,24 +132,20 @@ export default function TaskRow({
               variant="outline"
               size="sm"
               onClick={() => onToggleStatus(task.id)}
-              className={`h-7 px-2 text-xs transition-all duration-200 ${STATUS_STYLES[task.status]}`}
+              className={`h-7 px-2 text-xs transition-colors duration-150 ${STATUS_BUTTON_STYLES[task.status]}`}
             >
               {STATUS_LABELS[task.status]}
             </Button>
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
-          <Badge
-            variant="outline"
-            className={`text-xs font-medium ${PRIORITY_STYLES[task.priority]}`}
-          >
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
+          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${PRIORITY_TEXT[task.priority]}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT[task.priority]}`} />
             {task.priority}
-          </Badge>
+          </span>
           {dueDateInfo && (
-            <span
-              className={`rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}
-            >
+            <span className={`rounded-sm px-2 py-0.5 text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
               {dueDateInfo.label}
             </span>
           )}
@@ -148,7 +153,7 @@ export default function TaskRow({
             variant="outline"
             size="sm"
             onClick={() => onToggleStatus(task.id)}
-            className={`h-7 px-2 text-xs transition-all duration-200 ${STATUS_STYLES[task.status]}`}
+            className={`h-7 px-2 text-xs transition-colors duration-150 ${STATUS_BUTTON_STYLES[task.status]}`}
           >
             {STATUS_LABELS[task.status]}
           </Button>
@@ -184,17 +189,16 @@ export default function TaskRow({
             </p>
           )}
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Badge variant="outline" className={`font-medium ${PRIORITY_STYLES[task.priority]}`}>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-medium">
+            <span className={`inline-flex items-center gap-1.5 ${PRIORITY_TEXT[task.priority]}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT[task.priority]}`} />
               {task.priority}
-            </Badge>
-            <Badge variant="outline" className={`font-medium ${STATUS_STYLES[task.status]}`}>
-              {task.status.replace("_", " ")}
-            </Badge>
+            </span>
+            <span className="text-muted-foreground">{STATUS_LABELS[task.status]}</span>
             {dueDateInfo && (
-              <Badge variant="outline" className={dueDateInfo.className}>
+              <span className={`rounded-sm px-2 py-0.5 ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
                 {dueDateInfo.label}
-              </Badge>
+              </span>
             )}
           </div>
         </DialogContent>

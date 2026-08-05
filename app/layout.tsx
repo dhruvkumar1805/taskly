@@ -37,7 +37,7 @@ export default function RootLayout({
         <script
           src="https://solvochat.com/widget.js"
           data-title="Taskly Support"
-          data-color="#00b483"
+          data-color="#d9622f"
           data-site-id="d20LIFOt8Q"
           data-offset-bottom="60"
           data-offset-side="20"

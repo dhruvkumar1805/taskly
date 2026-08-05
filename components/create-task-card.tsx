@@ -14,7 +14,7 @@ export default function CreateTaskCard({ onClick }: Props) {
       onClick={onClick}
       className="
         min-h-36
-        md:min-h-48
+        md:min-h-40
         group
         flex
         cursor-pointer
@@ -22,30 +22,23 @@ export default function CreateTaskCard({ onClick }: Props) {
         items-center
         justify-center
         gap-2
-        rounded-xl
-        border
+        rounded-lg
         border-dashed
-        border-teal-500/25
-        bg-card/70
+        border-border
         p-5
         text-muted-foreground
-        shadow-sm
-        backdrop-blur-xl
-        transition-all
-        duration-300
-        hover:-translate-y-1
-        hover:border-teal-500/45
-        hover:bg-teal-500/5
-        hover:shadow-md
+        transition-colors
+        duration-200
+        hover:border-primary/40
+        hover:bg-primary/5
         hover:text-foreground
-        active:scale-[0.99]
       "
     >
-      <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-teal-500/10 text-teal-700 transition group-hover:bg-teal-500/15 dark:text-teal-300">
+      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
         <Plus className="h-5 w-5" />
       </div>
 
-      <p className="font-semibold text-foreground">Create New Task</p>
+      <p className="font-semibold text-foreground">Create new task</p>
       <p className="text-xs text-muted-foreground">
         Add a new item to your list
       </p>

@@ -47,9 +47,9 @@ type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
 
 const STATUS_SECTIONS = [
-  { key: "TODO" as const, label: "To Do", color: "text-foreground" },
-  { key: "IN_PROGRESS" as const, label: "In Progress", color: "text-amber-600" },
-  { key: "COMPLETED" as const, label: "Completed", color: "text-emerald-600" },
+  { key: "TODO" as const, label: "To do", color: "text-foreground" },
+  { key: "IN_PROGRESS" as const, label: "In progress", color: "text-info" },
+  { key: "COMPLETED" as const, label: "Completed", color: "text-success" },
 ];
 
 export default function TasksView({ tasks }: { tasks: Task[] }) {
@@ -153,7 +153,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-3 md:space-y-4">
-      <div className="animate-scale-in rounded-xl border bg-card/85 p-2.5 shadow-sm backdrop-blur-xl md:p-3">
+      <div className="animate-scale-in rounded-lg border border-border bg-card p-2.5 md:p-3">
         <div className="mb-2.5 flex items-center justify-between gap-3 px-1">
           <div>
             <h2 className="text-sm font-semibold">All tasks</h2>
@@ -163,10 +163,10 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
           </div>
           <Button
             onClick={() => setCreateOpen(true)}
-            className="hidden gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90 sm:flex dark:bg-primary dark:text-primary-foreground"
+            className="hidden gap-2 sm:flex"
           >
             <Plus className="h-4 w-4" />
-            New Task
+            New task
           </Button>
         </div>
 
@@ -178,14 +178,14 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Escape" && setQuery("")}
-              className="h-10 w-full rounded-lg border bg-background/80 px-10 text-sm shadow-sm outline-none transition focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20"
+              className="h-10 w-full rounded-md border border-input bg-background px-10 text-sm outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring/30"
             />
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:contents">
             <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
-              <SelectTrigger className="h-10 w-full min-w-0 rounded-lg bg-background/80 shadow-sm">
+              <SelectTrigger className="h-10 w-full min-w-0 bg-background">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -197,7 +197,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
             </Select>
 
             <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-              <SelectTrigger className="h-10 w-full min-w-0 rounded-lg bg-background/80 shadow-sm">
+              <SelectTrigger className="h-10 w-full min-w-0 bg-background">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
@@ -212,8 +212,8 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
       </div>
 
       {!hasAnyVisible ? (
-        <div className="animate-fade-up flex flex-col items-center gap-3 rounded-xl border bg-card/80 px-5 py-14 text-center shadow-sm backdrop-blur-xl md:py-16">
-          <div className="rounded-full bg-teal-500/10 p-4 text-teal-700 dark:text-teal-300">
+        <div className="animate-fade-up flex flex-col items-center gap-3 rounded-lg border border-border bg-card px-5 py-14 text-center md:py-16">
+          <div className="rounded-full bg-muted p-4 text-muted-foreground">
             {tasks.length === 0 ? (
               <ClipboardList className="h-6 w-6" />
             ) : (
@@ -257,7 +257,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
               <div key={key} className="animate-fade-up">
                 <button
                   onClick={() => toggleCollapse(key)}
-                  className="flex items-center gap-2 mb-3 rounded-lg px-1 py-1 transition hover:bg-muted/50 group"
+                  className="group mb-3 flex items-center gap-2 rounded-md px-1 py-1 transition-colors hover:bg-muted/50"
                 >
                   {isCollapsed ? (
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -265,7 +265,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   )}
                   <span className={`text-sm font-semibold ${color}`}>{label}</span>
-                  <span className="text-xs font-medium bg-muted text-muted-foreground rounded-full px-1.5 py-0.5">
+                  <span className="rounded-full bg-muted px-1.5 py-0.5 font-mono text-xs font-medium text-muted-foreground">
                     {sectionTasks.length}
                   </span>
                 </button>
@@ -299,7 +299,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Task</DialogTitle>
+            <DialogTitle>Edit task</DialogTitle>
           </DialogHeader>
           {editingTask && (
             <TaskForm
@@ -315,7 +315,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Create New Task</DialogTitle>
+            <DialogTitle>Create new task</DialogTitle>
           </DialogHeader>
           <TaskForm onSubmit={() => setCreateOpen(false)} />
         </DialogContent>
@@ -323,7 +323,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
 
       <button
         onClick={() => setCreateOpen(true)}
-        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-lg shadow-foreground/25 transition-transform active:scale-95 md:hidden dark:bg-primary dark:text-primary-foreground"
+        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95 md:hidden"
         aria-label="New task"
       >
         <Plus className="h-6 w-6" />

@@ -3,7 +3,6 @@
 import { Task } from "@/generated/prisma/client";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,20 +29,52 @@ function getDueDateInfo(dueDate: Date, isCompleted: boolean) {
   const due = new Date(dueDate);
   due.setHours(0, 0, 0, 0);
 
+  const formatted = new Date(dueDate).toLocaleDateString();
+
   if (isCompleted) {
-    return { label: `Due ${new Date(dueDate).toLocaleDateString()}`, className: "bg-muted text-muted-foreground" };
+    return { label: `Due ${formatted}`, tone: "neutral" as const };
   }
   if (due < today) {
-    return { label: "Overdue", className: "bg-red-500/10 text-red-600 border border-red-500/20" };
+    return { label: "Overdue", tone: "urgent" as const };
   }
   if (due.getTime() === today.getTime()) {
-    return { label: "Due today", className: "bg-amber-500/10 text-amber-600 border border-amber-500/20" };
+    return { label: "Due today", tone: "soon" as const };
   }
   if (due.getTime() === tomorrow.getTime()) {
-    return { label: "Due tomorrow", className: "bg-yellow-500/10 text-yellow-600 border border-yellow-500/20" };
+    return { label: "Due tomorrow", tone: "soon" as const };
   }
-  return { label: `Due ${new Date(dueDate).toLocaleDateString()}`, className: "bg-muted text-muted-foreground" };
+  return { label: `Due ${formatted}`, tone: "neutral" as const };
 }
+
+const DUE_TONE_STYLES: Record<"urgent" | "soon" | "neutral", string> = {
+  urgent: "bg-primary/10 text-primary",
+  soon: "bg-primary/5 text-primary/90",
+  neutral: "bg-muted text-muted-foreground",
+};
+
+const PRIORITY_DOT: Record<Task["priority"], string> = {
+  HIGH: "bg-primary",
+  MEDIUM: "bg-muted-foreground/50",
+  LOW: "bg-info",
+};
+
+const PRIORITY_TEXT: Record<Task["priority"], string> = {
+  HIGH: "text-primary",
+  MEDIUM: "text-muted-foreground",
+  LOW: "text-info",
+};
+
+const STATUS_LABELS: Record<Task["status"], string> = {
+  TODO: "To do",
+  IN_PROGRESS: "In progress",
+  COMPLETED: "Completed",
+};
+
+const STATUS_BUTTON_STYLES: Record<Task["status"], string> = {
+  TODO: "",
+  IN_PROGRESS: "border-info/40 text-info hover:bg-info/10",
+  COMPLETED: "border-success/40 text-success hover:bg-success/10",
+};
 
 type Props = {
   task: Task;
@@ -54,18 +85,6 @@ type Props = {
   onDelete: (id: string) => void;
 };
 
-const PRIORITY_STYLES: Record<Task["priority"], string> = {
-  HIGH: "bg-rose-500/10 text-rose-700 border-rose-500/25 dark:text-rose-300",
-  MEDIUM: "bg-amber-500/10 text-amber-700 border-amber-500/25 dark:text-amber-300",
-  LOW: "bg-sky-500/10 text-sky-700 border-sky-500/25 dark:text-sky-300",
-};
-
-const STATUS_STYLES: Record<Task["status"], string> = {
-  COMPLETED: "bg-emerald-500/10 text-emerald-700 border-emerald-500/25 dark:text-emerald-300",
-  IN_PROGRESS: "bg-amber-500/10 text-amber-700 border-amber-500/25 dark:text-amber-300",
-  TODO: "bg-muted/70 text-muted-foreground hover:bg-muted",
-};
-
 export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, onToggleStatus, onDelete }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -74,22 +93,19 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
 
   return (
     <Card
-      className={`group relative flex min-h-36 flex-col rounded-xl border bg-card/90 p-3.5 md:min-h-40 md:p-4 gap-2.5 overflow-hidden shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-teal-500/25 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] active:scale-[0.99] dark:bg-card/80 dark:hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)] ${
-        isPending ? "opacity-60 pointer-events-none" : ""
+      className={`group relative flex min-h-36 flex-col gap-2.5 rounded-lg border-border p-3.5 transition-colors duration-200 hover:border-foreground/20 md:min-h-40 md:p-4 ${
+        isPending ? "pointer-events-none opacity-60" : ""
       }`}
     >
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 via-emerald-500 to-amber-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-center justify-between">
-        <Badge
-          variant="outline"
-          className={`rounded-md text-xs font-medium transition-colors duration-200 ${PRIORITY_STYLES[task.priority]}`}
-        >
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${PRIORITY_TEXT[task.priority]}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT[task.priority]}`} />
           {task.priority}
-        </Badge>
+        </span>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-8 w-8 -mr-1 rounded-lg">
+            <Button size="icon" variant="ghost" className="h-8 w-8 -mr-1">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -119,15 +135,15 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-border/60 sm:gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2.5 sm:gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <Checkbox
             checked={isCompleted}
             onCheckedChange={() => onToggleCompleted(task.id)}
-            className="transition-all duration-200 ease-out data-[state=checked]:scale-105 hover:border-primary active:scale-95"
+            className="transition-transform duration-150 ease-out data-[state=checked]:scale-105 active:scale-95"
           />
           {dueDateInfo && (
-            <span className={`inline-flex min-w-0 items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${dueDateInfo.className}`}>
+            <span className={`inline-flex min-w-0 items-center gap-1 rounded-sm px-2 py-0.5 text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
               <CalendarClock className="h-3 w-3 shrink-0" />
               {dueDateInfo.label}
             </span>
@@ -138,9 +154,9 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
           variant="outline"
           size="sm"
           onClick={() => onToggleStatus(task.id)}
-          className={`h-8 shrink-0 rounded-lg px-2.5 text-xs font-medium transition-all duration-200 ease-out ${STATUS_STYLES[task.status]}`}
+          className={`h-8 shrink-0 px-2.5 text-xs font-medium transition-colors duration-150 ${STATUS_BUTTON_STYLES[task.status]}`}
         >
-          {task.status.replace("_", " ")}
+          {STATUS_LABELS[task.status]}
         </Button>
       </div>
 
@@ -156,17 +172,16 @@ export default function TaskCard({ task, isPending, onEdit, onToggleCompleted, o
             </p>
           )}
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Badge variant="outline" className={`font-medium ${PRIORITY_STYLES[task.priority]}`}>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-medium">
+            <span className={`inline-flex items-center gap-1.5 ${PRIORITY_TEXT[task.priority]}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT[task.priority]}`} />
               {task.priority}
-            </Badge>
-            <Badge variant="outline" className={STATUS_STYLES[task.status]}>
-              {task.status.replace("_", " ")}
-            </Badge>
+            </span>
+            <span className="text-muted-foreground">{STATUS_LABELS[task.status]}</span>
             {dueDateInfo && (
-              <Badge variant="outline" className={dueDateInfo.className}>
+              <span className={`rounded-sm px-2 py-0.5 ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
                 {dueDateInfo.label}
-              </Badge>
+              </span>
             )}
           </div>
         </DialogContent>
