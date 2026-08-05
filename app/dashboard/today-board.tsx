@@ -46,14 +46,6 @@ function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
   });
 }
 
-function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
 const QUICK_ADD_PRIORITY_DOT: Record<string, string> = {
   HIGH: "bg-primary",
   MEDIUM: "bg-muted-foreground/50",
@@ -230,7 +222,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
     deleteTimers.current.set(id, timer);
   }
 
-  const { overdue, dueToday, upNext, upNextTotal, completedToday, isEmpty, taskById } =
+  const { overdue, dueToday, upNext, upNextTotal, recentlyCompleted, isEmpty, taskById } =
     useMemo(() => {
       const visible = optimisticTasks.filter((t) => !pendingDeletes.has(t.id));
       const today = new Date();
@@ -239,11 +231,11 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
       const overdue: Task[] = [];
       const dueToday: Task[] = [];
       const upNext: Task[] = [];
-      const completedToday: Task[] = [];
+      const completed: Task[] = [];
 
       for (const task of visible) {
         if (task.status === "COMPLETED") {
-          if (isSameDay(new Date(task.updatedAt), new Date())) completedToday.push(task);
+          completed.push(task);
           continue;
         }
         if (!task.dueDate) {
@@ -265,9 +257,13 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
         return priorityOrder[a.priority] - priorityOrder[b.priority];
       });
 
+      const recentlyCompleted = completed
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, 5);
+
       const upNextVisible = upNext.slice(0, 6);
       const taskById = new Map(
-        [...overdue, ...dueToday, ...upNextVisible, ...completedToday].map((t) => [t.id, t]),
+        [...overdue, ...dueToday, ...upNextVisible, ...recentlyCompleted].map((t) => [t.id, t]),
       );
 
       return {
@@ -275,15 +271,15 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
         dueToday,
         upNext: upNextVisible,
         upNextTotal: upNext.length,
-        completedToday,
+        recentlyCompleted,
         isEmpty: visible.length === 0,
         taskById,
       };
     }, [optimisticTasks, pendingDeletes]);
 
   const flatIds = useMemo(
-    () => [...overdue, ...dueToday, ...upNext, ...completedToday].map((t) => t.id),
-    [overdue, dueToday, upNext, completedToday],
+    () => [...overdue, ...dueToday, ...upNext, ...recentlyCompleted].map((t) => t.id),
+    [overdue, dueToday, upNext, recentlyCompleted],
   );
 
   const { selectedId } = useListKeyboardNav(
@@ -404,13 +400,13 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
             </Section>
           )}
 
-          {completedToday.length > 0 && (
+          {recentlyCompleted.length > 0 && (
             <div className="border-t border-border pt-5">
               <p className="mb-2.5 px-0.5 text-xs font-medium text-muted-foreground">
-                Completed today · {completedToday.length}
+                Recently completed
               </p>
               <div className="space-y-2 opacity-70">
-                {completedToday.map((task) => (
+                {recentlyCompleted.map((task) => (
                   <TaskRow
                     key={task.id}
                     task={task}
