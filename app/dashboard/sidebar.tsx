@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  CheckCircle2,
   ListTodo,
   Plus,
   Search,
@@ -161,16 +160,6 @@ export default function Sidebar({
           <ListTodo className="h-4 w-4 shrink-0" />
           My Tasks
         </Link>
-
-        <span className="flex items-center justify-between gap-3 rounded-md px-3 py-2.5 text-muted-foreground/50 select-none">
-          <span className="flex items-center gap-3">
-            <CheckCircle2 className="h-4 w-4" />
-            Completed
-          </span>
-          <span className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-wide uppercase">
-            soon
-          </span>
-        </span>
       </nav>
 
       <div className="flex-1" />
