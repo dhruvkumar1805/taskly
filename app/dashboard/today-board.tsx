@@ -38,7 +38,7 @@ function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
   return tasks.map((t) => {
     if (t.id !== action.id) return t;
     if (action.type === "toggle_completed") {
-      return { ...t, status: t.status === "COMPLETED" ? "TODO" : "COMPLETED" } as Task;
+      return { ...t, status: t.status === "COMPLETED" ? "IN_PROGRESS" : "COMPLETED" } as Task;
     }
     const next =
       t.status === "TODO" ? "IN_PROGRESS" : t.status === "IN_PROGRESS" ? "COMPLETED" : "TODO";

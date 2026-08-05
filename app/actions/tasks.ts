@@ -81,7 +81,7 @@ export async function toggleTaskCompleted(taskId: string) {
 
   if (!task) return;
 
-  const nextStatus = task.status === "COMPLETED" ? "TODO" : "COMPLETED";
+  const nextStatus = task.status === "COMPLETED" ? "IN_PROGRESS" : "COMPLETED";
 
   await prisma.task.update({
     where: { id: taskId },
