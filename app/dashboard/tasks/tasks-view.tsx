@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useOptimistic, startTransition } from "react";
+import { useState, useRef, useEffect, useMemo, useOptimistic, startTransition } from "react";
 import type { Task } from "@/generated/prisma/client";
 import {
   updateTask,
@@ -26,6 +26,7 @@ import { ChevronDown, ChevronRight, ClipboardList, Plus, Search, SearchX } from 
 import { toast } from "sonner";
 import TaskRow from "./task-row";
 import TaskForm from "@/app/dashboard/task-form";
+import { useListKeyboardNav } from "@/hooks/use-list-keyboard-nav";
 
 type OptimisticAction =
   | { type: "toggle_completed"; id: string }
@@ -66,6 +67,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [openDetailsId, setOpenDetailsId] = useState<string | null>(null);
 
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -172,6 +174,36 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const hasAnyVisible = visibleTasks.length > 0;
+
+  const taskById = useMemo(() => new Map(visibleTasks.map((t) => [t.id, t])), [visibleTasks]);
+
+  const flatIds = useMemo(() => {
+    const ids: string[] = [];
+    for (const { key } of STATUS_SECTIONS) {
+      if (collapsed.has(key)) continue;
+      for (const t of visibleTasks) {
+        if (t.status === key) ids.push(t.id);
+      }
+    }
+    return ids;
+  }, [visibleTasks, collapsed]);
+
+  const { selectedId } = useListKeyboardNav(
+    flatIds,
+    {
+      onOpen: (id) => setOpenDetailsId(id),
+      onEdit: (id) => {
+        const t = taskById.get(id);
+        if (t) {
+          setEditingTask(t);
+          setEditOpen(true);
+        }
+      },
+      onToggleCompleted: handleToggleCompleted,
+      onDelete: handleDelete,
+    },
+    !editOpen && !createOpen && !openDetailsId,
+  );
 
   return (
     <div className="space-y-3 md:space-y-4">
@@ -304,6 +336,9 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
                         <TaskRow
                           task={task}
                           isPending={pendingIds.has(task.id)}
+                          isSelected={selectedId === task.id}
+                          detailsOpen={openDetailsId === task.id}
+                          onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
                           onEdit={(t) => { setEditingTask(t); setEditOpen(true); }}
                           onToggleCompleted={handleToggleCompleted}
                           onToggleStatus={handleToggleStatus}
@@ -351,6 +386,26 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
       >
         <Plus className="h-6 w-6" />
       </button>
+
+      {selectedId && (
+        <div className="fixed bottom-4 left-1/2 z-30 hidden -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-popover px-4 py-2 font-mono text-xs text-muted-foreground shadow-lg md:flex">
+          <span>
+            <kbd className="text-foreground">↑↓</kbd> navigate
+          </span>
+          <span>
+            <kbd className="text-foreground">enter</kbd> open
+          </span>
+          <span>
+            <kbd className="text-foreground">e</kbd> edit
+          </span>
+          <span>
+            <kbd className="text-foreground">x</kbd> done
+          </span>
+          <span>
+            <kbd className="text-foreground">⌫</kbd> delete
+          </span>
+        </div>
+      )}
     </div>
   );
 }

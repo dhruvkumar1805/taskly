@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { MoreHorizontal } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 
 function getDueDateInfo(dueDate: Date, isCompleted: boolean) {
   const today = new Date();
@@ -68,6 +68,9 @@ const STATUS_LABELS: Record<Task["status"], string> = {
 type Props = {
   task: Task;
   isPending?: boolean;
+  isSelected?: boolean;
+  detailsOpen: boolean;
+  onDetailsOpenChange: (open: boolean) => void;
   onEdit: (task: Task) => void;
   onToggleCompleted: (id: string) => void;
   onToggleStatus: (id: string) => void;
@@ -77,21 +80,29 @@ type Props = {
 export default function TaskRow({
   task,
   isPending,
+  isSelected,
+  detailsOpen,
+  onDetailsOpenChange,
   onEdit,
   onToggleCompleted,
   onToggleStatus,
   onDelete,
 }: Props) {
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const isCompleted = task.status === "COMPLETED";
   const dueDateInfo = task.dueDate ? getDueDateInfo(task.dueDate, isCompleted) : null;
+
+  const rowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (isSelected) rowRef.current?.scrollIntoView({ block: "nearest" });
+  }, [isSelected]);
 
   return (
     <>
       <div
-        className={`flex items-start gap-3 rounded-lg border border-border bg-card px-3 py-3 transition-colors duration-150 hover:bg-muted/30 sm:items-center sm:px-4 ${
-          isPending ? "pointer-events-none opacity-60" : ""
-        }`}
+        ref={rowRef}
+        className={`flex items-start gap-3 rounded-lg border bg-card px-3 py-3 transition-colors duration-150 hover:bg-muted/30 sm:items-center sm:px-4 ${
+          isSelected ? "border-ring ring-2 ring-ring" : "border-border"
+        } ${isPending ? "pointer-events-none opacity-60" : ""}`}
       >
         <Checkbox
           checked={isCompleted}
@@ -102,7 +113,7 @@ export default function TaskRow({
         <div className="min-w-0 flex-1">
           <div
             role="button"
-            onClick={() => setDetailsOpen(true)}
+            onClick={() => onDetailsOpenChange(true)}
             className="cursor-pointer"
           >
             <p
@@ -177,7 +188,7 @@ export default function TaskRow({
         </DropdownMenu>
       </div>
 
-      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+      <Dialog open={detailsOpen} onOpenChange={onDetailsOpenChange}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{task.title}</DialogTitle>

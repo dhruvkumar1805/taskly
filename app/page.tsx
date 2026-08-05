@@ -20,6 +20,10 @@ const FEATURES = [
     title: "Search that's actually fast",
     desc: "Hit ‘/’, type, done. Filter by status or priority without leaving the keyboard.",
   },
+  {
+    title: "Run the whole list without a mouse",
+    desc: "j / k to move, enter to open, x to mark done, e to edit. The kind of navigation you'd expect from an inbox, not a to-do app.",
+  },
 ];
 
 const MOCK_TASKS = [
@@ -89,7 +93,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <dl className="mt-14 grid max-w-md grid-cols-3 gap-6 border-t border-border pt-6 font-mono text-xs">
+          <dl className="mt-14 grid max-w-md grid-cols-2 gap-x-6 gap-y-5 border-t border-border pt-6 font-mono text-xs">
             <div>
               <dt className="text-muted-foreground">Shortcut</dt>
               <dd className="mt-1 text-foreground">n → new task</dd>
@@ -101,6 +105,10 @@ export default function Home() {
             <div>
               <dt className="text-muted-foreground">Shortcut</dt>
               <dd className="mt-1 text-foreground">⌘K → command palette</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Shortcut</dt>
+              <dd className="mt-1 text-foreground">j / k → move through list</dd>
             </div>
           </dl>
         </div>
