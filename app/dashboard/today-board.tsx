@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, CalendarClock, ListChecks, Plus, Sparkles } from "lucide-react";
+import { AlertTriangle, CalendarClock, Inbox, ListChecks, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import TaskForm from "./task-form";
@@ -78,11 +78,12 @@ function QuickAdd({ onCreate }: { onCreate: (task: Task, formData: FormData) => 
     const trimmed = title.trim();
     if (!trimmed) return;
 
-    const { title: parsedTitle, dueDate, priority } = parseQuickAdd(trimmed);
+    const { title: parsedTitle, dueDate, hasTime, priority } = parseQuickAdd(trimmed);
     if (!parsedTitle) return;
 
     const resolvedPriority = priority ?? "MEDIUM";
     const resolvedDueDate = dueDate ?? new Date();
+    if (!hasTime) resolvedDueDate.setHours(0, 0, 0, 0);
 
     const fd = new FormData();
     fd.set("title", parsedTitle);
@@ -239,68 +240,84 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
     deleteTimers.current.set(id, timer);
   }
 
-  const { overdue, dueToday, upNext, upNextTotal, completedToday, isEmpty, taskById } =
-    useMemo(() => {
-      const visible = optimisticTasks.filter((t) => !pendingDeletes.has(t.id));
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+  const {
+    overdue,
+    dueToday,
+    upNext,
+    upNextTotal,
+    someday,
+    somedayTotal,
+    completedToday,
+    isEmpty,
+    taskById,
+  } = useMemo(() => {
+    const visible = optimisticTasks.filter((t) => !pendingDeletes.has(t.id));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-      const overdue: Task[] = [];
-      const dueToday: Task[] = [];
-      const upNext: Task[] = [];
-      const completedToday: Task[] = [];
+    const overdue: Task[] = [];
+    const dueToday: Task[] = [];
+    const upNext: Task[] = [];
+    const someday: Task[] = [];
+    const completedToday: Task[] = [];
 
-      for (const task of visible) {
-        if (task.status === "COMPLETED") {
-          if (task.completedAt) {
-            const completedDay = new Date(task.completedAt);
-            completedDay.setHours(0, 0, 0, 0);
-            if (completedDay.getTime() === today.getTime()) completedToday.push(task);
-          }
-          continue;
+    for (const task of visible) {
+      if (task.status === "COMPLETED") {
+        if (task.completedAt) {
+          const completedDay = new Date(task.completedAt);
+          completedDay.setHours(0, 0, 0, 0);
+          if (completedDay.getTime() === today.getTime()) completedToday.push(task);
         }
-        if (!task.dueDate) {
-          upNext.push(task);
-          continue;
-        }
-        const due = new Date(task.dueDate);
-        due.setHours(0, 0, 0, 0);
-        if (due < today) overdue.push(task);
-        else if (due.getTime() === today.getTime()) dueToday.push(task);
-        else upNext.push(task);
+        continue;
       }
+      if (!task.dueDate) {
+        someday.push(task);
+        continue;
+      }
+      const due = new Date(task.dueDate);
+      due.setHours(0, 0, 0, 0);
+      if (due < today) overdue.push(task);
+      else if (due.getTime() === today.getTime()) dueToday.push(task);
+      else upNext.push(task);
+    }
 
-      const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 } as const;
-      upNext.sort((a, b) => {
-        if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        if (a.dueDate) return -1;
-        if (b.dueDate) return 1;
-        return priorityOrder[a.priority] - priorityOrder[b.priority];
-      });
+    const byDueDate = (a: Task, b: Task) =>
+      new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime();
+    overdue.sort(byDueDate);
+    dueToday.sort(byDueDate);
+    upNext.sort(byDueDate);
 
-      completedToday.sort(
-        (a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime(),
-      );
+    const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 } as const;
+    someday.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
-      const upNextVisible = upNext.slice(0, 6);
-      const taskById = new Map(
-        [...overdue, ...dueToday, ...upNextVisible, ...completedToday].map((t) => [t.id, t]),
-      );
+    completedToday.sort(
+      (a, b) => new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime(),
+    );
 
-      return {
-        overdue,
-        dueToday,
-        upNext: upNextVisible,
-        upNextTotal: upNext.length,
-        completedToday,
-        isEmpty: visible.length === 0,
-        taskById,
-      };
-    }, [optimisticTasks, pendingDeletes]);
+    const upNextVisible = upNext.slice(0, 6);
+    const somedayVisible = someday.slice(0, 5);
+    const taskById = new Map(
+      [...overdue, ...dueToday, ...upNextVisible, ...somedayVisible, ...completedToday].map(
+        (t) => [t.id, t],
+      ),
+    );
+
+    return {
+      overdue,
+      dueToday,
+      upNext: upNextVisible,
+      upNextTotal: upNext.length,
+      someday: somedayVisible,
+      somedayTotal: someday.length,
+      completedToday,
+      isEmpty: visible.length === 0,
+      taskById,
+    };
+  }, [optimisticTasks, pendingDeletes]);
 
   const flatIds = useMemo(
-    () => [...overdue, ...dueToday, ...upNext, ...completedToday].map((t) => t.id),
-    [overdue, dueToday, upNext, completedToday],
+    () => [...overdue, ...dueToday, ...upNext, ...someday, ...completedToday].map((t) => t.id),
+    [overdue, dueToday, upNext, someday, completedToday],
   );
 
   const { selectedId } = useListKeyboardNav(
@@ -397,7 +414,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
             <Section
               title="Up next"
               icon={<ListChecks className="h-4 w-4" />}
-              count={upNext.length}
+              count={upNextTotal}
             >
               {upNext.map((task) => (
                 <TaskRow
@@ -416,6 +433,34 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
                   className="block px-0.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   +{upNextTotal - upNext.length} more in My Tasks →
+                </Link>
+              )}
+            </Section>
+          )}
+
+          {someday.length > 0 && (
+            <Section
+              title="Someday"
+              icon={<Inbox className="h-4 w-4" />}
+              count={somedayTotal}
+            >
+              {someday.map((task) => (
+                <TaskRow
+                  key={task.id}
+                  task={task}
+                  isPending={pendingIds.has(task.id)}
+                  isSelected={selectedId === task.id}
+                  detailsOpen={openDetailsId === task.id}
+                  onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
+                  {...rowProps}
+                />
+              ))}
+              {somedayTotal > someday.length && (
+                <Link
+                  href="/dashboard/tasks"
+                  className="block px-0.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  +{somedayTotal - someday.length} more in My Tasks →
                 </Link>
               )}
             </Section>

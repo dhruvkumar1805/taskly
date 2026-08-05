@@ -15,12 +15,15 @@ export default async function DashboardPage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const dueSoonCount = tasks.filter((t) => {
-    if (t.status === "COMPLETED" || !t.dueDate) return false;
+  let overdueCount = 0;
+  let dueTodayCount = 0;
+  for (const t of tasks) {
+    if (t.status === "COMPLETED" || !t.dueDate) continue;
     const due = new Date(t.dueDate);
     due.setHours(0, 0, 0, 0);
-    return due <= today;
-  }).length;
+    if (due < today) overdueCount++;
+    else if (due.getTime() === today.getTime()) dueTodayCount++;
+  }
 
   const dateString = today.toLocaleDateString("en-US", {
     day: "numeric",
@@ -48,19 +51,27 @@ export default async function DashboardPage() {
             {getGreeting()}, {name}
           </h1>
           <p className="text-sm leading-5 text-muted-foreground">
-            {dueSoonCount === 0 ? (
+            {overdueCount > 0 ? (
+              <>
+                You have{" "}
+                <span className="font-semibold text-primary">
+                  {overdueCount} {overdueCount === 1 ? "task" : "tasks"}
+                </span>{" "}
+                overdue.
+              </>
+            ) : dueTodayCount > 0 ? (
+              <>
+                You have{" "}
+                <span className="font-semibold text-foreground">
+                  {dueTodayCount} {dueTodayCount === 1 ? "task" : "tasks"}
+                </span>{" "}
+                due today.
+              </>
+            ) : (
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 You&apos;re all caught up for today.
               </span>
-            ) : (
-              <>
-                You have{" "}
-                <span className="font-semibold text-foreground">
-                  {dueSoonCount} {dueSoonCount === 1 ? "task" : "tasks"}
-                </span>{" "}
-                due today.
-              </>
             )}
           </p>
         </div>

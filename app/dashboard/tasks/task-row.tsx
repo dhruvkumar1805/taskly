@@ -18,6 +18,14 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useRef } from "react";
 
+function hasExplicitTime(date: Date) {
+  return date.getHours() !== 0 || date.getMinutes() !== 0;
+}
+
+function formatTime(date: Date) {
+  return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+}
+
 function getDueDateInfo(dueDate: Date, isCompleted: boolean) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -26,13 +34,18 @@ function getDueDateInfo(dueDate: Date, isCompleted: boolean) {
   const due = new Date(dueDate);
   due.setHours(0, 0, 0, 0);
 
+  const withTime = (label: string) =>
+    hasExplicitTime(dueDate) ? `${label}, ${formatTime(dueDate)}` : label;
+
   const formatted = new Date(dueDate).toLocaleDateString();
 
   if (isCompleted) return { label: formatted, tone: "neutral" as const };
-  if (due < today) return { label: "Overdue", tone: "urgent" as const };
-  if (due.getTime() === today.getTime()) return { label: "Due today", tone: "soon" as const };
-  if (due.getTime() === tomorrow.getTime()) return { label: "Due tomorrow", tone: "soon" as const };
-  return { label: formatted, tone: "neutral" as const };
+  if (due < today) return { label: withTime("Overdue"), tone: "urgent" as const };
+  if (due.getTime() === today.getTime())
+    return { label: withTime("Due today"), tone: "soon" as const };
+  if (due.getTime() === tomorrow.getTime())
+    return { label: withTime("Due tomorrow"), tone: "soon" as const };
+  return { label: withTime(formatted), tone: "neutral" as const };
 }
 
 const DUE_TONE_STYLES: Record<"urgent" | "soon" | "neutral", string> = {
