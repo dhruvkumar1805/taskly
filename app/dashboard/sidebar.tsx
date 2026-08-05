@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ListTodo,
   Plus,
+  Search,
   Sun,
   Moon,
   Check,
@@ -41,9 +42,15 @@ type SidebarProps = {
   };
   enableShortcut?: boolean;
   onNavigate?: () => void;
+  onOpenCommandPalette?: () => void;
 };
 
-export default function Sidebar({ user, enableShortcut = true, onNavigate }: SidebarProps) {
+export default function Sidebar({
+  user,
+  enableShortcut = true,
+  onNavigate,
+  onOpenCommandPalette,
+}: SidebarProps) {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -87,6 +94,18 @@ export default function Sidebar({ user, enableShortcut = true, onNavigate }: Sid
           </div>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={onOpenCommandPalette}
+        className="mb-4 flex h-9 w-full items-center gap-2 rounded-md border border-border bg-background px-3 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <Search className="h-3.5 w-3.5 shrink-0" />
+        <span className="flex-1">Search…</span>
+        <span className="flex shrink-0 items-center gap-0.5 font-mono text-[10px]">
+          <Command className="h-3 w-3" />K
+        </span>
+      </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>

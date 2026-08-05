@@ -1,7 +1,8 @@
 "use client";
 
 import { Check, Menu } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Task } from "@/generated/prisma/client";
 import {
   Sheet,
   SheetContent,
@@ -12,6 +13,7 @@ import {
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import Sidebar from "./sidebar";
+import CommandPalette from "./command-palette";
 
 type DashboardUser = {
   name?: string | null;
@@ -22,16 +24,31 @@ type DashboardUser = {
 export default function DashboardShell({
   children,
   user,
+  tasks,
 }: {
   children: React.ReactNode;
   user?: DashboardUser;
+  tasks: Task[];
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCommandOpen((v) => !v);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="h-screen bg-background">
       <div className="hidden md:flex h-full">
-        <Sidebar user={user} />
+        <Sidebar user={user} onOpenCommandPalette={() => setCommandOpen(true)} />
         <main className="my-2 mr-2 flex-1 overflow-y-auto rounded-xl border border-border bg-frame">
           {children}
         </main>
@@ -57,6 +74,7 @@ export default function DashboardShell({
                 user={user}
                 enableShortcut={false}
                 onNavigate={() => setMobileNavOpen(false)}
+                onOpenCommandPalette={() => setCommandOpen(true)}
               />
             </SheetContent>
           </Sheet>
@@ -68,6 +86,8 @@ export default function DashboardShell({
 
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
+
+      <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} tasks={tasks} />
     </div>
   );
 }
