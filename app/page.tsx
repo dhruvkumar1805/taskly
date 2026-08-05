@@ -1,19 +1,20 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Check, CheckCircle2, Circle, ListTodo } from "lucide-react";
+import { Logo } from "@/components/logo";
+import { CheckCircle2, Circle, ListTodo } from "lucide-react";
 
 const FEATURES = [
   {
     title: "Capture without friction",
-    desc: "Press ‘n’ from anywhere in the app and a task is in your list before you lose the thought. No forms, no required fields.",
+    desc: "Type into the quick-add bar or press ‘n’ from anywhere and a task is in your list before you lose the thought. No forms, no required fields.",
   },
   {
     title: "Priority that means something",
     desc: "Three levels, one color that actually signals urgency. High-priority and overdue work share the same visual language on purpose — they're both asking for the same thing: attention now.",
   },
   {
-    title: "A board or a list — your call",
-    desc: "Work the grid when you want an overview, drop into the grouped list when you want to move fast through a queue. Same data, two ways to look at it.",
+    title: "A command palette, not a settings menu",
+    desc: "Press ⌘K to jump straight to any task, switch views, or flip the theme — without leaving the keyboard or hunting through menus.",
   },
   {
     title: "Search that's actually fast",
@@ -40,12 +41,7 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border bg-background">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Check className="h-4 w-4" strokeWidth={2.75} />
-            </div>
-            <span className="font-semibold tracking-tight">Taskly</span>
-          </div>
+          <Logo />
 
           <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
             <a href="#features" className="transition-colors hover:text-foreground">
@@ -103,8 +99,8 @@ export default function Home() {
               <dd className="mt-1 text-foreground">/ → search</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Views</dt>
-              <dd className="mt-1 text-foreground">board / list</dd>
+              <dt className="text-muted-foreground">Shortcut</dt>
+              <dd className="mt-1 text-foreground">⌘K → command palette</dd>
             </div>
           </dl>
         </div>

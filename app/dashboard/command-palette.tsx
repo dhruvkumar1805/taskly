@@ -24,7 +24,7 @@ import {
 import TaskForm from "./task-form";
 import { updateTask } from "../actions/tasks";
 import {
-  LayoutDashboard,
+  Sunrise,
   ListTodo,
   Plus,
   Sun,
@@ -87,8 +87,8 @@ export default function CommandPalette({ open, onOpenChange, tasks }: Props) {
 
           <CommandGroup heading="Navigate">
             <CommandItem onSelect={() => run(() => router.push("/dashboard"))}>
-              <LayoutDashboard />
-              Dashboard
+              <Sunrise />
+              Today
             </CommandItem>
             <CommandItem
               onSelect={() => run(() => router.push("/dashboard/tasks"))}

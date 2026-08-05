@@ -1,19 +1,18 @@
 "use client";
 
 import {
-  LayoutDashboard,
   CheckCircle2,
   ListTodo,
   Plus,
   Search,
   Sun,
   Moon,
-  Check,
   Command,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { LogoMark } from "@/components/logo";
 import {
   Dialog,
   DialogContent,
@@ -86,7 +85,7 @@ export default function Sidebar({
       <div className="mb-6 md:mb-7">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Check className="h-4.5 w-4.5" strokeWidth={2.75} />
+            <LogoMark className="h-4.5 w-4.5" />
           </div>
           <div className="space-y-0.5">
             <p className="font-semibold leading-none tracking-tight">Taskly</p>
@@ -140,8 +139,8 @@ export default function Sidebar({
               : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
           }`}
         >
-          <LayoutDashboard className="h-4 w-4" />
-          Dashboard
+          <Sun className="h-4 w-4" />
+          Today
         </Link>
 
         <Link

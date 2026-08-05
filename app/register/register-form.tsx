@@ -6,7 +6,8 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 export default function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
@@ -39,12 +40,7 @@ export default function RegisterForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-8 flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Check className="h-4 w-4" strokeWidth={2.75} />
-          </div>
-          <span className="font-semibold tracking-tight">Taskly</span>
-        </div>
+        <Logo className="mb-8" />
 
         <Card className="border-border">
           <CardContent className="space-y-6">

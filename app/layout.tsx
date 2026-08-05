@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -14,10 +14,35 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const title = "Taskly — One list for everything that matters today";
+const description =
+  "Taskly is where your day lives: capture fast, see what's actually due, close the loop. No boards to configure, no busywork to maintain.";
+
 export const metadata: Metadata = {
-  title: "Taskly — Modern Task Manager",
-  description:
-    "Taskly is a modern task manager built with Next.js, Prisma, and shadcn/ui to organize tasks, track progress, and stay focused.",
+  metadataBase: new URL("https://taskly-pmmm.vercel.app"),
+  title: {
+    default: title,
+    template: "%s · Taskly",
+  },
+  description,
+  openGraph: {
+    title,
+    description,
+    siteName: "Taskly",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#141414" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f6f6" },
+  ],
 };
 
 export default function RootLayout({

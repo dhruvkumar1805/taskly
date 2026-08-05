@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useOptimistic, startTransition } from "react";
+import { useState, useRef, useEffect, useOptimistic, startTransition } from "react";
 import type { Task } from "@/generated/prisma/client";
 import {
   updateTask,
@@ -66,6 +66,28 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
+      if (isTyping) return;
+
+      if (e.key === "/") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   function addPending(id: string) {
     setPendingIds((prev) => new Set([...prev, id]));
@@ -173,8 +195,9 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="relative flex-1 min-w-0">
             <input
+              ref={searchRef}
               type="text"
-              placeholder="Search tasks..."
+              placeholder="Search tasks ( / )"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Escape" && setQuery("")}

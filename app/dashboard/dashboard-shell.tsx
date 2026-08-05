@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Task } from "@/generated/prisma/client";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 import Sidebar from "./sidebar";
 import CommandPalette from "./command-palette";
 
@@ -78,10 +79,7 @@ export default function DashboardShell({
               />
             </SheetContent>
           </Sheet>
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Check className="h-4 w-4" strokeWidth={2.75} />
-          </div>
-          <span className="text-base font-semibold tracking-tight">Taskly</span>
+          <Logo size="sm" />
         </header>
 
         <main className="flex-1 overflow-y-auto">{children}</main>

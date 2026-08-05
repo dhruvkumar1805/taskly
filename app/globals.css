@@ -199,9 +199,24 @@
     animation-delay: 225ms;
   }
 
+  @keyframes taskly-skeleton {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .skeleton {
+    animation: taskly-skeleton 1.6s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-up,
-    .animate-scale-in {
+    .animate-scale-in,
+    .skeleton {
       animation: none;
     }
   }

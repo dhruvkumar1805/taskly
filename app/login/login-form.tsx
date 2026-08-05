@@ -5,7 +5,8 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, ArrowRight, Check, Loader2, EyeOff } from "lucide-react";
+import { Eye, ArrowRight, Loader2, EyeOff } from "lucide-react";
+import { Logo } from "@/components/logo";
 import Link from "next/link";
 
 export default function LoginForm() {
@@ -25,12 +26,7 @@ export default function LoginForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-8 flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Check className="h-4 w-4" strokeWidth={2.75} />
-          </div>
-          <span className="font-semibold tracking-tight">Taskly</span>
-        </div>
+        <Logo className="mb-8" />
 
         <Card className="border-border">
           <CardContent className="space-y-6">
