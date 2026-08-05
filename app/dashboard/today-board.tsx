@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useMemo,
-  useRef,
-  useState,
-  useOptimistic,
-  useTransition,
-  startTransition,
-} from "react";
+import { useMemo, useRef, useState, useOptimistic, startTransition } from "react";
 import type { Task } from "@/generated/prisma/client";
 import {
   createTask,
@@ -22,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, CalendarClock, ListChecks, Loader2, Plus, Sparkles } from "lucide-react";
+import { AlertTriangle, CalendarClock, ListChecks, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import TaskForm from "./task-form";
@@ -32,9 +25,13 @@ import { parseQuickAdd } from "./parse-quick-add";
 
 type OptimisticAction =
   | { type: "toggle_completed"; id: string }
-  | { type: "toggle_status"; id: string };
+  | { type: "toggle_status"; id: string }
+  | { type: "create"; task: Task };
 
 function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
+  if (action.type === "create") {
+    return [action.task, ...tasks];
+  }
   return tasks.map((t) => {
     if (t.id !== action.id) return t;
     if (action.type === "toggle_completed") {
@@ -71,9 +68,8 @@ function formatPreviewDate(date: Date, hasTime: boolean) {
   return label;
 }
 
-function QuickAdd() {
+function QuickAdd({ onCreate }: { onCreate: (task: Task, formData: FormData) => void }) {
   const [title, setTitle] = useState("");
-  const [pending, startTransition] = useTransition();
 
   const parsed = useMemo(() => (title.trim() ? parseQuickAdd(title) : null), [title]);
 
@@ -85,15 +81,29 @@ function QuickAdd() {
     const { title: parsedTitle, dueDate, priority } = parseQuickAdd(trimmed);
     if (!parsedTitle) return;
 
+    const resolvedPriority = priority ?? "MEDIUM";
+    const resolvedDueDate = dueDate ?? new Date();
+
     const fd = new FormData();
     fd.set("title", parsedTitle);
-    fd.set("priority", priority ?? "MEDIUM");
-    fd.set("dueDate", (dueDate ?? new Date()).toISOString());
+    fd.set("priority", resolvedPriority);
+    fd.set("dueDate", resolvedDueDate.toISOString());
 
-    startTransition(async () => {
-      await createTask(fd);
-      setTitle("");
-    });
+    const tempTask: Task = {
+      id: crypto.randomUUID(),
+      title: parsedTitle,
+      description: null,
+      priority: resolvedPriority,
+      status: "TODO",
+      dueDate: resolvedDueDate,
+      completedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      userId: "",
+    };
+
+    setTitle("");
+    onCreate(tempTask, fd);
   }
 
   return (
@@ -106,8 +116,7 @@ function QuickAdd() {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Add a task — try “tomorrow 3pm !high”"
-        disabled={pending}
-        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-60"
+        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
       />
       {parsed && (parsed.dueDate || parsed.priority) && (
         <div className="flex shrink-0 items-center gap-1.5">
@@ -123,7 +132,6 @@ function QuickAdd() {
           )}
         </div>
       )}
-      {pending && <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />}
     </form>
   );
 }
@@ -174,6 +182,15 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
       const next = new Set(prev);
       next.delete(id);
       return next;
+    });
+  }
+
+  function handleCreate(tempTask: Task, formData: FormData) {
+    addPending(tempTask.id);
+    startTransition(async () => {
+      applyOptimistic({ type: "create", task: tempTask });
+      await createTask(formData);
+      removePending(tempTask.id);
     });
   }
 
@@ -315,7 +332,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-6 md:space-y-7">
-      <QuickAdd />
+      <QuickAdd onCreate={handleCreate} />
 
       {isEmpty ? (
         <div className="animate-fade-up flex flex-col items-center gap-3 rounded-lg border border-border bg-card px-5 py-16 text-center">
