@@ -1,7 +1,8 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { MotionConfig } from "motion/react";
 import type { Task } from "@/generated/prisma/client";
 import {
@@ -22,6 +23,7 @@ import {
 import { Logo } from "@/components/logo";
 import Sidebar from "./sidebar";
 import CommandPalette from "./command-palette";
+import ShortcutsDialog from "./shortcuts-dialog";
 import TaskForm from "./task-form";
 
 type DashboardUser = {
@@ -39,21 +41,61 @@ export default function DashboardShell({
   user?: DashboardUser;
   tasks: Task[];
 }) {
+  const router = useRouter();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const pendingGoTo = useRef(false);
+  const pendingGoToTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setCommandOpen((v) => !v);
+        return;
+      }
+
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+      if (isTyping || e.metaKey || e.ctrlKey || e.altKey) return;
+
+      // "g" then "t"/"m" — Gmail/Linear-style go-to navigation.
+      if (pendingGoTo.current) {
+        pendingGoTo.current = false;
+        if (pendingGoToTimer.current) clearTimeout(pendingGoToTimer.current);
+        const key = e.key.toLowerCase();
+        if (key === "t") {
+          e.preventDefault();
+          router.push("/dashboard");
+        } else if (key === "m") {
+          e.preventDefault();
+          router.push("/dashboard/tasks");
+        }
+        return;
+      }
+
+      if (e.key.toLowerCase() === "g") {
+        pendingGoTo.current = true;
+        pendingGoToTimer.current = setTimeout(() => {
+          pendingGoTo.current = false;
+        }, 600);
+        return;
+      }
+
+      if (e.key === "?") {
+        e.preventDefault();
+        setShortcutsOpen((v) => !v);
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [router]);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -100,7 +142,12 @@ export default function DashboardShell({
           <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
 
-        <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} tasks={tasks} />
+        <CommandPalette
+          open={commandOpen}
+          onOpenChange={setCommandOpen}
+          tasks={tasks}
+          onOpenShortcuts={() => setShortcutsOpen(true)}
+        />
 
         <Dialog open={createTaskOpen} onOpenChange={setCreateTaskOpen}>
           <DialogContent className="sm:max-w-lg">
@@ -110,6 +157,8 @@ export default function DashboardShell({
             <TaskForm onSubmit={() => setCreateTaskOpen(false)} />
           </DialogContent>
         </Dialog>
+
+        <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
       </div>
     </MotionConfig>
   );

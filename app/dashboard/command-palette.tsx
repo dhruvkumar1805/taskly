@@ -30,6 +30,7 @@ import {
   Sun,
   Moon,
   LogOut,
+  Keyboard,
 } from "lucide-react";
 import { PriorityIcon } from "@/components/task-icons";
 
@@ -37,9 +38,10 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tasks: Task[];
+  onOpenShortcuts: () => void;
 };
 
-export default function CommandPalette({ open, onOpenChange, tasks }: Props) {
+export default function CommandPalette({ open, onOpenChange, tasks, onOpenShortcuts }: Props) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [createOpen, setCreateOpen] = useState(false);
@@ -76,6 +78,11 @@ export default function CommandPalette({ open, onOpenChange, tasks }: Props) {
               {theme === "dark" ? <Sun /> : <Moon />}
               Switch to {theme === "dark" ? "light" : "dark"} mode
             </CommandItem>
+            <CommandItem onSelect={() => run(onOpenShortcuts)}>
+              <Keyboard />
+              Keyboard shortcuts
+              <CommandShortcut>?</CommandShortcut>
+            </CommandItem>
           </CommandGroup>
 
           <CommandSeparator />
@@ -84,12 +91,14 @@ export default function CommandPalette({ open, onOpenChange, tasks }: Props) {
             <CommandItem onSelect={() => run(() => router.push("/dashboard"))}>
               <Sunrise />
               Today
+              <CommandShortcut>G T</CommandShortcut>
             </CommandItem>
             <CommandItem
               onSelect={() => run(() => router.push("/dashboard/tasks"))}
             >
               <ListTodo />
               My tasks
+              <CommandShortcut>G M</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 
