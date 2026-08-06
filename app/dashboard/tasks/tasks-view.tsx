@@ -310,10 +310,13 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
             const isCollapsed = collapsed.has(key);
 
             return (
-              <div key={key} className="animate-fade-up">
+              <div
+                key={key}
+                className="animate-fade-up overflow-hidden rounded-lg border border-border bg-card"
+              >
                 <button
                   onClick={() => toggleCollapse(key)}
-                  className="group mb-3 flex items-center gap-2 rounded-md px-1 py-1 transition-colors hover:bg-muted/50"
+                  className="flex w-full items-center gap-2 px-3.5 py-2.5 text-left transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted/30 sm:px-4"
                 >
                   <motion.span
                     animate={{ rotate: isCollapsed ? -90 : 0 }}
@@ -323,7 +326,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
                     <ChevronDown className="h-4 w-4" />
                   </motion.span>
                   <span className={`text-sm font-semibold ${color}`}>{label}</span>
-                  <span className="rounded-full bg-muted px-1.5 py-0.5 font-mono text-xs font-medium text-muted-foreground">
+                  <span className="font-mono text-xs text-muted-foreground">
                     {sectionTasks.length}
                   </span>
                 </button>
@@ -336,9 +339,9 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                      className="overflow-hidden"
+                      className="overflow-hidden border-t border-border"
                     >
-                      <div className="space-y-2">
+                      <div className="divide-y divide-border">
                         <AnimatePresence mode="popLayout" initial={false}>
                           {sectionTasks.map((task) => (
                             <TaskRow

@@ -104,15 +104,15 @@ export default function TaskForm({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="LOW">
-              <PriorityIcon priority="LOW" />
+              <PriorityIcon priority="LOW" standalone={false} />
               Low
             </SelectItem>
             <SelectItem value="MEDIUM">
-              <PriorityIcon priority="MEDIUM" />
+              <PriorityIcon priority="MEDIUM" standalone={false} />
               Medium
             </SelectItem>
             <SelectItem value="HIGH">
-              <PriorityIcon priority="HIGH" />
+              <PriorityIcon priority="HIGH" standalone={false} />
               High
             </SelectItem>
           </SelectContent>

@@ -43,18 +43,20 @@ function getDueDateInfo(dueDate: Date, isCompleted: boolean) {
   const due = new Date(dueDate);
   due.setHours(0, 0, 0, 0);
 
-  const withTime = (label: string) =>
-    hasExplicitTime(dueDate) ? `${label}, ${formatTime(dueDate)}` : label;
-
+  const time = hasExplicitTime(dueDate) ? formatTime(dueDate) : null;
+  const withTime = (label: string) => (time ? `${label}, ${time}` : label);
   const formatted = new Date(dueDate).toLocaleDateString();
 
-  if (isCompleted) return { label: formatted, tone: "neutral" as const };
-  if (due < today) return { label: withTime("Overdue"), tone: "urgent" as const };
+  // `compact` is the time alone (or null) — used inside sections whose own
+  // header already states the date ("Overdue", "Today") so the row doesn't
+  // repeat it.
+  if (isCompleted) return { label: formatted, compact: formatted, tone: "neutral" as const };
+  if (due < today) return { label: withTime("Overdue"), compact: time, tone: "urgent" as const };
   if (due.getTime() === today.getTime())
-    return { label: withTime("Due today"), tone: "soon" as const };
+    return { label: withTime("Due today"), compact: time, tone: "soon" as const };
   if (due.getTime() === tomorrow.getTime())
-    return { label: withTime("Due tomorrow"), tone: "soon" as const };
-  return { label: withTime(formatted), tone: "neutral" as const };
+    return { label: withTime("Due tomorrow"), compact: time, tone: "soon" as const };
+  return { label: withTime(formatted), compact: time, tone: "neutral" as const };
 }
 
 const DUE_TONE_STYLES: Record<"urgent" | "soon" | "neutral", string> = {
@@ -67,6 +69,9 @@ type Props = {
   task: Task;
   isPending?: boolean;
   isSelected?: boolean;
+  /** "compact" shows just the time (or nothing) — for sections whose header
+   * already states the date, e.g. "Overdue" / "Today". */
+  dueDisplay?: "full" | "compact";
   detailsOpen: boolean;
   onDetailsOpenChange: (open: boolean) => void;
   onEdit: (task: Task) => void;
@@ -79,6 +84,7 @@ export default function TaskRow({
   task,
   isPending,
   isSelected,
+  dueDisplay = "full",
   detailsOpen,
   onDetailsOpenChange,
   onEdit,
@@ -89,6 +95,11 @@ export default function TaskRow({
   const isCompleted = task.status === "COMPLETED";
   const dueDateInfo = task.dueDate ? getDueDateInfo(task.dueDate, isCompleted) : null;
   const isOverdue = dueDateInfo?.tone === "urgent";
+  const dueLabel = dueDateInfo
+    ? dueDisplay === "compact"
+      ? dueDateInfo.compact
+      : dueDateInfo.label
+    : null;
 
   const rowRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -104,12 +115,8 @@ export default function TaskRow({
         animate={rowMotion.animate}
         exit={rowMotion.exit}
         transition={rowMotion.transition}
-        className={`flex items-start gap-3 rounded-lg border bg-card px-3 py-3 transition-[background-color,opacity] duration-150 ease-(--ease-out-quart) hover:bg-muted/30 sm:items-center sm:px-4 ${
-          isSelected
-            ? "border-ring ring-2 ring-ring"
-            : isOverdue
-              ? "border-primary/20 bg-primary/[0.035]"
-              : "border-border"
+        className={`flex items-start gap-3 px-3.5 py-3 transition-[background-color,opacity] duration-150 ease-(--ease-out-quart) hover:bg-muted/30 sm:items-center sm:px-4 ${
+          isSelected ? "bg-accent ring-1 ring-inset ring-ring" : isOverdue ? "bg-primary/[0.035]" : ""
         } ${isPending ? "pointer-events-none opacity-60" : ""}`}
       >
         <Checkbox
@@ -137,14 +144,11 @@ export default function TaskRow({
               </p>
             )}
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:hidden">
-            <span className={`inline-flex items-center gap-1 font-mono text-xs font-medium tracking-tight ${PRIORITY_TEXT[task.priority]}`}>
-              <PriorityIcon priority={task.priority} />
-              {task.priority}
-            </span>
-            {dueDateInfo && (
-              <span className={`rounded-sm px-2 py-0.5 font-mono text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
-                {dueDateInfo.label}
+          <div className="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
+            <PriorityIcon priority={task.priority} className="h-3.5 w-3.5" />
+            {dueLabel && (
+              <span className={`rounded-sm px-2 py-0.5 font-mono text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo!.tone]}`}>
+                {dueLabel}
               </span>
             )}
             <button
@@ -159,13 +163,13 @@ export default function TaskRow({
         </div>
 
         <div className="hidden sm:flex items-center gap-3 shrink-0">
-          <span className={`inline-flex items-center gap-1 font-mono text-xs font-medium tracking-tight ${PRIORITY_TEXT[task.priority]}`}>
-            <PriorityIcon priority={task.priority} />
-            {task.priority}
-          </span>
-          {dueDateInfo && (
-            <span className={`rounded-sm px-2 py-0.5 font-mono text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
-              {dueDateInfo.label}
+          <PriorityIcon
+            priority={task.priority}
+            className="h-3.5 w-3.5"
+          />
+          {dueLabel && (
+            <span className={`rounded-sm px-2 py-0.5 font-mono text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo!.tone]}`}>
+              {dueLabel}
             </span>
           )}
           <button
@@ -210,7 +214,7 @@ export default function TaskRow({
 
           <div className="mt-4 flex flex-wrap items-center gap-3 font-mono text-xs font-medium">
             <span className={`inline-flex items-center gap-1 ${PRIORITY_TEXT[task.priority]}`}>
-              <PriorityIcon priority={task.priority} />
+              <PriorityIcon priority={task.priority} standalone={false} />
               {task.priority}
             </span>
             <span className={`inline-flex items-center gap-1 ${STATUS_TEXT[task.status]}`}>

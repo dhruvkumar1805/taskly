@@ -16,7 +16,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, CalendarClock, Inbox, ListChecks, Plus, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  CalendarClock,
+  CheckCircle2,
+  Inbox,
+  ListChecks,
+  Plus,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import TaskForm from "./task-form";
@@ -151,8 +159,12 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <div className="mb-2.5 flex items-center gap-2 px-0.5">
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div
+        className={`flex items-center gap-2 border-b border-border px-3.5 py-2.5 sm:px-4 ${
+          tone === "urgent" ? "bg-primary/[0.035]" : ""
+        }`}
+      >
         <span className={tone === "urgent" ? "text-primary" : "text-muted-foreground"}>
           {icon}
         </span>
@@ -161,10 +173,13 @@ function Section({
         </h2>
         <span className="font-mono text-xs text-muted-foreground">{count}</span>
       </div>
-      <div className="space-y-2">{children}</div>
+      <div className="divide-y divide-border">{children}</div>
     </div>
   );
 }
+
+const MORE_LINK_CLASS =
+  "block px-3.5 py-2.5 text-sm text-muted-foreground transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted/30 hover:text-foreground sm:px-4";
 
 export default function TodayBoard({ tasks }: { tasks: Task[] }) {
   const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
@@ -377,6 +392,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
                   <TaskRow
                     key={task.id}
                     task={task}
+                    dueDisplay="compact"
                     isPending={pendingIds.has(task.id)}
                     isSelected={selectedId === task.id}
                     detailsOpen={openDetailsId === task.id}
@@ -399,6 +415,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
                   <TaskRow
                     key={task.id}
                     task={task}
+                    dueDisplay="compact"
                     isPending={pendingIds.has(task.id)}
                     isSelected={selectedId === task.id}
                     detailsOpen={openDetailsId === task.id}
@@ -414,7 +431,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.18 }}
-                  className="rounded-lg border border-dashed border-border px-3.5 py-4 text-sm text-muted-foreground"
+                  className="px-3.5 py-4 text-sm text-muted-foreground sm:px-4"
                 >
                   Nothing due today.
                 </motion.p>
@@ -442,10 +459,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
                 ))}
               </AnimatePresence>
               {upNextTotal > upNext.length && (
-                <Link
-                  href="/dashboard/tasks"
-                  className="block px-0.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
+                <Link href="/dashboard/tasks" className={MORE_LINK_CLASS}>
                   +{upNextTotal - upNext.length} more in My Tasks →
                 </Link>
               )}
@@ -472,10 +486,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
                 ))}
               </AnimatePresence>
               {somedayTotal > someday.length && (
-                <Link
-                  href="/dashboard/tasks"
-                  className="block px-0.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
+                <Link href="/dashboard/tasks" className={MORE_LINK_CLASS}>
                   +{somedayTotal - someday.length} more in My Tasks →
                 </Link>
               )}
@@ -483,26 +494,25 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
           )}
 
           {completedToday.length > 0 && (
-            <div className="border-t border-border pt-5">
-              <p className="mb-2.5 px-0.5 text-xs font-medium text-muted-foreground">
-                Completed today · {completedToday.length}
-              </p>
-              <div className="space-y-2 opacity-70">
-                <AnimatePresence mode="popLayout" initial={false}>
-                  {completedToday.map((task) => (
-                    <TaskRow
-                      key={task.id}
-                      task={task}
-                      isPending={pendingIds.has(task.id)}
-                      isSelected={selectedId === task.id}
-                      detailsOpen={openDetailsId === task.id}
-                      onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
-                      {...rowProps}
-                    />
-                  ))}
-                </AnimatePresence>
-              </div>
-            </div>
+            <Section
+              title="Completed today"
+              icon={<CheckCircle2 className="h-4 w-4" />}
+              count={completedToday.length}
+            >
+              <AnimatePresence mode="popLayout" initial={false}>
+                {completedToday.map((task) => (
+                  <TaskRow
+                    key={task.id}
+                    task={task}
+                    isPending={pendingIds.has(task.id)}
+                    isSelected={selectedId === task.id}
+                    detailsOpen={openDetailsId === task.id}
+                    onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
+                    {...rowProps}
+                  />
+                ))}
+              </AnimatePresence>
+            </Section>
           )}
         </>
       )}
