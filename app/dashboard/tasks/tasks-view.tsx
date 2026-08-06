@@ -55,6 +55,10 @@ const STATUS_SECTIONS = [
   { key: "COMPLETED" as const, label: "Completed", color: "text-success" },
 ];
 
+// Rows rendered (and animated) per status group before a "Show more" reveal
+// is needed — keeps hundreds of tasks from ever hitting the DOM at once.
+const PAGE_SIZE = 50;
+
 export default function TasksView({ tasks }: { tasks: Task[] }) {
   const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
@@ -161,6 +165,16 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
     });
   }
 
+  // Cap rows actually rendered (and animated) per status group instead of
+  // virtualizing — a "Show more" reveal keeps hundreds of tasks from ever
+  // hitting the DOM/AnimatePresence at once, without the complexity and
+  // risk of retrofitting a windowed list onto the existing exit/reorder
+  // animations.
+  const [shownCounts, setShownCounts] = useState<Record<string, number>>({});
+  function showMore(key: string) {
+    setShownCounts((prev) => ({ ...prev, [key]: (prev[key] ?? PAGE_SIZE) + PAGE_SIZE }));
+  }
+
   const visibleTasks = optimisticTasks
     .filter((t) => !pendingDeletes.has(t.id))
     .filter((t) => {
@@ -183,12 +197,17 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
     const ids: string[] = [];
     for (const { key } of STATUS_SECTIONS) {
       if (collapsed.has(key)) continue;
+      const shown = shownCounts[key] ?? PAGE_SIZE;
+      let count = 0;
       for (const t of visibleTasks) {
-        if (t.status === key) ids.push(t.id);
+        if (t.status !== key) continue;
+        if (count >= shown) break;
+        ids.push(t.id);
+        count++;
       }
     }
     return ids;
-  }, [visibleTasks, collapsed]);
+  }, [visibleTasks, collapsed, shownCounts]);
 
   const { selectedId } = useListKeyboardNav(
     flatIds,
@@ -314,8 +333,12 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
       ) : (
         <div className="space-y-5 md:space-y-6">
           {STATUS_SECTIONS.map(({ key, label, color }) => {
-            const sectionTasks = visibleTasks.filter((t) => t.status === key);
-            if (sectionTasks.length === 0) return null;
+            const allSectionTasks = visibleTasks.filter((t) => t.status === key);
+            if (allSectionTasks.length === 0) return null;
+
+            const shown = shownCounts[key] ?? PAGE_SIZE;
+            const sectionTasks = allSectionTasks.slice(0, shown);
+            const remaining = allSectionTasks.length - sectionTasks.length;
 
             const isCollapsed = collapsed.has(key);
 
@@ -337,7 +360,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
                   </motion.span>
                   <span className={`text-sm font-semibold ${color}`}>{label}</span>
                   <span className="font-mono text-xs text-muted-foreground">
-                    {sectionTasks.length}
+                    {allSectionTasks.length}
                   </span>
                 </button>
 
@@ -368,6 +391,15 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
                             />
                           ))}
                         </AnimatePresence>
+                        {remaining > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => showMore(key)}
+                            className="block w-full px-3.5 py-2.5 text-left text-sm text-muted-foreground transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted/30 hover:text-foreground sm:px-4"
+                          >
+                            Show {Math.min(remaining, PAGE_SIZE)} more
+                          </button>
+                        )}
                       </div>
                     </motion.div>
                   )}
