@@ -19,6 +19,13 @@ import {
 } from "@/components/ui/dialog";
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useRef } from "react";
+import {
+  PriorityIcon,
+  PRIORITY_TEXT,
+  StatusIcon,
+  STATUS_TEXT,
+  STATUS_LABELS,
+} from "@/components/task-icons";
 
 function hasExplicitTime(date: Date) {
   return date.getHours() !== 0 || date.getMinutes() !== 0;
@@ -56,30 +63,6 @@ const DUE_TONE_STYLES: Record<"urgent" | "soon" | "neutral", string> = {
   neutral: "bg-muted text-muted-foreground",
 };
 
-const PRIORITY_DOT: Record<Task["priority"], string> = {
-  HIGH: "bg-primary",
-  MEDIUM: "bg-muted-foreground/50",
-  LOW: "bg-info",
-};
-
-const PRIORITY_TEXT: Record<Task["priority"], string> = {
-  HIGH: "text-primary",
-  MEDIUM: "text-muted-foreground",
-  LOW: "text-info",
-};
-
-const STATUS_BUTTON_STYLES: Record<Task["status"], string> = {
-  TODO: "",
-  IN_PROGRESS: "border-info/40 text-info hover:bg-info/10",
-  COMPLETED: "border-success/40 text-success hover:bg-success/10",
-};
-
-const STATUS_LABELS: Record<Task["status"], string> = {
-  TODO: "To do",
-  IN_PROGRESS: "In progress",
-  COMPLETED: "Completed",
-};
-
 type Props = {
   task: Task;
   isPending?: boolean;
@@ -105,6 +88,7 @@ export default function TaskRow({
 }: Props) {
   const isCompleted = task.status === "COMPLETED";
   const dueDateInfo = task.dueDate ? getDueDateInfo(task.dueDate, isCompleted) : null;
+  const isOverdue = dueDateInfo?.tone === "urgent";
 
   const rowRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -121,7 +105,11 @@ export default function TaskRow({
         exit={rowMotion.exit}
         transition={rowMotion.transition}
         className={`flex items-start gap-3 rounded-lg border bg-card px-3 py-3 transition-[background-color,opacity] duration-150 ease-(--ease-out-quart) hover:bg-muted/30 sm:items-center sm:px-4 ${
-          isSelected ? "border-ring ring-2 ring-ring" : "border-border"
+          isSelected
+            ? "border-ring ring-2 ring-ring"
+            : isOverdue
+              ? "border-primary/20 bg-primary/[0.035]"
+              : "border-border"
         } ${isPending ? "pointer-events-none opacity-60" : ""}`}
       >
         <Checkbox
@@ -150,44 +138,44 @@ export default function TaskRow({
             )}
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:hidden">
-            <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${PRIORITY_TEXT[task.priority]}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT[task.priority]}`} />
+            <span className={`inline-flex items-center gap-1 font-mono text-xs font-medium tracking-tight ${PRIORITY_TEXT[task.priority]}`}>
+              <PriorityIcon priority={task.priority} />
               {task.priority}
             </span>
             {dueDateInfo && (
-              <span className={`rounded-sm px-2 py-0.5 text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
+              <span className={`rounded-sm px-2 py-0.5 font-mono text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
                 {dueDateInfo.label}
               </span>
             )}
-            <Button
-              variant="outline"
-              size="sm"
+            <button
+              type="button"
               onClick={() => onToggleStatus(task.id)}
-              className={`h-7 px-2 text-xs transition-colors duration-150 ease-(--ease-out-quart) ${STATUS_BUTTON_STYLES[task.status]}`}
+              className={`inline-flex h-7 items-center gap-1.5 rounded-md px-2 font-mono text-xs font-medium transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted ${STATUS_TEXT[task.status]}`}
             >
+              <StatusIcon status={task.status} />
               {STATUS_LABELS[task.status]}
-            </Button>
+            </button>
           </div>
         </div>
 
         <div className="hidden sm:flex items-center gap-3 shrink-0">
-          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${PRIORITY_TEXT[task.priority]}`}>
-            <span className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT[task.priority]}`} />
+          <span className={`inline-flex items-center gap-1 font-mono text-xs font-medium tracking-tight ${PRIORITY_TEXT[task.priority]}`}>
+            <PriorityIcon priority={task.priority} />
             {task.priority}
           </span>
           {dueDateInfo && (
-            <span className={`rounded-sm px-2 py-0.5 text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
+            <span className={`rounded-sm px-2 py-0.5 font-mono text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
               {dueDateInfo.label}
             </span>
           )}
-          <Button
-            variant="outline"
-            size="sm"
+          <button
+            type="button"
             onClick={() => onToggleStatus(task.id)}
-            className={`h-7 px-2 text-xs transition-colors duration-150 ${STATUS_BUTTON_STYLES[task.status]}`}
+            className={`inline-flex h-7 items-center gap-1.5 rounded-md px-2 font-mono text-xs font-medium transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted ${STATUS_TEXT[task.status]}`}
           >
+            <StatusIcon status={task.status} />
             {STATUS_LABELS[task.status]}
-          </Button>
+          </button>
         </div>
 
         <DropdownMenu>
@@ -220,12 +208,15 @@ export default function TaskRow({
             </p>
           )}
 
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-medium">
-            <span className={`inline-flex items-center gap-1.5 ${PRIORITY_TEXT[task.priority]}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${PRIORITY_DOT[task.priority]}`} />
+          <div className="mt-4 flex flex-wrap items-center gap-3 font-mono text-xs font-medium">
+            <span className={`inline-flex items-center gap-1 ${PRIORITY_TEXT[task.priority]}`}>
+              <PriorityIcon priority={task.priority} />
               {task.priority}
             </span>
-            <span className="text-muted-foreground">{STATUS_LABELS[task.status]}</span>
+            <span className={`inline-flex items-center gap-1 ${STATUS_TEXT[task.status]}`}>
+              <StatusIcon status={task.status} />
+              {STATUS_LABELS[task.status]}
+            </span>
             {dueDateInfo && (
               <span className={`rounded-sm px-2 py-0.5 ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
                 {dueDateInfo.label}

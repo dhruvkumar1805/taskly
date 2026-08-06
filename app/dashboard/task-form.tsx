@@ -21,6 +21,7 @@ import {
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useTransition } from "react";
+import { PriorityIcon } from "@/components/task-icons";
 
 export default function TaskForm({
   task,
@@ -102,9 +103,18 @@ export default function TaskForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="LOW">Low</SelectItem>
-            <SelectItem value="MEDIUM">Medium</SelectItem>
-            <SelectItem value="HIGH">High</SelectItem>
+            <SelectItem value="LOW">
+              <PriorityIcon priority="LOW" />
+              Low
+            </SelectItem>
+            <SelectItem value="MEDIUM">
+              <PriorityIcon priority="MEDIUM" />
+              Medium
+            </SelectItem>
+            <SelectItem value="HIGH">
+              <PriorityIcon priority="HIGH" />
+              High
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>

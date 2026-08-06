@@ -37,11 +37,44 @@ function AnimatedNumber({ value }: { value: number }) {
   return <motion.span>{rounded}</motion.span>;
 }
 
+const RING_RADIUS = 18;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+function CompletionRing({ pct }: { pct: number }) {
+  const offset = RING_CIRCUMFERENCE - (RING_CIRCUMFERENCE * pct) / 100;
+
+  return (
+    <div className="relative flex h-20 w-20 shrink-0 items-center justify-center md:h-22 md:w-22">
+      <svg viewBox="0 0 44 44" className="h-full w-full -rotate-90">
+        <circle cx="22" cy="22" r={RING_RADIUS} fill="none" strokeWidth="3.5" className="stroke-muted" />
+        <motion.circle
+          cx="22"
+          cy="22"
+          r={RING_RADIUS}
+          fill="none"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          className="stroke-primary"
+          strokeDasharray={RING_CIRCUMFERENCE}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-mono text-lg font-bold tracking-tight md:text-xl">
+          <AnimatedNumber value={pct} />
+          <span className="text-xs font-semibold text-muted-foreground">%</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function StatsCards({ stats }: { stats: Stats }) {
   const pct = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
   const hasOverdue = stats.overdue > 0;
 
-  const cards = [
+  const metrics = [
     { label: "Total", value: stats.total, icon: ListChecks, tone: "text-muted-foreground" },
     { label: "In progress", value: stats.inProgress, icon: CircleDashed, tone: "text-info" },
     { label: "Completed", value: stats.completed, icon: CheckCircle2, tone: "text-success" },
@@ -54,16 +87,25 @@ export default function StatsCards({ stats }: { stats: Stats }) {
   ];
 
   return (
-    <div className="rounded-lg border border-border bg-card">
-      <div className="grid grid-cols-2 divide-x divide-y divide-border lg:grid-cols-4 lg:divide-y-0">
-        {cards.map(({ label, value, icon: Icon, tone }) => (
-          <div key={label} className="p-3.5 md:p-4">
+    <div className="flex flex-col gap-5 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center md:gap-6 md:p-5">
+      <div className="flex items-center gap-4 sm:flex-col sm:items-start sm:gap-2">
+        <CompletionRing pct={pct} />
+        <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase sm:text-center">
+          Completion
+        </span>
+      </div>
+
+      <div className="h-px w-full bg-border sm:h-auto sm:w-px sm:self-stretch" />
+
+      <div className="grid flex-1 grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-4">
+        {metrics.map(({ label, value, icon: Icon, tone }) => (
+          <div key={label}>
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Icon className={`h-3.5 w-3.5 ${tone}`} />
               {label}
             </div>
             <p
-              className={`mt-2 font-mono text-2xl font-semibold tracking-tight ${
+              className={`mt-1.5 font-mono text-2xl font-semibold tracking-tight ${
                 label === "Overdue" && hasOverdue ? "text-primary" : ""
               }`}
             >
@@ -71,21 +113,6 @@ export default function StatsCards({ stats }: { stats: Stats }) {
             </p>
           </div>
         ))}
-      </div>
-
-      <div className="border-t border-border p-3.5 md:p-4">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-medium text-muted-foreground">Completion</span>
-          <span className="font-mono font-medium">
-            <AnimatedNumber value={pct} />%
-          </span>
-        </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-500 ease-(--ease-out-quart)"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
       </div>
     </div>
   );

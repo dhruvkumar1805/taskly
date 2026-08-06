@@ -43,7 +43,7 @@ export function Logo({
       >
         <LogoMark className={glyph} />
       </div>
-      {showWordmark && <span className="font-semibold tracking-tight">Taskly</span>}
+      {showWordmark && <span className="font-bold tracking-tight">Taskly</span>}
     </div>
   );
 }

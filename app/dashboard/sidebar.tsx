@@ -80,9 +80,11 @@ export default function Sidebar({
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <LogoMark className="h-4.5 w-4.5" />
           </div>
-          <div className="space-y-0.5">
-            <p className="font-semibold leading-none tracking-tight">Taskly</p>
-            <p className="text-xs text-muted-foreground">Focused daily work</p>
+          <div className="space-y-1">
+            <p className="text-[15px] font-bold leading-none tracking-tight">Taskly</p>
+            <p className="font-mono text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+              Focused daily work
+            </p>
           </div>
         </div>
       </div>

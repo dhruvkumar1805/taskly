@@ -20,7 +20,7 @@ export default async function TasksPage() {
             <ListTodo className="h-4 w-4 md:h-5 md:w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight md:text-2xl">My tasks</h1>
+            <h1 className="text-xl font-bold tracking-tight md:text-2xl">My tasks</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Manage and track all your tasks
             </p>

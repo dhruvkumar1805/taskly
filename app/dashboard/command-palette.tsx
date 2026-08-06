@@ -31,12 +31,7 @@ import {
   Moon,
   LogOut,
 } from "lucide-react";
-
-const PRIORITY_DOT: Record<Task["priority"], string> = {
-  HIGH: "bg-primary",
-  MEDIUM: "bg-muted-foreground/50",
-  LOW: "bg-info",
-};
+import { PriorityIcon } from "@/components/task-icons";
 
 type Props = {
   open: boolean;
@@ -108,9 +103,7 @@ export default function CommandPalette({ open, onOpenChange, tasks }: Props) {
                     value={task.title}
                     onSelect={() => run(() => setEditingTask(task))}
                   >
-                    <span
-                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_DOT[task.priority]}`}
-                    />
+                    <PriorityIcon priority={task.priority} />
                     <span className="truncate">{task.title}</span>
                   </CommandItem>
                 ))}

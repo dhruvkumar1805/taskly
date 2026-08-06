@@ -23,6 +23,7 @@ import TaskForm from "./task-form";
 import TaskRow from "./tasks/task-row";
 import { useListKeyboardNav } from "@/hooks/use-list-keyboard-nav";
 import { parseQuickAdd } from "./parse-quick-add";
+import { PriorityIcon } from "@/components/task-icons";
 
 type OptimisticAction =
   | { type: "toggle_completed"; id: string }
@@ -43,12 +44,6 @@ function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
     return { ...t, status: next } as Task;
   });
 }
-
-const QUICK_ADD_PRIORITY_DOT: Record<string, string> = {
-  HIGH: "bg-primary",
-  MEDIUM: "bg-muted-foreground/50",
-  LOW: "bg-info",
-};
 
 function formatPreviewDate(date: Date, hasTime: boolean) {
   const today = new Date();
@@ -129,11 +124,7 @@ function QuickAdd({ onCreate }: { onCreate: (task: Task, formData: FormData) => 
             transition={{ duration: 0.15, ease: [0.25, 1, 0.5, 1] }}
             className="flex shrink-0 items-center gap-1.5"
           >
-            {parsed.priority && (
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${QUICK_ADD_PRIORITY_DOT[parsed.priority]}`}
-              />
-            )}
+            {parsed.priority && <PriorityIcon priority={parsed.priority} />}
             {parsed.dueDate && (
               <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 font-mono text-xs whitespace-nowrap text-primary">
                 {formatPreviewDate(parsed.dueDate, parsed.hasTime)}
