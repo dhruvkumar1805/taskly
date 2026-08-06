@@ -25,15 +25,16 @@ model User {
 }
 
 model Task {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   title       String
   description String?
-  priority    Priority  @default(MEDIUM)
-  status      Status    @default(TODO)
+  priority    Priority    @default(MEDIUM)
+  status      Status      @default(TODO)
   dueDate     DateTime?
   completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  recurrence  Recurrence?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -53,4 +54,14 @@ enum Priority {
   LOW
   MEDIUM
   HIGH
+}
+
+// Fixed-cadence repeat. On completion, the next occurrence is generated from
+// the due date (not from the completion date) — see app/lib/recurrence.ts.
+enum Recurrence {
+  DAILY
+  WEEKDAYS
+  WEEKLY
+  MONTHLY
+  YEARLY
 }

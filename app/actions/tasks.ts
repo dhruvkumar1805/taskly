@@ -3,6 +3,17 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { getNextOccurrence } from "@/app/lib/recurrence";
+import type { Priority, Recurrence } from "@/generated/prisma/client";
+
+const RECURRENCE_VALUES = ["DAILY", "WEEKDAYS", "WEEKLY", "MONTHLY", "YEARLY"] as const;
+
+function parseRecurrence(value: FormDataEntryValue | null): Recurrence | null {
+  const str = value?.toString();
+  return str && (RECURRENCE_VALUES as readonly string[]).includes(str)
+    ? (str as Recurrence)
+    : null;
+}
 
 export async function createTask(formData: FormData) {
   const session = await auth();
@@ -18,6 +29,7 @@ export async function createTask(formData: FormData) {
     | "HIGH"
     | undefined;
   const dueDateRaw = formData.get("dueDate")?.toString();
+  const recurrence = parseRecurrence(formData.get("recurrence"));
 
   if (!title) {
     throw new Error("Title is required");
@@ -29,11 +41,38 @@ export async function createTask(formData: FormData) {
       description: description || null,
       priority: priority ?? "MEDIUM",
       dueDate: dueDateRaw ? new Date(dueDateRaw) : null,
+      // A recurrence only means something with a due date to recur from.
+      recurrence: dueDateRaw ? recurrence : null,
       userId: session.user.id,
     },
   });
 
   revalidatePath("/dashboard", "layout");
+}
+
+async function createNextOccurrence(
+  tx: Pick<typeof prisma, "task">,
+  task: {
+    title: string;
+    description: string | null;
+    priority: Priority;
+    dueDate: Date | null;
+    recurrence: Recurrence | null;
+    userId: string;
+  },
+) {
+  if (!task.recurrence || !task.dueDate) return;
+
+  await tx.task.create({
+    data: {
+      title: task.title,
+      description: task.description,
+      priority: task.priority,
+      dueDate: getNextOccurrence(task.dueDate, task.recurrence),
+      recurrence: task.recurrence,
+      userId: task.userId,
+    },
+  });
 }
 
 export async function toggleTaskStatus(taskId: string) {
@@ -60,12 +99,15 @@ export async function toggleTaskStatus(taskId: string) {
       ? "COMPLETED"
       : "TODO";
 
-  await prisma.task.update({
-    where: { id: task.id },
-    data: {
-      status: nextStatus,
-      completedAt: nextStatus === "COMPLETED" ? new Date() : null,
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.task.update({
+      where: { id: task.id },
+      data: {
+        status: nextStatus,
+        completedAt: nextStatus === "COMPLETED" ? new Date() : null,
+      },
+    });
+    if (nextStatus === "COMPLETED") await createNextOccurrence(tx, task);
   });
 
   revalidatePath("/dashboard", "layout");
@@ -77,19 +119,21 @@ export async function toggleTaskCompleted(taskId: string) {
 
   const task = await prisma.task.findFirst({
     where: { id: taskId, userId: session.user.id },
-    select: { status: true },
   });
 
   if (!task) return;
 
   const nextStatus = task.status === "COMPLETED" ? "IN_PROGRESS" : "COMPLETED";
 
-  await prisma.task.update({
-    where: { id: taskId },
-    data: {
-      status: nextStatus,
-      completedAt: nextStatus === "COMPLETED" ? new Date() : null,
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.task.update({
+      where: { id: taskId },
+      data: {
+        status: nextStatus,
+        completedAt: nextStatus === "COMPLETED" ? new Date() : null,
+      },
+    });
+    if (nextStatus === "COMPLETED") await createNextOccurrence(tx, task);
   });
 
   revalidatePath("/dashboard", "layout");
@@ -121,6 +165,8 @@ export async function updateTask(taskId: string, formData: FormData) {
     | "MEDIUM"
     | "HIGH"
     | undefined;
+  const dueDateRaw = formData.get("dueDate")?.toString();
+  const recurrence = parseRecurrence(formData.get("recurrence"));
 
   if (!title) return;
 
@@ -133,9 +179,8 @@ export async function updateTask(taskId: string, formData: FormData) {
       title,
       description: formData.get("description")?.toString() || null,
       priority,
-      dueDate: formData.get("dueDate")
-        ? new Date(formData.get("dueDate") as string)
-        : null,
+      dueDate: dueDateRaw ? new Date(dueDateRaw) : null,
+      recurrence: dueDateRaw ? recurrence : null,
     },
   });
 

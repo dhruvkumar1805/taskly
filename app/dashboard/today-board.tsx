@@ -110,6 +110,7 @@ function QuickAdd({
       status: "TODO",
       dueDate: resolvedDueDate,
       completedAt: null,
+      recurrence: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       userId: "",

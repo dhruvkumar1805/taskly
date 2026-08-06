@@ -1,6 +1,6 @@
 "use client";
 
-import type { Task } from "@/generated/prisma/client";
+import type { Task, Recurrence } from "@/generated/prisma/client";
 import { motion } from "motion/react";
 import { rowMotion } from "@/lib/motion";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Repeat } from "lucide-react";
 import { useEffect, useRef } from "react";
 import {
   PriorityIcon,
@@ -26,6 +26,7 @@ import {
   STATUS_TEXT,
   STATUS_LABELS,
 } from "@/components/task-icons";
+import { RECURRENCE_LABELS } from "@/app/lib/recurrence";
 
 function hasExplicitTime(date: Date) {
   return date.getHours() !== 0 || date.getMinutes() !== 0;
@@ -64,6 +65,30 @@ const DUE_TONE_STYLES: Record<"urgent" | "soon" | "neutral", string> = {
   soon: "bg-primary/5 text-primary/90",
   neutral: "bg-muted text-muted-foreground",
 };
+
+function DueBadge({
+  tone,
+  recurrence,
+  children,
+}: {
+  tone: "urgent" | "soon" | "neutral";
+  recurrence: Recurrence | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-sm px-2 py-0.5 font-mono text-xs font-medium ${DUE_TONE_STYLES[tone]}`}
+    >
+      {recurrence && (
+        <>
+          <Repeat className="h-3 w-3" aria-hidden="true" />
+          <span className="sr-only">Repeats {RECURRENCE_LABELS[recurrence]}. </span>
+        </>
+      )}
+      {children}
+    </span>
+  );
+}
 
 type Props = {
   task: Task;
@@ -147,9 +172,9 @@ export default function TaskRow({
           <div className="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
             <PriorityIcon priority={task.priority} className="h-3.5 w-3.5" />
             {dueLabel && (
-              <span className={`rounded-sm px-2 py-0.5 font-mono text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo!.tone]}`}>
+              <DueBadge tone={dueDateInfo!.tone} recurrence={task.recurrence}>
                 {dueLabel}
-              </span>
+              </DueBadge>
             )}
             <button
               type="button"
@@ -168,9 +193,9 @@ export default function TaskRow({
             className="h-3.5 w-3.5"
           />
           {dueLabel && (
-            <span className={`rounded-sm px-2 py-0.5 font-mono text-xs font-medium ${DUE_TONE_STYLES[dueDateInfo!.tone]}`}>
+            <DueBadge tone={dueDateInfo!.tone} recurrence={task.recurrence}>
               {dueLabel}
-            </span>
+            </DueBadge>
           )}
           <button
             type="button"
@@ -222,9 +247,9 @@ export default function TaskRow({
               {STATUS_LABELS[task.status]}
             </span>
             {dueDateInfo && (
-              <span className={`rounded-sm px-2 py-0.5 ${DUE_TONE_STYLES[dueDateInfo.tone]}`}>
+              <DueBadge tone={dueDateInfo.tone} recurrence={task.recurrence}>
                 {dueDateInfo.label}
-              </span>
+              </DueBadge>
             )}
           </div>
         </DialogContent>

@@ -18,10 +18,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, Repeat } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useTransition } from "react";
 import { PriorityIcon } from "@/components/task-icons";
+import { RECURRENCE_LABELS } from "@/app/lib/recurrence";
 
 export default function TaskForm({
   task,
@@ -67,7 +68,7 @@ export default function TaskForm({
         rows={4}
       />
 
-      <div className="md:flex items-center justify-between gap-3 space-y-4 md:space-y-0">
+      <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
         <div className="flex flex-col gap-2">
           <Popover>
             <PopoverTrigger asChild>
@@ -98,6 +99,7 @@ export default function TaskForm({
             value={dueDate ? dueDate.toISOString() : ""}
           />
         </div>
+
         <Select name="priority" defaultValue={task?.priority ?? "MEDIUM"}>
           <SelectTrigger className="w-30">
             <SelectValue />
@@ -117,6 +119,27 @@ export default function TaskForm({
             </SelectItem>
           </SelectContent>
         </Select>
+
+        <Select name="recurrence" defaultValue={task?.recurrence ?? "NONE"} disabled={!dueDate}>
+          <SelectTrigger className="w-36">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="NONE">
+              <Repeat className="h-4 w-4 text-muted-foreground" />
+              No repeat
+            </SelectItem>
+            {Object.entries(RECURRENCE_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                <Repeat className="h-4 w-4 text-muted-foreground" />
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {!dueDate && (
+          <p className="text-xs text-muted-foreground">Pick a date to repeat this task.</p>
+        )}
       </div>
       <Button className="w-full cursor-pointer" type="submit" disabled={isPending}>
         {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : submitLabel}
