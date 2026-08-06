@@ -111,6 +111,7 @@ function QuickAdd({
       dueDate: resolvedDueDate,
       completedAt: null,
       recurrence: null,
+      recurrenceCreatedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       userId: "",

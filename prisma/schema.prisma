@@ -25,16 +25,20 @@ model User {
 }
 
 model Task {
-  id          String      @id @default(cuid())
-  title       String
-  description String?
-  priority    Priority    @default(MEDIUM)
-  status      Status      @default(TODO)
-  dueDate     DateTime?
-  completedAt DateTime?
-  recurrence  Recurrence?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                  String      @id @default(cuid())
+  title               String
+  description         String?
+  priority            Priority    @default(MEDIUM)
+  status              Status      @default(TODO)
+  dueDate             DateTime?
+  completedAt         DateTime?
+  recurrence          Recurrence?
+  // Set once this task's completion has spawned its next occurrence, so
+  // toggling complete -> incomplete -> complete again on the same task
+  // never spawns a second, duplicate successor.
+  recurrenceCreatedAt DateTime?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id])

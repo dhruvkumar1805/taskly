@@ -53,15 +53,19 @@ export async function createTask(formData: FormData) {
 async function createNextOccurrence(
   tx: Pick<typeof prisma, "task">,
   task: {
+    id: string;
     title: string;
     description: string | null;
     priority: Priority;
     dueDate: Date | null;
     recurrence: Recurrence | null;
+    recurrenceCreatedAt: Date | null;
     userId: string;
   },
 ) {
-  if (!task.recurrence || !task.dueDate) return;
+  // Guarded so toggling complete -> incomplete -> complete again on the
+  // same task can't spawn a second successor for the same due date.
+  if (!task.recurrence || !task.dueDate || task.recurrenceCreatedAt) return;
 
   await tx.task.create({
     data: {
@@ -72,6 +76,11 @@ async function createNextOccurrence(
       recurrence: task.recurrence,
       userId: task.userId,
     },
+  });
+
+  await tx.task.update({
+    where: { id: task.id },
+    data: { recurrenceCreatedAt: new Date() },
   });
 }
 
