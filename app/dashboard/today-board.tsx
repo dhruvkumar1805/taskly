@@ -72,9 +72,17 @@ function formatPreviewDate(date: Date, hasTime: boolean) {
   return label;
 }
 
-function QuickAdd({ onCreate }: { onCreate: (task: Task, formData: FormData) => void }) {
-  const [title, setTitle] = useState("");
-
+function QuickAdd({
+  title,
+  onTitleChange,
+  onCreate,
+  inputRef,
+}: {
+  title: string;
+  onTitleChange: (title: string) => void;
+  onCreate: (task: Task, formData: FormData) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}) {
   const parsed = useMemo(() => (title.trim() ? parseQuickAdd(title) : null), [title]);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -107,7 +115,7 @@ function QuickAdd({ onCreate }: { onCreate: (task: Task, formData: FormData) => 
       userId: "",
     };
 
-    setTitle("");
+    onTitleChange("");
     onCreate(tempTask, fd);
   }
 
@@ -118,8 +126,9 @@ function QuickAdd({ onCreate }: { onCreate: (task: Task, formData: FormData) => 
     >
       <Plus className="h-4 w-4 shrink-0 text-muted-foreground" />
       <input
+        ref={inputRef}
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e) => onTitleChange(e.target.value)}
         placeholder="Add a task — try “tomorrow 3pm !high”"
         className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
       />
@@ -181,6 +190,38 @@ function Section({
 const MORE_LINK_CLASS =
   "block px-3.5 py-2.5 text-sm text-muted-foreground transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted/30 hover:text-foreground sm:px-4";
 
+const QUICK_ADD_EXAMPLES = [
+  "Reply to Sam tomorrow 9am !high",
+  "Renew passport friday !medium",
+  "Water the plants",
+];
+
+function EmptyState({ onPickExample }: { onPickExample: (example: string) => void }) {
+  return (
+    <div className="animate-fade-up rounded-lg border border-border bg-card px-5 py-12 text-center">
+      <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <Sparkles className="h-5 w-5" />
+      </div>
+      <p className="mt-4 font-medium">Nothing on your list yet</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Type into the box above — dates, times, and !priority are parsed as you go.
+      </p>
+      <div className="mx-auto mt-5 flex max-w-md flex-col gap-2">
+        {QUICK_ADD_EXAMPLES.map((example) => (
+          <button
+            key={example}
+            type="button"
+            onClick={() => onPickExample(example)}
+            className="rounded-md border border-dashed border-border px-3 py-2 text-left font-mono text-xs text-muted-foreground transition-colors duration-150 ease-(--ease-out-quart) hover:border-primary/30 hover:border-solid hover:bg-primary/5 hover:text-foreground"
+          >
+            “{example}”
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function TodayBoard({ tasks }: { tasks: Task[] }) {
   const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
@@ -189,6 +230,8 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [openDetailsId, setOpenDetailsId] = useState<string | null>(null);
+  const [quickAddTitle, setQuickAddTitle] = useState("");
+  const quickAddInputRef = useRef<HTMLInputElement>(null);
 
   function addPending(id: string) {
     setPendingIds((prev) => new Set([...prev, id]));
@@ -364,20 +407,20 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
 
   return (
     <div className="space-y-6 md:space-y-7">
-      <QuickAdd onCreate={handleCreate} />
+      <QuickAdd
+        title={quickAddTitle}
+        onTitleChange={setQuickAddTitle}
+        onCreate={handleCreate}
+        inputRef={quickAddInputRef}
+      />
 
       {isEmpty ? (
-        <div className="animate-fade-up flex flex-col items-center gap-3 rounded-lg border border-border bg-card px-5 py-16 text-center">
-          <div className="rounded-full bg-muted p-4 text-muted-foreground">
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="font-medium">Nothing on your list yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Add your first task above to get started.
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          onPickExample={(example) => {
+            setQuickAddTitle(example);
+            quickAddInputRef.current?.focus();
+          }}
+        />
       ) : (
         <>
           {overdue.length > 0 && (

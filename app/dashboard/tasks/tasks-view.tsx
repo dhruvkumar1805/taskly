@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ClipboardList, Plus, Search, SearchX } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 import TaskRow from "./task-row";
 import TaskForm from "@/app/dashboard/task-form";
 import { useListKeyboardNav } from "@/hooks/use-list-keyboard-nav";
@@ -287,10 +288,19 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
             </p>
           </div>
           {tasks.length === 0 ? (
-            <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4 mr-1" />
-              New Task
-            </Button>
+            <>
+              <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
+                <Plus className="h-4 w-4 mr-1" />
+                New Task
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Faster: the quick-add bar on{" "}
+                <Link href="/dashboard" className="font-medium text-foreground underline underline-offset-2">
+                  Today
+                </Link>{" "}
+                parses dates and priority as you type — try “tomorrow 3pm !high”.
+              </p>
+            </>
           ) : (
             <Button
               size="sm"
