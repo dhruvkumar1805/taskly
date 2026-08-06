@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { AlertTriangle, CheckCircle2, CircleDashed, ListChecks } from "lucide-react";
+import { motion, useMotionValue, useReducedMotion, useTransform, animate } from "motion/react";
 
 type Stats = {
   total: number;
@@ -6,6 +10,32 @@ type Stats = {
   completed: number;
   overdue: number;
 };
+
+function AnimatedNumber({ value }: { value: number }) {
+  const prefersReducedMotion = useReducedMotion();
+  const motionValue = useMotionValue(value);
+  const rounded = useTransform(motionValue, (v) => Math.round(v).toString());
+  const hasMounted = useRef(false);
+
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      motionValue.jump(value);
+      return;
+    }
+    if (prefersReducedMotion) {
+      motionValue.jump(value);
+      return;
+    }
+    const controls = animate(motionValue, value, {
+      duration: 0.45,
+      ease: [0.25, 1, 0.5, 1],
+    });
+    return () => controls.stop();
+  }, [value, motionValue, prefersReducedMotion]);
+
+  return <motion.span>{rounded}</motion.span>;
+}
 
 export default function StatsCards({ stats }: { stats: Stats }) {
   const pct = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
@@ -37,7 +67,7 @@ export default function StatsCards({ stats }: { stats: Stats }) {
                 label === "Overdue" && hasOverdue ? "text-primary" : ""
               }`}
             >
-              {value}
+              <AnimatedNumber value={value} />
             </p>
           </div>
         ))}
@@ -46,11 +76,13 @@ export default function StatsCards({ stats }: { stats: Stats }) {
       <div className="border-t border-border p-3.5 md:p-4">
         <div className="flex items-center justify-between text-xs">
           <span className="font-medium text-muted-foreground">Completion</span>
-          <span className="font-mono font-medium">{pct}%</span>
+          <span className="font-mono font-medium">
+            <AnimatedNumber value={pct} />%
+          </span>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
+            className="h-full rounded-full bg-primary transition-all duration-500 ease-(--ease-out-quart)"
             style={{ width: `${pct}%` }}
           />
         </div>

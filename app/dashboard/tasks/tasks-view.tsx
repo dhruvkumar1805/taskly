@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useOptimistic, startTransition } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import type { Task } from "@/generated/prisma/client";
 import {
   updateTask,
@@ -22,7 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, ClipboardList, Plus, Search, SearchX } from "lucide-react";
+import { ChevronDown, ClipboardList, Plus, Search, SearchX } from "lucide-react";
 import { toast } from "sonner";
 import TaskRow from "./task-row";
 import TaskForm from "@/app/dashboard/task-form";
@@ -314,40 +315,50 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
                   onClick={() => toggleCollapse(key)}
                   className="group mb-3 flex items-center gap-2 rounded-md px-1 py-1 transition-colors hover:bg-muted/50"
                 >
-                  {isCollapsed ? (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  )}
+                  <motion.span
+                    animate={{ rotate: isCollapsed ? -90 : 0 }}
+                    transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
+                    className="flex text-muted-foreground"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </motion.span>
                   <span className={`text-sm font-semibold ${color}`}>{label}</span>
                   <span className="rounded-full bg-muted px-1.5 py-0.5 font-mono text-xs font-medium text-muted-foreground">
                     {sectionTasks.length}
                   </span>
                 </button>
 
-                {!isCollapsed && (
-                  <div className="space-y-2">
-                    {sectionTasks.map((task, index) => (
-                      <div
-                        key={task.id}
-                        className="animate-fade-up"
-                        style={{ animationDelay: `${Math.min(280, index * 30)}ms` }}
-                      >
-                        <TaskRow
-                          task={task}
-                          isPending={pendingIds.has(task.id)}
-                          isSelected={selectedId === task.id}
-                          detailsOpen={openDetailsId === task.id}
-                          onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
-                          onEdit={(t) => { setEditingTask(t); setEditOpen(true); }}
-                          onToggleCompleted={handleToggleCompleted}
-                          onToggleStatus={handleToggleStatus}
-                          onDelete={handleDelete}
-                        />
+                <AnimatePresence initial={false}>
+                  {!isCollapsed && (
+                    <motion.div
+                      key="content"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="space-y-2">
+                        <AnimatePresence mode="popLayout" initial={false}>
+                          {sectionTasks.map((task) => (
+                            <TaskRow
+                              key={task.id}
+                              task={task}
+                              isPending={pendingIds.has(task.id)}
+                              isSelected={selectedId === task.id}
+                              detailsOpen={openDetailsId === task.id}
+                              onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
+                              onEdit={(t) => { setEditingTask(t); setEditOpen(true); }}
+                              onToggleCompleted={handleToggleCompleted}
+                              onToggleStatus={handleToggleStatus}
+                              onDelete={handleDelete}
+                            />
+                          ))}
+                        </AnimatePresence>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}
@@ -381,7 +392,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
 
       <button
         onClick={() => setCreateOpen(true)}
-        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95 md:hidden"
+        className="fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform duration-150 ease-(--ease-out-quart) active:scale-90 motion-reduce:active:scale-100 md:hidden"
         aria-label="New task"
       >
         <Plus className="h-6 w-6" />

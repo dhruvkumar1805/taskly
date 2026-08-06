@@ -1,6 +1,8 @@
 "use client";
 
 import type { Task } from "@/generated/prisma/client";
+import { motion } from "motion/react";
+import { rowMotion } from "@/lib/motion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -111,16 +113,21 @@ export default function TaskRow({
 
   return (
     <>
-      <div
+      <motion.div
         ref={rowRef}
-        className={`flex items-start gap-3 rounded-lg border bg-card px-3 py-3 transition-colors duration-150 hover:bg-muted/30 sm:items-center sm:px-4 ${
+        layout="position"
+        initial={rowMotion.initial}
+        animate={rowMotion.animate}
+        exit={rowMotion.exit}
+        transition={rowMotion.transition}
+        className={`flex items-start gap-3 rounded-lg border bg-card px-3 py-3 transition-[background-color,opacity] duration-150 ease-(--ease-out-quart) hover:bg-muted/30 sm:items-center sm:px-4 ${
           isSelected ? "border-ring ring-2 ring-ring" : "border-border"
         } ${isPending ? "pointer-events-none opacity-60" : ""}`}
       >
         <Checkbox
           checked={isCompleted}
           onCheckedChange={() => onToggleCompleted(task.id)}
-          className="shrink-0 transition-transform duration-150 data-[state=checked]:scale-105"
+          className="shrink-0 data-[state=checked]:scale-105 motion-reduce:data-[state=checked]:scale-100"
         />
 
         <div className="min-w-0 flex-1">
@@ -130,7 +137,7 @@ export default function TaskRow({
             className="cursor-pointer"
           >
             <p
-              className={`text-sm font-medium leading-snug ${
+              className={`text-sm font-medium leading-snug transition-colors duration-200 ease-(--ease-out-quart) ${
                 isCompleted ? "line-through text-muted-foreground" : ""
               }`}
             >
@@ -156,7 +163,7 @@ export default function TaskRow({
               variant="outline"
               size="sm"
               onClick={() => onToggleStatus(task.id)}
-              className={`h-7 px-2 text-xs transition-colors duration-150 ${STATUS_BUTTON_STYLES[task.status]}`}
+              className={`h-7 px-2 text-xs transition-colors duration-150 ease-(--ease-out-quart) ${STATUS_BUTTON_STYLES[task.status]}`}
             >
               {STATUS_LABELS[task.status]}
             </Button>
@@ -199,7 +206,7 @@ export default function TaskRow({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </motion.div>
 
       <Dialog open={detailsOpen} onOpenChange={onDetailsOpenChange}>
         <DialogContent className="sm:max-w-lg">

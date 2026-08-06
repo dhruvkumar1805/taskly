@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useOptimistic, startTransition } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import type { Task } from "@/generated/prisma/client";
 import {
   createTask,
@@ -119,20 +120,28 @@ function QuickAdd({ onCreate }: { onCreate: (task: Task, formData: FormData) => 
         placeholder="Add a task — try “tomorrow 3pm !high”"
         className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
       />
-      {parsed && (parsed.dueDate || parsed.priority) && (
-        <div className="flex shrink-0 items-center gap-1.5">
-          {parsed.priority && (
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${QUICK_ADD_PRIORITY_DOT[parsed.priority]}`}
-            />
-          )}
-          {parsed.dueDate && (
-            <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 font-mono text-xs whitespace-nowrap text-primary">
-              {formatPreviewDate(parsed.dueDate, parsed.hasTime)}
-            </span>
-          )}
-        </div>
-      )}
+      <AnimatePresence>
+        {parsed && (parsed.dueDate || parsed.priority) && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85, x: -4 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            transition={{ duration: 0.15, ease: [0.25, 1, 0.5, 1] }}
+            className="flex shrink-0 items-center gap-1.5"
+          >
+            {parsed.priority && (
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${QUICK_ADD_PRIORITY_DOT[parsed.priority]}`}
+              />
+            )}
+            {parsed.dueDate && (
+              <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 font-mono text-xs whitespace-nowrap text-primary">
+                {formatPreviewDate(parsed.dueDate, parsed.hasTime)}
+              </span>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </form>
   );
 }
@@ -372,17 +381,19 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
               tone="urgent"
               count={overdue.length}
             >
-              {overdue.map((task) => (
-                <TaskRow
-                  key={task.id}
-                  task={task}
-                  isPending={pendingIds.has(task.id)}
-                  isSelected={selectedId === task.id}
-                  detailsOpen={openDetailsId === task.id}
-                  onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
-                  {...rowProps}
-                />
-              ))}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {overdue.map((task) => (
+                  <TaskRow
+                    key={task.id}
+                    task={task}
+                    isPending={pendingIds.has(task.id)}
+                    isSelected={selectedId === task.id}
+                    detailsOpen={openDetailsId === task.id}
+                    onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
+                    {...rowProps}
+                  />
+                ))}
+              </AnimatePresence>
             </Section>
           )}
 
@@ -391,23 +402,33 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
             icon={<CalendarClock className="h-4 w-4" />}
             count={dueToday.length}
           >
-            {dueToday.length > 0 ? (
-              dueToday.map((task) => (
-                <TaskRow
-                  key={task.id}
-                  task={task}
-                  isPending={pendingIds.has(task.id)}
-                  isSelected={selectedId === task.id}
-                  detailsOpen={openDetailsId === task.id}
-                  onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
-                  {...rowProps}
-                />
-              ))
-            ) : (
-              <p className="rounded-lg border border-dashed border-border px-3.5 py-4 text-sm text-muted-foreground">
-                Nothing due today.
-              </p>
-            )}
+            <AnimatePresence mode="popLayout" initial={false}>
+              {dueToday.length > 0 ? (
+                dueToday.map((task) => (
+                  <TaskRow
+                    key={task.id}
+                    task={task}
+                    isPending={pendingIds.has(task.id)}
+                    isSelected={selectedId === task.id}
+                    detailsOpen={openDetailsId === task.id}
+                    onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
+                    {...rowProps}
+                  />
+                ))
+              ) : (
+                <motion.p
+                  key="empty-today"
+                  layout="position"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="rounded-lg border border-dashed border-border px-3.5 py-4 text-sm text-muted-foreground"
+                >
+                  Nothing due today.
+                </motion.p>
+              )}
+            </AnimatePresence>
           </Section>
 
           {upNext.length > 0 && (
@@ -416,17 +437,19 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
               icon={<ListChecks className="h-4 w-4" />}
               count={upNextTotal}
             >
-              {upNext.map((task) => (
-                <TaskRow
-                  key={task.id}
-                  task={task}
-                  isPending={pendingIds.has(task.id)}
-                  isSelected={selectedId === task.id}
-                  detailsOpen={openDetailsId === task.id}
-                  onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
-                  {...rowProps}
-                />
-              ))}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {upNext.map((task) => (
+                  <TaskRow
+                    key={task.id}
+                    task={task}
+                    isPending={pendingIds.has(task.id)}
+                    isSelected={selectedId === task.id}
+                    detailsOpen={openDetailsId === task.id}
+                    onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
+                    {...rowProps}
+                  />
+                ))}
+              </AnimatePresence>
               {upNextTotal > upNext.length && (
                 <Link
                   href="/dashboard/tasks"
@@ -444,17 +467,19 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
               icon={<Inbox className="h-4 w-4" />}
               count={somedayTotal}
             >
-              {someday.map((task) => (
-                <TaskRow
-                  key={task.id}
-                  task={task}
-                  isPending={pendingIds.has(task.id)}
-                  isSelected={selectedId === task.id}
-                  detailsOpen={openDetailsId === task.id}
-                  onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
-                  {...rowProps}
-                />
-              ))}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {someday.map((task) => (
+                  <TaskRow
+                    key={task.id}
+                    task={task}
+                    isPending={pendingIds.has(task.id)}
+                    isSelected={selectedId === task.id}
+                    detailsOpen={openDetailsId === task.id}
+                    onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
+                    {...rowProps}
+                  />
+                ))}
+              </AnimatePresence>
               {somedayTotal > someday.length && (
                 <Link
                   href="/dashboard/tasks"
@@ -472,17 +497,19 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
                 Completed today · {completedToday.length}
               </p>
               <div className="space-y-2 opacity-70">
-                {completedToday.map((task) => (
-                  <TaskRow
-                    key={task.id}
-                    task={task}
-                    isPending={pendingIds.has(task.id)}
-                    isSelected={selectedId === task.id}
-                    detailsOpen={openDetailsId === task.id}
-                    onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
-                    {...rowProps}
-                  />
-                ))}
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {completedToday.map((task) => (
+                    <TaskRow
+                      key={task.id}
+                      task={task}
+                      isPending={pendingIds.has(task.id)}
+                      isSelected={selectedId === task.id}
+                      detailsOpen={openDetailsId === task.id}
+                      onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
+                      {...rowProps}
+                    />
+                  ))}
+                </AnimatePresence>
               </div>
             </div>
           )}

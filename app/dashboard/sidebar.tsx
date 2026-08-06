@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/logo";
 import {
@@ -92,7 +93,7 @@ export default function Sidebar({
           onNavigate?.();
           onOpenCommandPalette?.();
         }}
-        className="mb-4 flex h-9 w-full items-center gap-2 rounded-md border border-border bg-background px-3 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="mb-4 flex h-9 w-full items-center gap-2 rounded-md border border-border bg-background px-3 text-left text-sm text-muted-foreground transition-all duration-150 ease-(--ease-out-quart) hover:text-foreground active:scale-[0.98] motion-reduce:active:scale-100"
       >
         <Search className="h-3.5 w-3.5 shrink-0" />
         <span className="flex-1">Search…</span>
@@ -119,31 +120,34 @@ export default function Sidebar({
       </Button>
 
       <nav className="space-y-0.5 text-sm">
-        <Link
-          href="/dashboard"
-          onClick={onNavigate}
-          className={`flex items-center gap-3 rounded-md px-3 py-2.5 transition-colors ${
-            isActive("/dashboard")
-              ? "bg-sidebar-accent font-medium text-foreground"
-              : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
-          }`}
-        >
-          <Sun className="h-4 w-4" />
-          Today
-        </Link>
-
-        <Link
-          href="/dashboard/tasks"
-          onClick={onNavigate}
-          className={`flex items-center gap-3 rounded-md px-3 py-2.5 transition-colors ${
-            isActive("/dashboard/tasks")
-              ? "bg-sidebar-accent font-medium text-foreground"
-              : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
-          }`}
-        >
-          <ListTodo className="h-4 w-4 shrink-0" />
-          My Tasks
-        </Link>
+        {[
+          { href: "/dashboard", label: "Today", icon: Sun },
+          { href: "/dashboard/tasks", label: "My Tasks", icon: ListTodo },
+        ].map(({ href, label, icon: Icon }) => {
+          const active = isActive(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={onNavigate}
+              className={`relative flex items-center gap-3 rounded-md px-3 py-2.5 transition-colors duration-150 ease-(--ease-out-quart) ${
+                active
+                  ? "font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
+              }`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="sidebar-active-pill"
+                  className="absolute inset-0 rounded-md bg-sidebar-accent"
+                  transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                />
+              )}
+              <Icon className="relative h-4 w-4 shrink-0" />
+              <span className="relative">{label}</span>
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="flex-1" />
