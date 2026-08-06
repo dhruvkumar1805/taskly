@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>You're offline · Taskly</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: #141414;
+    color: #f2f2f2;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    max-width: 22rem;
+    text-align: center;
+  }
+  .mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #d9622f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+  h1 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  p {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #a3a3a3;
+    margin: 0 0 20px;
+  }
+  button {
+    font: inherit;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #f2f2f2;
+    background: #262626;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+  }
+  button:hover { background: #2e2e2e; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="mark">
+      <svg width="26" height="26" viewBox="0 0 16 16" fill="none">
+        <circle cx="3.6" cy="11.6" r="1.15" fill="white" />
+        <circle cx="8.2" cy="8" r="1.55" fill="white" />
+        <circle cx="12.6" cy="4.2" r="2.05" fill="white" />
+      </svg>
+    </div>
+    <h1>You're offline</h1>
+    <p>Taskly needs a connection to load your tasks. Reconnect and try again — nothing you had open has been lost.</p>
+    <button onclick="location.reload()">Retry</button>
+  </div>
+</body>
+</html>
