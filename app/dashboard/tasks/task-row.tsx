@@ -147,7 +147,7 @@ export default function TaskRow({
         <Checkbox
           checked={isCompleted}
           onCheckedChange={() => onToggleCompleted(task.id)}
-          className="shrink-0 data-[state=checked]:scale-105 motion-reduce:data-[state=checked]:scale-100"
+          className="relative shrink-0 after:absolute after:-inset-3 after:content-[''] data-[state=checked]:scale-105 motion-reduce:data-[state=checked]:scale-100"
         />
 
         <div className="min-w-0 flex-1">
@@ -179,7 +179,7 @@ export default function TaskRow({
             <button
               type="button"
               onClick={() => onToggleStatus(task.id)}
-              className={`inline-flex h-7 items-center gap-1.5 rounded-md px-2 font-mono text-xs font-medium transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted ${STATUS_TEXT[task.status]}`}
+              className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 font-mono text-xs font-medium transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted sm:h-7 ${STATUS_TEXT[task.status]}`}
             >
               <StatusIcon status={task.status} />
               {STATUS_LABELS[task.status]}
@@ -200,7 +200,7 @@ export default function TaskRow({
           <button
             type="button"
             onClick={() => onToggleStatus(task.id)}
-            className={`inline-flex h-7 items-center gap-1.5 rounded-md px-2 font-mono text-xs font-medium transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted ${STATUS_TEXT[task.status]}`}
+            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 font-mono text-xs font-medium transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted sm:h-7 ${STATUS_TEXT[task.status]}`}
           >
             <StatusIcon status={task.status} />
             {STATUS_LABELS[task.status]}
@@ -209,7 +209,7 @@ export default function TaskRow({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0">
+            <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 sm:h-7 sm:w-7">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
