@@ -217,9 +217,25 @@
     animation: taskly-skeleton 1.6s ease-in-out infinite;
   }
 
+  @keyframes taskly-caret-blink {
+    0%,
+    45% {
+      opacity: 1;
+    }
+    50%,
+    95% {
+      opacity: 0;
+    }
+  }
+
+  .animate-caret-blink {
+    animation: taskly-caret-blink 1.05s steps(1) infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-up,
     .animate-scale-in,
+    .animate-caret-blink,
     .skeleton {
       animation: none;
     }
