@@ -1,14 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo, useOptimistic, startTransition } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Task } from "@/generated/prisma/client";
-import {
-  updateTask,
-  toggleTaskCompleted,
-  toggleTaskStatus,
-  deleteTask,
-} from "@/app/actions/tasks";
+import { updateTask } from "@/app/actions/tasks";
 import {
   Select,
   SelectContent,
@@ -24,27 +19,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ClipboardList, Plus, Search, SearchX } from "lucide-react";
-import { toast } from "sonner";
 import Link from "next/link";
 import TaskRow from "./task-row";
 import TaskForm from "@/app/dashboard/task-form";
 import { useListKeyboardNav } from "@/hooks/use-list-keyboard-nav";
-
-type OptimisticAction =
-  | { type: "toggle_completed"; id: string }
-  | { type: "toggle_status"; id: string };
-
-function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
-  return tasks.map((t) => {
-    if (t.id !== action.id) return t;
-    if (action.type === "toggle_completed") {
-      return { ...t, status: t.status === "COMPLETED" ? "IN_PROGRESS" : "COMPLETED" } as Task;
-    }
-    const next =
-      t.status === "TODO" ? "IN_PROGRESS" : t.status === "IN_PROGRESS" ? "COMPLETED" : "TODO";
-    return { ...t, status: next } as Task;
-  });
-}
+import { useTaskActions } from "@/hooks/use-task-actions";
 
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
@@ -60,10 +39,8 @@ const STATUS_SECTIONS = [
 const PAGE_SIZE = 50;
 
 export default function TasksView({ tasks }: { tasks: Task[] }) {
-  const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
-  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
-  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
-  const deleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const { visibleTasks: activeTasks, pendingIds, handleToggleCompleted, handleToggleStatus, handleDelete } =
+    useTaskActions(tasks);
 
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
@@ -97,62 +74,6 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  function addPending(id: string) {
-    setPendingIds((prev) => new Set([...prev, id]));
-  }
-  function removePending(id: string) {
-    setPendingIds((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
-  }
-
-  function handleToggleCompleted(id: string) {
-    const wasCompleted = optimisticTasks.find((t) => t.id === id)?.status === "COMPLETED";
-    addPending(id);
-    startTransition(async () => {
-      applyOptimistic({ type: "toggle_completed", id });
-      await toggleTaskCompleted(id);
-      toast.success(wasCompleted ? "Task marked as pending" : "Task completed");
-      removePending(id);
-    });
-  }
-
-  function handleToggleStatus(id: string) {
-    addPending(id);
-    startTransition(async () => {
-      applyOptimistic({ type: "toggle_status", id });
-      await toggleTaskStatus(id);
-      removePending(id);
-    });
-  }
-
-  function handleDelete(id: string) {
-    setPendingDeletes((prev) => new Set([...prev, id]));
-    toast("Task deleted", {
-      action: {
-        label: "Undo",
-        onClick: () => {
-          const timer = deleteTimers.current.get(id);
-          if (timer) clearTimeout(timer);
-          deleteTimers.current.delete(id);
-          setPendingDeletes((prev) => {
-            const next = new Set(prev);
-            next.delete(id);
-            return next;
-          });
-        },
-      },
-      duration: 4000,
-    });
-    const timer = setTimeout(async () => {
-      deleteTimers.current.delete(id);
-      await deleteTask(id);
-    }, 4000);
-    deleteTimers.current.set(id, timer);
-  }
-
   function toggleCollapse(key: string) {
     setCollapsed((prev) => {
       const next = new Set(prev);
@@ -175,8 +96,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
     setShownCounts((prev) => ({ ...prev, [key]: (prev[key] ?? PAGE_SIZE) + PAGE_SIZE }));
   }
 
-  const visibleTasks = optimisticTasks
-    .filter((t) => !pendingDeletes.has(t.id))
+  const visibleTasks = activeTasks
     .filter((t) => {
       if (status !== "ALL" && t.status !== status) return false;
       if (priority !== "ALL" && t.priority !== priority) return false;

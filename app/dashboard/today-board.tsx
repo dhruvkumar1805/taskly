@@ -1,15 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState, useOptimistic, startTransition } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Task } from "@/generated/prisma/client";
-import {
-  createTask,
-  updateTask,
-  toggleTaskCompleted,
-  toggleTaskStatus,
-  deleteTask,
-} from "../actions/tasks";
+import { updateTask } from "../actions/tasks";
 import {
   Dialog,
   DialogContent,
@@ -25,33 +19,13 @@ import {
   Plus,
   Sparkles,
 } from "lucide-react";
-import { toast } from "sonner";
 import Link from "next/link";
 import TaskForm from "./task-form";
 import TaskRow from "./tasks/task-row";
 import { useListKeyboardNav } from "@/hooks/use-list-keyboard-nav";
+import { useTaskActions } from "@/hooks/use-task-actions";
 import { parseQuickAdd } from "./parse-quick-add";
 import { PriorityIcon } from "@/components/task-icons";
-
-type OptimisticAction =
-  | { type: "toggle_completed"; id: string }
-  | { type: "toggle_status"; id: string }
-  | { type: "create"; task: Task };
-
-function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
-  if (action.type === "create") {
-    return [action.task, ...tasks];
-  }
-  return tasks.map((t) => {
-    if (t.id !== action.id) return t;
-    if (action.type === "toggle_completed") {
-      return { ...t, status: t.status === "COMPLETED" ? "IN_PROGRESS" : "COMPLETED" } as Task;
-    }
-    const next =
-      t.status === "TODO" ? "IN_PROGRESS" : t.status === "IN_PROGRESS" ? "COMPLETED" : "TODO";
-    return { ...t, status: next } as Task;
-  });
-}
 
 function formatPreviewDate(date: Date, hasTime: boolean) {
   const today = new Date();
@@ -225,80 +199,13 @@ function EmptyState({ onPickExample }: { onPickExample: (example: string) => voi
 }
 
 export default function TodayBoard({ tasks }: { tasks: Task[] }) {
-  const [optimisticTasks, applyOptimistic] = useOptimistic(tasks, optimisticReducer);
-  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
-  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
-  const deleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const { visibleTasks, pendingIds, handleCreate, handleToggleCompleted, handleToggleStatus, handleDelete } =
+    useTaskActions(tasks);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [openDetailsId, setOpenDetailsId] = useState<string | null>(null);
   const [quickAddTitle, setQuickAddTitle] = useState("");
   const quickAddInputRef = useRef<HTMLInputElement>(null);
-
-  function addPending(id: string) {
-    setPendingIds((prev) => new Set([...prev, id]));
-  }
-  function removePending(id: string) {
-    setPendingIds((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
-  }
-
-  function handleCreate(tempTask: Task, formData: FormData) {
-    addPending(tempTask.id);
-    startTransition(async () => {
-      applyOptimistic({ type: "create", task: tempTask });
-      await createTask(formData);
-      removePending(tempTask.id);
-    });
-  }
-
-  function handleToggleCompleted(id: string) {
-    const wasCompleted = optimisticTasks.find((t) => t.id === id)?.status === "COMPLETED";
-    addPending(id);
-    startTransition(async () => {
-      applyOptimistic({ type: "toggle_completed", id });
-      await toggleTaskCompleted(id);
-      toast.success(wasCompleted ? "Task marked as pending" : "Task completed");
-      removePending(id);
-    });
-  }
-
-  function handleToggleStatus(id: string) {
-    addPending(id);
-    startTransition(async () => {
-      applyOptimistic({ type: "toggle_status", id });
-      await toggleTaskStatus(id);
-      removePending(id);
-    });
-  }
-
-  function handleDelete(id: string) {
-    setPendingDeletes((prev) => new Set([...prev, id]));
-    toast("Task deleted", {
-      action: {
-        label: "Undo",
-        onClick: () => {
-          const timer = deleteTimers.current.get(id);
-          if (timer) clearTimeout(timer);
-          deleteTimers.current.delete(id);
-          setPendingDeletes((prev) => {
-            const next = new Set(prev);
-            next.delete(id);
-            return next;
-          });
-        },
-      },
-      duration: 4000,
-    });
-    const timer = setTimeout(async () => {
-      deleteTimers.current.delete(id);
-      await deleteTask(id);
-    }, 4000);
-    deleteTimers.current.set(id, timer);
-  }
 
   const {
     overdue,
@@ -311,7 +218,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
     isEmpty,
     taskById,
   } = useMemo(() => {
-    const visible = optimisticTasks.filter((t) => !pendingDeletes.has(t.id));
+    const visible = visibleTasks;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -373,7 +280,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
       isEmpty: visible.length === 0,
       taskById,
     };
-  }, [optimisticTasks, pendingDeletes]);
+  }, [visibleTasks]);
 
   const flatIds = useMemo(
     () => [...overdue, ...dueToday, ...upNext, ...someday, ...completedToday].map((t) => t.id),

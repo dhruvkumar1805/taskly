@@ -15,11 +15,16 @@ function parseRecurrence(value: FormDataEntryValue | null): Recurrence | null {
     : null;
 }
 
-export async function createTask(formData: FormData) {
+async function requireUserId(): Promise<string> {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
+  return session.user.id;
+}
+
+export async function createTask(formData: FormData) {
+  const userId = await requireUserId();
 
   const title = formData.get("title")?.toString();
   const description = formData.get("description")?.toString();
@@ -43,7 +48,7 @@ export async function createTask(formData: FormData) {
       dueDate: dueDateRaw ? new Date(dueDateRaw) : null,
       // A recurrence only means something with a due date to recur from.
       recurrence: dueDateRaw ? recurrence : null,
-      userId: session.user.id,
+      userId,
     },
   });
 
@@ -85,15 +90,12 @@ async function createNextOccurrence(
 }
 
 export async function toggleTaskStatus(taskId: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
+  const userId = await requireUserId();
 
   const task = await prisma.task.findFirst({
     where: {
       id: taskId,
-      userId: session.user.id,
+      userId,
     },
   });
 
@@ -123,14 +125,15 @@ export async function toggleTaskStatus(taskId: string) {
 }
 
 export async function toggleTaskCompleted(taskId: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const userId = await requireUserId();
 
   const task = await prisma.task.findFirst({
-    where: { id: taskId, userId: session.user.id },
+    where: { id: taskId, userId },
   });
 
-  if (!task) return;
+  if (!task) {
+    throw new Error("Task not found");
+  }
 
   const nextStatus = task.status === "COMPLETED" ? "IN_PROGRESS" : "COMPLETED";
 
@@ -149,15 +152,12 @@ export async function toggleTaskCompleted(taskId: string) {
 }
 
 export async function deleteTask(taskId: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
+  const userId = await requireUserId();
 
   await prisma.task.deleteMany({
     where: {
       id: taskId,
-      userId: session.user.id,
+      userId,
     },
   });
 
@@ -165,8 +165,7 @@ export async function deleteTask(taskId: string) {
 }
 
 export async function updateTask(taskId: string, formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) return;
+  const userId = await requireUserId();
 
   const title = formData.get("title")?.toString();
   const priority = formData.get("priority")?.toString() as
@@ -177,12 +176,14 @@ export async function updateTask(taskId: string, formData: FormData) {
   const dueDateRaw = formData.get("dueDate")?.toString();
   const recurrence = parseRecurrence(formData.get("recurrence"));
 
-  if (!title) return;
+  if (!title) {
+    throw new Error("Title is required");
+  }
 
   await prisma.task.update({
     where: {
       id: taskId,
-      userId: session.user.id,
+      userId,
     },
     data: {
       title,
