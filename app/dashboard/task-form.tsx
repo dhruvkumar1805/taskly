@@ -23,6 +23,12 @@ import { format } from "date-fns";
 import { useState, useTransition } from "react";
 import { PriorityIcon } from "@/components/task-icons";
 import { RECURRENCE_LABELS } from "@/app/lib/recurrence";
+import { hasExplicitTime } from "@/app/lib/due-date";
+
+function timeStringFrom(date: Date | undefined) {
+  if (!date || !hasExplicitTime(date)) return "";
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
 
 export default function TaskForm({
   task,
@@ -39,6 +45,35 @@ export default function TaskForm({
   const [dueDate, setDueDate] = useState<Date | undefined>(
     task?.dueDate ? new Date(task.dueDate) : undefined
   );
+  // Kept separately from dueDate so picking a new day never silently drops
+  // an already-set time — the day and time-of-day are merged back together
+  // on every change instead of the calendar's midnight default winning.
+  const [time, setTime] = useState(() => timeStringFrom(dueDate));
+
+  function handleDateSelect(selected: Date | undefined) {
+    if (!selected) {
+      setDueDate(undefined);
+      return;
+    }
+    if (time) {
+      const [hours, minutes] = time.split(":").map(Number);
+      selected.setHours(hours, minutes, 0, 0);
+    }
+    setDueDate(selected);
+  }
+
+  function handleTimeChange(value: string) {
+    setTime(value);
+    if (!dueDate) return;
+    const next = new Date(dueDate);
+    if (value) {
+      const [hours, minutes] = value.split(":").map(Number);
+      next.setHours(hours, minutes, 0, 0);
+    } else {
+      next.setHours(0, 0, 0, 0);
+    }
+    setDueDate(next);
+  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -69,7 +104,7 @@ export default function TaskForm({
       />
 
       <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 md:flex-row">
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -79,7 +114,7 @@ export default function TaskForm({
                 }`}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {dueDate ? format(dueDate, "PPP") : "Pick a date"}
+                {dueDate ? format(dueDate, time ? "PPP, p" : "PPP") : "Pick a date"}
               </Button>
             </PopoverTrigger>
 
@@ -87,11 +122,20 @@ export default function TaskForm({
               <Calendar
                 mode="single"
                 selected={dueDate}
-                onSelect={setDueDate}
+                onSelect={handleDateSelect}
                 initialFocus
               />
             </PopoverContent>
           </Popover>
+
+          <Input
+            type="time"
+            value={time}
+            onChange={(e) => handleTimeChange(e.target.value)}
+            disabled={!dueDate}
+            className="w-32"
+            aria-label="Due time"
+          />
 
           <input
             type="hidden"

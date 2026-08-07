@@ -27,10 +27,7 @@ import {
   STATUS_LABELS,
 } from "@/components/task-icons";
 import { RECURRENCE_LABELS } from "@/app/lib/recurrence";
-
-function hasExplicitTime(date: Date) {
-  return date.getHours() !== 0 || date.getMinutes() !== 0;
-}
+import { hasExplicitTime } from "@/app/lib/due-date";
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
