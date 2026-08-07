@@ -62,7 +62,7 @@ function StepMark({ active }: { active: number }) {
         <span
           key={size}
           className={`rounded-full transition-colors duration-300 ${
-            i <= active ? "bg-primary" : "bg-border"
+            i <= active ? "bg-primary" : "bg-muted-foreground/25"
           }`}
           style={{ width: size, height: size }}
         />

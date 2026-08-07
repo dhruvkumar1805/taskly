@@ -38,7 +38,7 @@ function AnimatedNumber({ value }: { value: number }) {
 }
 
 const SEGMENT_COLOR = {
-  todo: "bg-muted-foreground/30",
+  todo: "bg-muted-foreground/45",
   inProgress: "bg-info",
   completed: "bg-success",
 } as const;
