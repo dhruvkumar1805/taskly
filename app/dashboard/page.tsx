@@ -44,7 +44,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-3 p-3 pb-24 md:space-y-5 md:p-6 lg:p-7">
+    <div className="mx-auto max-w-3xl space-y-3 p-3 pb-32 md:space-y-5 md:p-6 md:pb-24 lg:p-7">
       <div className="animate-fade-up flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">

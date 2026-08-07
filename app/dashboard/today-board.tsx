@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import type { Task } from "@/generated/prisma/client";
 import { updateTask } from "../actions/tasks";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Dialog,
   DialogContent,
@@ -98,7 +100,7 @@ function QuickAdd({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3.5 py-3"
+      className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3.5 py-3 shadow-lg md:shadow-none"
     >
       <Plus className="h-4 w-4 shrink-0 text-muted-foreground" />
       <input
@@ -206,6 +208,11 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
   const [openDetailsId, setOpenDetailsId] = useState<string | null>(null);
   const [quickAddTitle, setQuickAddTitle] = useState("");
   const quickAddInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    Promise.resolve().then(() => setMounted(true));
+  }, []);
 
   const {
     overdue,
@@ -314,14 +321,34 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
     onDelete: handleDelete,
   };
 
+  const quickAdd = (
+    <QuickAdd
+      title={quickAddTitle}
+      onTitleChange={setQuickAddTitle}
+      onCreate={handleCreate}
+      inputRef={quickAddInputRef}
+    />
+  );
+
   return (
     <div className="space-y-6 md:space-y-7">
-      <QuickAdd
-        title={quickAddTitle}
-        onTitleChange={setQuickAddTitle}
-        onCreate={handleCreate}
-        inputRef={quickAddInputRef}
-      />
+      {/* Pinned to the bottom of the viewport on mobile — the highest-frequency
+          action in the app belongs in thumb reach, not at the top of a tall
+          scrolling page. Portaled to <body> rather than positioned in place:
+          an ancestor (the page's animate-fade-up wrapper) ends its animation
+          holding transform: translateY(0), which creates a containing block
+          for position:fixed descendants — a plain fixed div here would anchor
+          to that wrapper's box, not the real viewport. Desktop keeps the
+          normal in-flow placement at the top, where it's the flagship
+          feature worth top billing and reach isn't a constraint. */}
+      {mounted && isMobile
+        ? createPortal(
+            <div className="fixed inset-x-0 bottom-0 z-40 px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              {quickAdd}
+            </div>,
+            document.body,
+          )
+        : !isMobile && quickAdd}
 
       {isEmpty ? (
         <EmptyState
