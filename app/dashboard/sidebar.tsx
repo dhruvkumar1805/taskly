@@ -31,6 +31,7 @@ type SidebarProps = {
     email?: string | null;
     image?: string | null;
   };
+  overdueCount?: number;
   enableShortcut?: boolean;
   onNavigate?: () => void;
   onOpenCommandPalette?: () => void;
@@ -39,6 +40,7 @@ type SidebarProps = {
 
 export default function Sidebar({
   user,
+  overdueCount = 0,
   enableShortcut = true,
   onNavigate,
   onOpenCommandPalette,
@@ -123,9 +125,9 @@ export default function Sidebar({
 
       <nav className="space-y-0.5 text-sm">
         {[
-          { href: "/dashboard", label: "Today", icon: Sun },
-          { href: "/dashboard/tasks", label: "My Tasks", icon: ListTodo },
-        ].map(({ href, label, icon: Icon }) => {
+          { href: "/dashboard", label: "Today", icon: Sun, badge: overdueCount },
+          { href: "/dashboard/tasks", label: "My Tasks", icon: ListTodo, badge: 0 },
+        ].map(({ href, label, icon: Icon, badge }) => {
           const active = isActive(href);
           return (
             <Link
@@ -146,7 +148,15 @@ export default function Sidebar({
                 />
               )}
               <Icon className="relative h-4 w-4 shrink-0" />
-              <span className="relative">{label}</span>
+              <span className="relative flex-1">{label}</span>
+              {badge > 0 && (
+                <span
+                  className="relative flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1 font-mono text-[10px] font-semibold text-primary-foreground"
+                  aria-label={`${badge} overdue`}
+                >
+                  {badge}
+                </span>
+              )}
             </Link>
           );
         })}

@@ -245,8 +245,8 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
           </Button>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <div className="relative flex-1 min-w-0">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
             <input
               ref={searchRef}
               type="text"
@@ -259,9 +259,9 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:contents">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
             <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
-              <SelectTrigger className="h-10 w-full min-w-0 bg-background">
+              <SelectTrigger className="h-10 w-full min-w-0 bg-background sm:w-40">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -273,7 +273,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
             </Select>
 
             <Select value={priority} onValueChange={(v) => setPriority(v as PriorityFilter)}>
-              <SelectTrigger className="h-10 w-full min-w-0 bg-background">
+              <SelectTrigger className="h-10 w-full min-w-0 bg-background sm:w-40">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>

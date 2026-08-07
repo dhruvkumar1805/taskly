@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MotionConfig } from "motion/react";
 import type { Task } from "@/generated/prisma/client";
@@ -42,6 +42,16 @@ export default function DashboardShell({
   tasks: Task[];
 }) {
   const router = useRouter();
+  const overdueCount = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return tasks.filter((t) => {
+      if (t.status === "COMPLETED" || !t.dueDate) return false;
+      const due = new Date(t.dueDate);
+      due.setHours(0, 0, 0, 0);
+      return due < today;
+    }).length;
+  }, [tasks]);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
@@ -103,6 +113,7 @@ export default function DashboardShell({
         <div className="hidden md:flex h-full">
           <Sidebar
             user={user}
+            overdueCount={overdueCount}
             onOpenCommandPalette={() => setCommandOpen(true)}
             onOpenCreateTask={() => setCreateTaskOpen(true)}
           />
@@ -129,6 +140,7 @@ export default function DashboardShell({
 
                 <Sidebar
                   user={user}
+                  overdueCount={overdueCount}
                   enableShortcut={false}
                   onNavigate={() => setMobileNavOpen(false)}
                   onOpenCommandPalette={() => setCommandOpen(true)}

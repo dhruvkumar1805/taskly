@@ -45,12 +45,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-3 p-3 pb-24 md:space-y-5 md:p-6 lg:p-7">
-      <div className="animate-fade-up flex flex-col gap-3 rounded-lg border border-border bg-card p-4 md:flex-row md:items-center md:justify-between md:px-5 md:py-4">
-        <div className="min-w-0 space-y-1">
-          <h1 className="text-xl font-bold tracking-tight md:text-2xl">
+      <div className="animate-fade-up flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
             {getGreeting()}, {name}
           </h1>
-          <p className="text-sm leading-5 text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             {overdueCount > 0 ? (
               <>
                 You have{" "}
@@ -76,14 +76,9 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex w-full items-center gap-3 rounded-md border border-border bg-background px-3.5 py-2.5 md:w-fit md:justify-end">
-          <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <div className="flex flex-col md:items-end md:text-right">
-            <p className="font-mono text-sm font-semibold tracking-tight">{dateString}</p>
-            <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-              {dayString}
-            </p>
-          </div>
+        <div className="flex shrink-0 items-center gap-1.5 font-mono text-xs text-muted-foreground">
+          <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+          {dateString} · {dayString}
         </div>
       </div>
 
