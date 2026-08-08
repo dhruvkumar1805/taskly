@@ -44,6 +44,7 @@ export default function TasksView() {
     visibleTasks: activeTasks,
     pendingIds,
     handleEdit,
+    handleSkip,
     handleToggleCompleted,
     handleToggleStatus,
     handleDelete,
@@ -315,6 +316,7 @@ export default function TasksView() {
                               onToggleCompleted={handleToggleCompleted}
                               onToggleStatus={handleToggleStatus}
                               onDelete={handleDelete}
+                              onSkip={handleSkip}
                             />
                           ))}
                         </AnimatePresence>

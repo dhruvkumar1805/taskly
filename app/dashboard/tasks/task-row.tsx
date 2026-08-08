@@ -106,6 +106,7 @@ type Props = {
   onToggleCompleted: (id: string) => void;
   onToggleStatus: (id: string) => void;
   onDelete: (id: string) => void;
+  onSkip: (id: string) => void;
 };
 
 export default function TaskRow({
@@ -119,6 +120,7 @@ export default function TaskRow({
   onToggleCompleted,
   onToggleStatus,
   onDelete,
+  onSkip,
 }: Props) {
   const isCompleted = task.status === "COMPLETED";
   const dueDateInfo = task.dueDate ? getDueDateInfo(task.dueDate, isCompleted) : null;
@@ -268,6 +270,11 @@ export default function TaskRow({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEdit(task)}>Edit</DropdownMenuItem>
+              {task.recurrence && !isCompleted && (
+                <DropdownMenuItem onClick={() => onSkip(task.id)}>
+                  Skip to next {RECURRENCE_LABELS[task.recurrence].toLowerCase()} occurrence
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() => onDelete(task.id)}

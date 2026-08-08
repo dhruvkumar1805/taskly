@@ -196,3 +196,25 @@ export async function updateTask(taskId: string, formData: FormData) {
 
   revalidatePath("/dashboard", "layout");
 }
+
+export async function skipToNextOccurrence(taskId: string) {
+  const userId = await requireUserId();
+
+  const task = await prisma.task.findFirst({
+    where: { id: taskId, userId },
+  });
+
+  if (!task) {
+    throw new Error("Task not found");
+  }
+  if (!task.recurrence || !task.dueDate) {
+    throw new Error("Task is not recurring");
+  }
+
+  await prisma.task.update({
+    where: { id: taskId },
+    data: { dueDate: getNextOccurrence(task.dueDate, task.recurrence) },
+  });
+
+  revalidatePath("/dashboard", "layout");
+}

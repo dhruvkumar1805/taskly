@@ -9,7 +9,9 @@ import {
   toggleTaskStatus,
   deleteTask,
   updateTask,
+  skipToNextOccurrence,
 } from "@/app/actions/tasks";
+import { getNextOccurrence } from "@/app/lib/recurrence";
 
 type OptimisticAction =
   | { type: "toggle_completed"; id: string }
@@ -107,6 +109,18 @@ export function useTaskActions(tasks: Task[]) {
     });
   }
 
+  function handleSkip(id: string) {
+    const task = optimisticTasks.find((t) => t.id === id);
+    if (!task?.recurrence || !task.dueDate) return;
+    const nextDueDate = getNextOccurrence(task.dueDate, task.recurrence);
+    addPending(id);
+    startTransition(async () => {
+      applyOptimistic({ type: "edit", id, patch: { dueDate: nextDueDate } });
+      await skipToNextOccurrence(id);
+      removePending(id);
+    });
+  }
+
   function handleToggleStatus(id: string) {
     addPending(id);
     startTransition(async () => {
@@ -148,6 +162,7 @@ export function useTaskActions(tasks: Task[]) {
     pendingIds,
     handleCreate,
     handleEdit,
+    handleSkip,
     handleToggleCompleted,
     handleToggleStatus,
     handleDelete,

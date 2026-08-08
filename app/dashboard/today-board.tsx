@@ -238,6 +238,7 @@ export default function TodayBoard() {
     pendingIds,
     handleCreate,
     handleEdit,
+    handleSkip,
     handleToggleCompleted,
     handleToggleStatus,
     handleDelete,
@@ -360,6 +361,7 @@ export default function TodayBoard() {
     onToggleCompleted: handleToggleCompleted,
     onToggleStatus: handleToggleStatus,
     onDelete: handleDelete,
+    onSkip: handleSkip,
   };
 
   const quickAdd = (
