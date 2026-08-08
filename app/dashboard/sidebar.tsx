@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CalendarDays,
   ListTodo,
   Plus,
   Search,
@@ -139,6 +140,7 @@ export default function Sidebar({
         {[
           { href: "/dashboard", label: "Today", icon: Sun, badge: overdueCount },
           { href: "/dashboard/tasks", label: "My Tasks", icon: ListTodo, badge: 0 },
+          { href: "/dashboard/calendar", label: "Calendar", icon: CalendarDays, badge: 0 },
         ].map(({ href, label, icon: Icon, badge }) => {
           const active = isActive(href);
           return (

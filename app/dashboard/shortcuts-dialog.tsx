@@ -23,6 +23,7 @@ const GROUPS: { title: string; items: { keys: string[]; label: string }[] }[] = 
     items: [
       { keys: ["G", "T"], label: "Go to Today" },
       { keys: ["G", "M"], label: "Go to My Tasks" },
+      { keys: ["G", "C"], label: "Go to Calendar" },
       { keys: ["/"], label: "Focus search (My Tasks)" },
     ],
   },

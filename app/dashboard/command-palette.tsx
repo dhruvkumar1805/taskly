@@ -26,6 +26,7 @@ import { updateTask } from "../actions/tasks";
 import {
   Sunrise,
   ListTodo,
+  CalendarDays,
   Plus,
   Sun,
   Moon,
@@ -99,6 +100,13 @@ export default function CommandPalette({ open, onOpenChange, tasks, onOpenShortc
               <ListTodo />
               My tasks
               <CommandShortcut>G M</CommandShortcut>
+            </CommandItem>
+            <CommandItem
+              onSelect={() => run(() => router.push("/dashboard/calendar"))}
+            >
+              <CalendarDays />
+              Calendar
+              <CommandShortcut>G C</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 

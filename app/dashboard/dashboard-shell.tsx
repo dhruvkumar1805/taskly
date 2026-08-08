@@ -77,6 +77,9 @@ export default function DashboardShell({
         } else if (key === "m") {
           e.preventDefault();
           router.push("/dashboard/tasks");
+        } else if (key === "c") {
+          e.preventDefault();
+          router.push("/dashboard/calendar");
         }
         return;
       }
