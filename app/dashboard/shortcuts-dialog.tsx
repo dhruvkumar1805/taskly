@@ -1,6 +1,13 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const GROUPS: { title: string; items: { keys: string[]; label: string }[] }[] = [
   {
@@ -44,6 +51,9 @@ export default function ShortcutsDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Keyboard shortcuts</DialogTitle>
+          <VisuallyHidden>
+            <DialogDescription>A list of keyboard shortcuts available in Taskly.</DialogDescription>
+          </VisuallyHidden>
         </DialogHeader>
         <div className="space-y-5">
           {GROUPS.map((group) => (

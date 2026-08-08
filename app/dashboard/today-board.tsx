@@ -3,15 +3,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
+import { easeOutQuint } from "@/lib/motion";
 import type { Task } from "@/generated/prisma/client";
 import { updateTask } from "../actions/tasks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
   AlertTriangle,
   CalendarClock,
@@ -25,7 +28,7 @@ import Link from "next/link";
 import TaskForm from "./task-form";
 import TaskRow from "./tasks/task-row";
 import { useListKeyboardNav } from "@/hooks/use-list-keyboard-nav";
-import { useTaskActions } from "@/hooks/use-task-actions";
+import { useTasks } from "./tasks-context";
 import { parseQuickAdd } from "./parse-quick-add";
 import { PriorityIcon } from "@/components/task-icons";
 
@@ -178,10 +181,20 @@ const QUICK_ADD_EXAMPLES = [
 
 function AllCaughtUp({ completedCount }: { completedCount: number }) {
   return (
-    <div className="animate-fade-up flex flex-col items-center justify-center gap-4 rounded-lg border border-border bg-card px-5 py-20 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.42, ease: easeOutQuint }}
+      className="flex flex-col items-center justify-center gap-4 rounded-lg border border-border bg-card px-5 py-20 text-center"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring", duration: 0.5, bounce: 0.15, delay: 0.15 }}
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success"
+      >
         <CheckCircle2 className="h-7 w-7" />
-      </div>
+      </motion.div>
       <div>
         <p className="font-medium">All caught up</p>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -190,7 +203,7 @@ function AllCaughtUp({ completedCount }: { completedCount: number }) {
             : "Nothing due or overdue right now."}
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -220,9 +233,9 @@ function EmptyState({ onPickExample }: { onPickExample: (example: string) => voi
   );
 }
 
-export default function TodayBoard({ tasks }: { tasks: Task[] }) {
+export default function TodayBoard() {
   const { visibleTasks, pendingIds, handleCreate, handleToggleCompleted, handleToggleStatus, handleDelete } =
-    useTaskActions(tasks);
+    useTasks();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [openDetailsId, setOpenDetailsId] = useState<string | null>(null);
@@ -526,6 +539,9 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit task</DialogTitle>
+            <VisuallyHidden>
+              <DialogDescription>Edit the details of this task.</DialogDescription>
+            </VisuallyHidden>
           </DialogHeader>
           {editingTask && (
             <TaskForm

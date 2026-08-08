@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MotionConfig } from "motion/react";
 import type { Task } from "@/generated/prisma/client";
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -25,6 +26,7 @@ import Sidebar from "./sidebar";
 import CommandPalette from "./command-palette";
 import ShortcutsDialog from "./shortcuts-dialog";
 import TaskForm from "./task-form";
+import { TasksProvider } from "./tasks-context";
 
 type DashboardUser = {
   name?: string | null;
@@ -42,16 +44,6 @@ export default function DashboardShell({
   tasks: Task[];
 }) {
   const router = useRouter();
-  const overdueCount = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return tasks.filter((t) => {
-      if (t.status === "COMPLETED" || !t.dueDate) return false;
-      const due = new Date(t.dueDate);
-      due.setHours(0, 0, 0, 0);
-      return due < today;
-    }).length;
-  }, [tasks]);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
@@ -108,70 +100,73 @@ export default function DashboardShell({
   }, [router]);
 
   return (
-    <MotionConfig reducedMotion="user">
-      <div className="h-screen bg-background">
-        <div className="hidden md:flex h-full">
-          <Sidebar
-            user={user}
-            overdueCount={overdueCount}
-            onOpenCommandPalette={() => setCommandOpen(true)}
-            onOpenCreateTask={() => setCreateTaskOpen(true)}
+    <TasksProvider tasks={tasks}>
+      <MotionConfig reducedMotion="user">
+        <div className="h-screen bg-background">
+          <div className="hidden md:flex h-full">
+            <Sidebar
+              user={user}
+              onOpenCommandPalette={() => setCommandOpen(true)}
+              onOpenCreateTask={() => setCreateTaskOpen(true)}
+            />
+            <main className="my-2 mr-2 flex-1 overflow-y-auto rounded-xl border border-border bg-frame">
+              {children}
+            </main>
+          </div>
+
+          <div className="flex md:hidden h-full flex-col">
+            <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-card px-3 py-2.5">
+              <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+                <SheetTrigger asChild>
+                  <Button size="icon" variant="ghost" className="h-10 w-10">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+
+                <SheetContent side="left" className="w-[82vw] max-w-72 p-0">
+                  <SheetHeader>
+                    <VisuallyHidden>
+                      <SheetTitle>Navigation</SheetTitle>
+                    </VisuallyHidden>
+                  </SheetHeader>
+
+                  <Sidebar
+                    user={user}
+                    enableShortcut={false}
+                    onNavigate={() => setMobileNavOpen(false)}
+                    onOpenCommandPalette={() => setCommandOpen(true)}
+                    onOpenCreateTask={() => setCreateTaskOpen(true)}
+                  />
+                </SheetContent>
+              </Sheet>
+              <Logo size="sm" />
+            </header>
+
+            <main className="flex-1 overflow-y-auto">{children}</main>
+          </div>
+
+          <CommandPalette
+            open={commandOpen}
+            onOpenChange={setCommandOpen}
+            tasks={tasks}
+            onOpenShortcuts={() => setShortcutsOpen(true)}
           />
-          <main className="my-2 mr-2 flex-1 overflow-y-auto rounded-xl border border-border bg-frame">
-            {children}
-          </main>
+
+          <Dialog open={createTaskOpen} onOpenChange={setCreateTaskOpen}>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Create new task</DialogTitle>
+                <VisuallyHidden>
+                  <DialogDescription>Add a new task to your list.</DialogDescription>
+                </VisuallyHidden>
+              </DialogHeader>
+              <TaskForm onSubmit={() => setCreateTaskOpen(false)} />
+            </DialogContent>
+          </Dialog>
+
+          <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
         </div>
-
-        <div className="flex md:hidden h-full flex-col">
-          <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-card px-3 py-2.5">
-            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-              <SheetTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-10 w-10">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-
-              <SheetContent side="left" className="w-[82vw] max-w-72 p-0">
-                <SheetHeader>
-                  <VisuallyHidden>
-                    <SheetTitle>Navigation</SheetTitle>
-                  </VisuallyHidden>
-                </SheetHeader>
-
-                <Sidebar
-                  user={user}
-                  overdueCount={overdueCount}
-                  enableShortcut={false}
-                  onNavigate={() => setMobileNavOpen(false)}
-                  onOpenCommandPalette={() => setCommandOpen(true)}
-                  onOpenCreateTask={() => setCreateTaskOpen(true)}
-                />
-              </SheetContent>
-            </Sheet>
-            <Logo size="sm" />
-          </header>
-
-          <main className="flex-1 overflow-y-auto">{children}</main>
-        </div>
-
-        <CommandPalette
-          open={commandOpen}
-          onOpenChange={setCommandOpen}
-          tasks={tasks}
-          onOpenShortcuts={() => setShortcutsOpen(true)}
-        />
-
-        <Dialog open={createTaskOpen} onOpenChange={setCreateTaskOpen}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Create new task</DialogTitle>
-            </DialogHeader>
-            <TaskForm onSubmit={() => setCreateTaskOpen(false)} />
-          </DialogContent>
-        </Dialog>
-
-        <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
-      </div>
-    </MotionConfig>
+      </MotionConfig>
+    </TasksProvider>
   );
 }

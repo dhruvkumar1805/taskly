@@ -1,8 +1,8 @@
 "use client";
 
 import type { Task, Recurrence } from "@/generated/prisma/client";
-import { motion, useMotionValue, useTransform, type PanInfo } from "motion/react";
-import { rowMotion } from "@/lib/motion";
+import { animate, motion, useMotionValue, useTransform, type PanInfo } from "motion/react";
+import { rowMotion, easeOutQuart } from "@/lib/motion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,11 +14,13 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { CheckCircle2, MoreHorizontal, Repeat, Trash2 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PriorityIcon,
   PRIORITY_TEXT,
@@ -136,11 +138,17 @@ export default function TaskRow({
   const x = useMotionValue(0);
   const completeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1]);
   const deleteOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0]);
+  const [swipeExitDirection, setSwipeExitDirection] = useState<1 | -1 | null>(null);
 
   function handleDragEnd(_: unknown, info: PanInfo) {
+    const flyDistance = (rowRef.current?.offsetWidth ?? 400) * 1.2;
     if (info.offset.x > SWIPE_THRESHOLD || info.velocity.x > SWIPE_VELOCITY) {
+      setSwipeExitDirection(1);
+      animate(x, flyDistance, { type: "spring", duration: 0.5, bounce: 0.2, velocity: info.velocity.x });
       onToggleCompleted(task.id);
     } else if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -SWIPE_VELOCITY) {
+      setSwipeExitDirection(-1);
+      animate(x, -flyDistance, { type: "spring", duration: 0.5, bounce: 0.2, velocity: info.velocity.x });
       onDelete(task.id);
     }
   }
@@ -152,7 +160,11 @@ export default function TaskRow({
         layout="position"
         initial={rowMotion.initial}
         animate={rowMotion.animate}
-        exit={rowMotion.exit}
+        exit={
+          swipeExitDirection
+            ? { opacity: 0, transition: { duration: 0.5, ease: easeOutQuart } }
+            : rowMotion.exit
+        }
         transition={rowMotion.transition}
         className="relative overflow-hidden"
       >
@@ -271,6 +283,9 @@ export default function TaskRow({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{task.title}</DialogTitle>
+            <VisuallyHidden>
+              <DialogDescription>Details for {task.title}.</DialogDescription>
+            </VisuallyHidden>
           </DialogHeader>
 
           {task.description && (

@@ -10,9 +10,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/logo";
+import { AnimatedNumber } from "@/components/animated-number";
+import { popMotion, durations, easeOutQuart } from "@/lib/motion";
+import { useTasks } from "./tasks-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 
@@ -31,7 +34,6 @@ type SidebarProps = {
     email?: string | null;
     image?: string | null;
   };
-  overdueCount?: number;
   enableShortcut?: boolean;
   onNavigate?: () => void;
   onOpenCommandPalette?: () => void;
@@ -40,13 +42,23 @@ type SidebarProps = {
 
 export default function Sidebar({
   user,
-  overdueCount = 0,
   enableShortcut = true,
   onNavigate,
   onOpenCommandPalette,
   onOpenCreateTask,
 }: SidebarProps) {
   const { theme, setTheme } = useTheme();
+  const { visibleTasks } = useTasks();
+  const overdueCount = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return visibleTasks.filter((t) => {
+      if (t.status === "COMPLETED" || !t.dueDate) return false;
+      const due = new Date(t.dueDate);
+      due.setHours(0, 0, 0, 0);
+      return due < today;
+    }).length;
+  }, [visibleTasks]);
 
   const pathname = usePathname();
 
@@ -149,14 +161,21 @@ export default function Sidebar({
               )}
               <Icon className="relative h-4 w-4 shrink-0" />
               <span className="relative flex-1">{label}</span>
-              {badge > 0 && (
-                <span
-                  className="relative flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1 font-mono text-[10px] font-semibold text-primary-foreground"
-                  aria-label={`${badge} overdue`}
-                >
-                  {badge}
-                </span>
-              )}
+              <AnimatePresence initial={false}>
+                {badge > 0 && (
+                  <motion.span
+                    key="overdue-badge"
+                    initial={popMotion.initial}
+                    animate={popMotion.animate}
+                    exit={popMotion.exit}
+                    transition={popMotion.transition}
+                    className="relative flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1 font-mono text-[10px] font-semibold text-primary-foreground"
+                    aria-label={`${badge} overdue`}
+                  >
+                    <AnimatedNumber value={badge} duration={durations.fast} ease={easeOutQuart} />
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
           );
         })}

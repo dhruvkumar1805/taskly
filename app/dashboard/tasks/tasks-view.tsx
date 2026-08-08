@@ -14,16 +14,18 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ClipboardList, Plus, Search, SearchX } from "lucide-react";
 import Link from "next/link";
 import TaskRow from "./task-row";
 import TaskForm from "@/app/dashboard/task-form";
 import { useListKeyboardNav } from "@/hooks/use-list-keyboard-nav";
-import { useTaskActions } from "@/hooks/use-task-actions";
+import { useTasks } from "@/app/dashboard/tasks-context";
 
 type StatusFilter = "ALL" | "TODO" | "IN_PROGRESS" | "COMPLETED";
 type PriorityFilter = "ALL" | "LOW" | "MEDIUM" | "HIGH";
@@ -38,9 +40,9 @@ const STATUS_SECTIONS = [
 // is needed — keeps hundreds of tasks from ever hitting the DOM at once.
 const PAGE_SIZE = 50;
 
-export default function TasksView({ tasks }: { tasks: Task[] }) {
+export default function TasksView() {
   const { visibleTasks: activeTasks, pendingIds, handleToggleCompleted, handleToggleStatus, handleDelete } =
-    useTaskActions(tasks);
+    useTasks();
 
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
@@ -210,7 +212,7 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
       {!hasAnyVisible ? (
         <div className="animate-fade-up flex flex-col items-center gap-3 rounded-lg border border-border bg-card px-5 py-14 text-center md:py-16">
           <div className="rounded-full bg-muted p-4 text-muted-foreground">
-            {tasks.length === 0 ? (
+            {activeTasks.length === 0 ? (
               <ClipboardList className="h-6 w-6" />
             ) : (
               <SearchX className="h-6 w-6" />
@@ -218,15 +220,15 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
           </div>
           <div>
             <p className="font-medium">
-              {tasks.length === 0 ? "No tasks yet" : "No tasks found"}
+              {activeTasks.length === 0 ? "No tasks yet" : "No tasks found"}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              {tasks.length === 0
+              {activeTasks.length === 0
                 ? "Create your first task to get started."
                 : "Try adjusting your search or filters."}
             </p>
           </div>
-          {tasks.length === 0 ? (
+          {activeTasks.length === 0 ? (
             <>
               <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
                 <Plus className="h-4 w-4 mr-1" />
@@ -334,6 +336,9 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit task</DialogTitle>
+            <VisuallyHidden>
+              <DialogDescription>Edit the details of this task.</DialogDescription>
+            </VisuallyHidden>
           </DialogHeader>
           {editingTask && (
             <TaskForm
@@ -350,6 +355,9 @@ export default function TasksView({ tasks }: { tasks: Task[] }) {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Create new task</DialogTitle>
+            <VisuallyHidden>
+              <DialogDescription>Add a new task to your list.</DialogDescription>
+            </VisuallyHidden>
           </DialogHeader>
           <TaskForm onSubmit={() => setCreateOpen(false)} />
         </DialogContent>

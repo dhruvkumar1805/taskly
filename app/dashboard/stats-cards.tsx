@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { motion } from "motion/react";
 import { AlertTriangle } from "lucide-react";
-import { motion, useMotionValue, useReducedMotion, useTransform, animate } from "motion/react";
+import { AnimatedNumber } from "@/components/animated-number";
 
 type Stats = {
   total: number;
@@ -10,32 +10,6 @@ type Stats = {
   completed: number;
   overdue: number;
 };
-
-function AnimatedNumber({ value }: { value: number }) {
-  const prefersReducedMotion = useReducedMotion();
-  const motionValue = useMotionValue(value);
-  const rounded = useTransform(motionValue, (v) => Math.round(v).toString());
-  const hasMounted = useRef(false);
-
-  useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      motionValue.jump(value);
-      return;
-    }
-    if (prefersReducedMotion) {
-      motionValue.jump(value);
-      return;
-    }
-    const controls = animate(motionValue, value, {
-      duration: 0.45,
-      ease: [0.25, 1, 0.5, 1],
-    });
-    return () => controls.stop();
-  }, [value, motionValue, prefersReducedMotion]);
-
-  return <motion.span>{rounded}</motion.span>;
-}
 
 const SEGMENT_COLOR = {
   todo: "bg-muted-foreground/45",
