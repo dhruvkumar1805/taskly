@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { easeOutQuint } from "@/lib/motion";
 import type { Task } from "@/generated/prisma/client";
-import { updateTask } from "../actions/tasks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Dialog,
@@ -234,8 +233,15 @@ function EmptyState({ onPickExample }: { onPickExample: (example: string) => voi
 }
 
 export default function TodayBoard() {
-  const { visibleTasks, pendingIds, handleCreate, handleToggleCompleted, handleToggleStatus, handleDelete } =
-    useTasks();
+  const {
+    visibleTasks,
+    pendingIds,
+    handleCreate,
+    handleEdit,
+    handleToggleCompleted,
+    handleToggleStatus,
+    handleDelete,
+  } = useTasks();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [openDetailsId, setOpenDetailsId] = useState<string | null>(null);
@@ -546,7 +552,7 @@ export default function TodayBoard() {
           {editingTask && (
             <TaskForm
               task={editingTask}
-              action={updateTask.bind(null, editingTask.id)}
+              action={(formData) => Promise.resolve(handleEdit(editingTask.id, formData))}
               submitLabel="Save changes"
               onSubmit={() => {
                 setEditOpen(false);

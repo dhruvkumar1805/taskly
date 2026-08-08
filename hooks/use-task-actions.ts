@@ -8,12 +8,14 @@ import {
   toggleTaskCompleted,
   toggleTaskStatus,
   deleteTask,
+  updateTask,
 } from "@/app/actions/tasks";
 
 type OptimisticAction =
   | { type: "toggle_completed"; id: string }
   | { type: "toggle_status"; id: string }
-  | { type: "create"; task: Task };
+  | { type: "create"; task: Task }
+  | { type: "edit"; id: string; patch: Partial<Task> };
 
 function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
   if (action.type === "create") {
@@ -28,6 +30,9 @@ function optimisticReducer(tasks: Task[], action: OptimisticAction): Task[] {
         status: completed ? "COMPLETED" : "IN_PROGRESS",
         completedAt: completed ? new Date() : null,
       } as Task;
+    }
+    if (action.type === "edit") {
+      return { ...t, ...action.patch } as Task;
     }
     const next =
       t.status === "TODO" ? "IN_PROGRESS" : t.status === "IN_PROGRESS" ? "COMPLETED" : "TODO";
@@ -80,6 +85,28 @@ export function useTaskActions(tasks: Task[]) {
     });
   }
 
+  function handleEdit(id: string, formData: FormData) {
+    const dueDateRaw = formData.get("dueDate")?.toString();
+    const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
+    const recurrenceRaw = formData.get("recurrence")?.toString();
+    const patch: Partial<Task> = {
+      title: formData.get("title")?.toString() ?? "",
+      description: formData.get("description")?.toString() || null,
+      priority: formData.get("priority")?.toString() as Task["priority"],
+      dueDate,
+      recurrence:
+        dueDate && recurrenceRaw && recurrenceRaw !== "NONE"
+          ? (recurrenceRaw as Task["recurrence"])
+          : null,
+    };
+    addPending(id);
+    startTransition(async () => {
+      applyOptimistic({ type: "edit", id, patch });
+      await updateTask(id, formData);
+      removePending(id);
+    });
+  }
+
   function handleToggleStatus(id: string) {
     addPending(id);
     startTransition(async () => {
@@ -120,6 +147,7 @@ export function useTaskActions(tasks: Task[]) {
     visibleTasks,
     pendingIds,
     handleCreate,
+    handleEdit,
     handleToggleCompleted,
     handleToggleStatus,
     handleDelete,

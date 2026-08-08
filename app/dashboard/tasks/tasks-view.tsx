@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Task } from "@/generated/prisma/client";
-import { updateTask } from "@/app/actions/tasks";
 import {
   Select,
   SelectContent,
@@ -41,8 +40,14 @@ const STATUS_SECTIONS = [
 const PAGE_SIZE = 50;
 
 export default function TasksView() {
-  const { visibleTasks: activeTasks, pendingIds, handleToggleCompleted, handleToggleStatus, handleDelete } =
-    useTasks();
+  const {
+    visibleTasks: activeTasks,
+    pendingIds,
+    handleEdit,
+    handleToggleCompleted,
+    handleToggleStatus,
+    handleDelete,
+  } = useTasks();
 
   const [status, setStatus] = useState<StatusFilter>("ALL");
   const [priority, setPriority] = useState<PriorityFilter>("ALL");
@@ -343,7 +348,7 @@ export default function TasksView() {
           {editingTask && (
             <TaskForm
               task={editingTask}
-              action={updateTask.bind(null, editingTask.id)}
+              action={(formData) => Promise.resolve(handleEdit(editingTask.id, formData))}
               submitLabel="Save Changes"
               onSubmit={() => { setEditOpen(false); setEditingTask(null); }}
             />
