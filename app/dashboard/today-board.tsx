@@ -176,6 +176,24 @@ const QUICK_ADD_EXAMPLES = [
   "Water the plants",
 ];
 
+function AllCaughtUp({ completedCount }: { completedCount: number }) {
+  return (
+    <div className="animate-fade-up flex flex-col items-center justify-center gap-4 rounded-lg border border-border bg-card px-5 py-20 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
+        <CheckCircle2 className="h-7 w-7" />
+      </div>
+      <div>
+        <p className="font-medium">All caught up</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {completedCount > 0
+            ? `${completedCount} ${completedCount === 1 ? "task" : "tasks"} done today. Nothing else due.`
+            : "Nothing due or overdue right now."}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function EmptyState({ onPickExample }: { onPickExample: (example: string) => void }) {
   return (
     <div className="animate-fade-up rounded-lg border border-border bg-card px-5 py-12 text-center">
@@ -313,6 +331,8 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
     !editOpen && !openDetailsId,
   );
 
+  const allCaughtUp = !isEmpty && overdue.length === 0 && dueToday.length === 0 && upNext.length === 0;
+
   const rowProps = {
     onEdit: (t: Task) => {
       setEditingTask(t);
@@ -385,40 +405,44 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
             </Section>
           )}
 
-          <Section
-            title="Today"
-            icon={<CalendarClock className="h-4 w-4" />}
-            count={dueToday.length}
-          >
-            <AnimatePresence mode="popLayout" initial={false}>
-              {dueToday.length > 0 ? (
-                dueToday.map((task) => (
-                  <TaskRow
-                    key={task.id}
-                    task={task}
-                    dueDisplay="compact"
-                    isPending={pendingIds.has(task.id)}
-                    isSelected={selectedId === task.id}
-                    detailsOpen={openDetailsId === task.id}
-                    onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
-                    {...rowProps}
-                  />
-                ))
-              ) : (
-                <motion.p
-                  key="empty-today"
-                  layout="position"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18 }}
-                  className="px-3.5 py-4 text-sm text-muted-foreground sm:px-4"
-                >
-                  Nothing due today.
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </Section>
+          {allCaughtUp ? (
+            <AllCaughtUp completedCount={completedToday.length} />
+          ) : (
+            <Section
+              title="Today"
+              icon={<CalendarClock className="h-4 w-4" />}
+              count={dueToday.length}
+            >
+              <AnimatePresence mode="popLayout" initial={false}>
+                {dueToday.length > 0 ? (
+                  dueToday.map((task) => (
+                    <TaskRow
+                      key={task.id}
+                      task={task}
+                      dueDisplay="compact"
+                      isPending={pendingIds.has(task.id)}
+                      isSelected={selectedId === task.id}
+                      detailsOpen={openDetailsId === task.id}
+                      onDetailsOpenChange={(open) => setOpenDetailsId(open ? task.id : null)}
+                      {...rowProps}
+                    />
+                  ))
+                ) : (
+                  <motion.p
+                    key="empty-today"
+                    layout="position"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.18 }}
+                    className="px-3.5 py-4 text-sm text-muted-foreground sm:px-4"
+                  >
+                    Nothing due today.
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </Section>
+          )}
 
           {upNext.length > 0 && (
             <Section
