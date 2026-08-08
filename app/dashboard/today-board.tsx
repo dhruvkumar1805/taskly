@@ -343,7 +343,7 @@ export default function TodayBoard({ tasks }: { tasks: Task[] }) {
           feature worth top billing and reach isn't a constraint. */}
       {mounted && isMobile
         ? createPortal(
-            <div className="fixed inset-x-0 bottom-0 z-40 px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               {quickAdd}
             </div>,
             document.body,
