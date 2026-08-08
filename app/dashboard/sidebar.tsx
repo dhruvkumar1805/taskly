@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  Bell,
+  BellOff,
   CalendarDays,
   ListTodo,
   Plus,
@@ -28,6 +30,7 @@ import { LogOut } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 
 type SidebarProps = {
   user?: {
@@ -49,6 +52,8 @@ export default function Sidebar({
   onOpenCreateTask,
 }: SidebarProps) {
   const { theme, setTheme } = useTheme();
+  const { supported: pushSupported, subscribed: pushSubscribed, enable: enablePush, disable: disablePush } =
+    usePushNotifications();
   const { visibleTasks } = useTasks();
   const overdueCount = useMemo(() => {
     const today = new Date();
@@ -222,6 +227,25 @@ export default function Sidebar({
               </>
             )}
           </DropdownMenuItem>
+
+          {pushSupported && (
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => (pushSubscribed ? disablePush() : enablePush())}
+            >
+              {pushSubscribed ? (
+                <>
+                  <BellOff className="mr-2 h-4 w-4" />
+                  Disable reminders
+                </>
+              ) : (
+                <>
+                  <Bell className="mr-2 h-4 w-4" />
+                  Enable reminders
+                </>
+              )}
+            </DropdownMenuItem>
+          )}
 
           <DropdownMenuItem
             className="text-destructive cursor-pointer"

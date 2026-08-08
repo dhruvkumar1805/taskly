@@ -90,6 +90,7 @@ function QuickAdd({
       completedAt: null,
       recurrence: null,
       recurrenceCreatedAt: null,
+      remindedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       userId: "",

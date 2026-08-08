@@ -21,7 +21,21 @@ model User {
   image     String?
   createdAt DateTime @default(now())
 
-  tasks Task[]
+  tasks             Task[]
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model Task {
@@ -37,6 +51,7 @@ model Task {
   // toggling complete -> incomplete -> complete again on the same task
   // never spawns a second, duplicate successor.
   recurrenceCreatedAt DateTime?
+  remindedAt          DateTime?
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 

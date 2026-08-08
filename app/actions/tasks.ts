@@ -191,6 +191,7 @@ export async function updateTask(taskId: string, formData: FormData) {
       priority,
       dueDate: dueDateRaw ? new Date(dueDateRaw) : null,
       recurrence: dueDateRaw ? recurrence : null,
+      remindedAt: null,
     },
   });
 
@@ -213,7 +214,7 @@ export async function skipToNextOccurrence(taskId: string) {
 
   await prisma.task.update({
     where: { id: taskId },
-    data: { dueDate: getNextOccurrence(task.dueDate, task.recurrence) },
+    data: { dueDate: getNextOccurrence(task.dueDate, task.recurrence), remindedAt: null },
   });
 
   revalidatePath("/dashboard", "layout");
