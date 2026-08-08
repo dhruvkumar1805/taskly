@@ -1,7 +1,7 @@
 "use client";
 
 import type { Task, Recurrence } from "@/generated/prisma/client";
-import { motion } from "motion/react";
+import { motion, useMotionValue, useTransform, type PanInfo } from "motion/react";
 import { rowMotion } from "@/lib/motion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MoreHorizontal, Repeat } from "lucide-react";
+import { CheckCircle2, MoreHorizontal, Repeat, Trash2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import {
   PriorityIcon,
@@ -28,6 +28,10 @@ import {
 } from "@/components/task-icons";
 import { RECURRENCE_LABELS } from "@/app/lib/recurrence";
 import { hasExplicitTime } from "@/app/lib/due-date";
+import { useMediaQuery } from "@/hooks/use-media-query";
+
+const SWIPE_THRESHOLD = 72;
+const SWIPE_VELOCITY = 500;
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -128,6 +132,19 @@ export default function TaskRow({
     if (isSelected) rowRef.current?.scrollIntoView({ block: "nearest" });
   }, [isSelected]);
 
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const x = useMotionValue(0);
+  const completeOpacity = useTransform(x, [0, SWIPE_THRESHOLD], [0, 1]);
+  const deleteOpacity = useTransform(x, [-SWIPE_THRESHOLD, 0], [1, 0]);
+
+  function handleDragEnd(_: unknown, info: PanInfo) {
+    if (info.offset.x > SWIPE_THRESHOLD || info.velocity.x > SWIPE_VELOCITY) {
+      onToggleCompleted(task.id);
+    } else if (info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -SWIPE_VELOCITY) {
+      onDelete(task.id);
+    }
+  }
+
   return (
     <>
       <motion.div
@@ -137,37 +154,85 @@ export default function TaskRow({
         animate={rowMotion.animate}
         exit={rowMotion.exit}
         transition={rowMotion.transition}
-        className={`flex items-start gap-3 px-3.5 py-3 transition-[background-color,opacity] duration-150 ease-(--ease-out-quart) hover:bg-muted/30 sm:items-center sm:px-4 ${
-          isSelected ? "bg-accent ring-1 ring-inset ring-ring" : isOverdue ? "bg-primary/[0.035]" : ""
-        } ${isPending ? "pointer-events-none opacity-60" : ""}`}
+        className="relative overflow-hidden"
       >
-        <Checkbox
-          checked={isCompleted}
-          onCheckedChange={() => onToggleCompleted(task.id)}
-          className="relative shrink-0 after:absolute after:-inset-3 after:content-[''] data-[state=checked]:scale-105 motion-reduce:data-[state=checked]:scale-100"
-        />
-
-        <div className="min-w-0 flex-1">
-          <div
-            role="button"
-            onClick={() => onDetailsOpenChange(true)}
-            className="cursor-pointer"
-          >
-            <p
-              className={`text-sm font-medium leading-snug transition-colors duration-200 ease-(--ease-out-quart) ${
-                isCompleted ? "line-through text-muted-foreground" : ""
-              }`}
+        {isMobile && (
+          <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+            <motion.div
+              style={{ opacity: completeOpacity }}
+              className="absolute inset-y-0 left-0 flex w-1/2 items-center gap-2 bg-success/15 pl-5 text-success"
             >
-              {task.title}
-            </p>
-            {task.description && (
-              <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground sm:truncate">
-                {task.description}
-              </p>
-            )}
+              <CheckCircle2 className="h-5 w-5" />
+              <span className="text-sm font-medium">Complete</span>
+            </motion.div>
+            <motion.div
+              style={{ opacity: deleteOpacity }}
+              className="absolute inset-y-0 right-0 flex w-1/2 items-center justify-end gap-2 bg-destructive/15 pr-5 text-destructive"
+            >
+              <span className="text-sm font-medium">Delete</span>
+              <Trash2 className="h-5 w-5" />
+            </motion.div>
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
-            <PriorityIcon priority={task.priority} className="h-3.5 w-3.5" />
+        )}
+
+        <motion.div
+          drag={isMobile ? "x" : false}
+          style={isMobile ? { x } : undefined}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.6}
+          onDragEnd={handleDragEnd}
+          className={`relative flex items-start gap-3 bg-card px-3.5 py-3 transition-[background-color,opacity] duration-150 ease-(--ease-out-quart) hover:bg-muted/30 sm:items-center sm:px-4 ${
+            isSelected ? "bg-accent ring-1 ring-inset ring-ring" : isOverdue ? "bg-primary/[0.035]" : ""
+          } ${isPending ? "pointer-events-none opacity-60" : ""}`}
+        >
+          <Checkbox
+            checked={isCompleted}
+            onCheckedChange={() => onToggleCompleted(task.id)}
+            className="relative shrink-0 after:absolute after:-inset-3 after:content-[''] data-[state=checked]:scale-105 motion-reduce:data-[state=checked]:scale-100"
+          />
+
+          <div className="min-w-0 flex-1">
+            <div
+              role="button"
+              onClick={() => onDetailsOpenChange(true)}
+              className="cursor-pointer"
+            >
+              <p
+                className={`text-sm font-medium leading-snug transition-colors duration-200 ease-(--ease-out-quart) ${
+                  isCompleted ? "line-through text-muted-foreground" : ""
+                }`}
+              >
+                {task.title}
+              </p>
+              {task.description && (
+                <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground sm:truncate">
+                  {task.description}
+                </p>
+              )}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
+              <PriorityIcon priority={task.priority} className="h-3.5 w-3.5" />
+              {dueLabel && (
+                <DueBadge tone={dueDateInfo!.tone} recurrence={task.recurrence}>
+                  {dueLabel}
+                </DueBadge>
+              )}
+              <button
+                type="button"
+                onClick={() => onToggleStatus(task.id)}
+                className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 font-mono text-xs font-medium transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted sm:h-7 ${STATUS_TEXT[task.status]}`}
+              >
+                <StatusIcon status={task.status} />
+                {STATUS_LABELS[task.status]}
+              </button>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
+            <PriorityIcon
+              priority={task.priority}
+              className="h-3.5 w-3.5"
+            />
             {dueLabel && (
               <DueBadge tone={dueDateInfo!.tone} recurrence={task.recurrence}>
                 {dueLabel}
@@ -182,44 +247,24 @@ export default function TaskRow({
               {STATUS_LABELS[task.status]}
             </button>
           </div>
-        </div>
 
-        <div className="hidden sm:flex items-center gap-3 shrink-0">
-          <PriorityIcon
-            priority={task.priority}
-            className="h-3.5 w-3.5"
-          />
-          {dueLabel && (
-            <DueBadge tone={dueDateInfo!.tone} recurrence={task.recurrence}>
-              {dueLabel}
-            </DueBadge>
-          )}
-          <button
-            type="button"
-            onClick={() => onToggleStatus(task.id)}
-            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 font-mono text-xs font-medium transition-colors duration-150 ease-(--ease-out-quart) hover:bg-muted sm:h-7 ${STATUS_TEXT[task.status]}`}
-          >
-            <StatusIcon status={task.status} />
-            {STATUS_LABELS[task.status]}
-          </button>
-        </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 sm:h-7 sm:w-7">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(task)}>Edit</DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => onDelete(task.id)}
-            >
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 sm:h-7 sm:w-7">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(task)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => onDelete(task.id)}
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </motion.div>
       </motion.div>
 
       <Dialog open={detailsOpen} onOpenChange={onDetailsOpenChange}>

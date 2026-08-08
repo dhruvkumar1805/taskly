@@ -63,6 +63,9 @@ export function useTaskActions(tasks: Task[]) {
 
   function handleToggleCompleted(id: string) {
     const wasCompleted = optimisticTasks.find((t) => t.id === id)?.status === "COMPLETED";
+    if (!wasCompleted && typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(15);
+    }
     addPending(id);
     startTransition(async () => {
       applyOptimistic({ type: "toggle_completed", id });
