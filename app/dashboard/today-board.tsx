@@ -100,9 +100,11 @@ function QuickAdd({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3.5 py-3 shadow-lg md:shadow-none"
+      className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3.5 py-3 shadow-lg transition-colors duration-150 ease-(--ease-out-quart) focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 md:shadow-none"
     >
-      <Plus className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+        <Plus className="h-3.5 w-3.5" />
+      </span>
       <input
         ref={inputRef}
         value={title}
