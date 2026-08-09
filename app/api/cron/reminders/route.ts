@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { prisma } from "@/lib/prisma";
 
-const REMINDER_WINDOW_MINUTES = 5;
+// GitHub Actions' scheduled trigger is best-effort, not exact — runs of a
+// "*/5 * * * *" workflow have been observed over an hour apart. remindedAt
+// already makes each task fire at most once, so the lower bound only exists
+// to stop a months-old stale task from suddenly notifying; it must stay far
+// wider than any realistic gap between cron runs.
+const REMINDER_LOOKBACK_HOURS = 24;
 
 function getWebPush() {
   webpush.setVapidDetails(
@@ -20,7 +25,7 @@ export async function GET(request: Request) {
   }
 
   const now = new Date();
-  const windowStart = new Date(now.getTime() - REMINDER_WINDOW_MINUTES * 60 * 1000);
+  const windowStart = new Date(now.getTime() - REMINDER_LOOKBACK_HOURS * 60 * 60 * 1000);
 
   const dueTasks = await prisma.task.findMany({
     where: {
